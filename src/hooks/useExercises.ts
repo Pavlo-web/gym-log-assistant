@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { exerciseRepository } from "@/data/local-storage-repositories";
+import { exerciseRepository } from "@/data";
 import type { NewExercise } from "@/types/domain";
 
 export const exercisesKey = ["exercises"] as const;

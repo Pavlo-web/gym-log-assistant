@@ -74,16 +74,22 @@ class LocalExerciseRepository implements ExerciseRepository {
 
   async create(data: NewExercise): Promise<Exercise> {
     const exercises = loadExercises();
-    const exercise: Exercise = { ...data, id: uuid() };
+    const name = data.name.trim();
+    if (!name || name.length > 60) throw new Error("Name must be between 1 and 60 characters.");
+    if (exercises.some((e) => e.muscleGroup === data.muscleGroup && e.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+      throw new Error("An exercise with this name already exists in this muscle group.");
+    }
+    const exercise: Exercise = { ...data, name, isCustom: true, id: uuid() };
     write(EXERCISES_KEY, [...exercises, exercise]);
     return exercise;
   }
 
   async delete(id: string): Promise<void> {
-    write(
-      EXERCISES_KEY,
-      loadExercises().filter((e) => e.id !== id),
-    );
+    const exercises = loadExercises();
+    const exercise = exercises.find((e) => e.id === id);
+    if (!exercise) throw new Error("Exercise not found.");
+    if (!exercise.isCustom) throw new Error("Default exercises cannot be deleted.");
+    write(EXERCISES_KEY, exercises.filter((e) => e.id !== id));
   }
 }
 
@@ -131,9 +137,6 @@ class LocalWorkoutRepository implements WorkoutRepository {
   }
 }
 
-/**
- * Single swap point: replace these instances with database-backed
- * implementations of the same interfaces when auth/DB arrives.
- */
+/** Local implementations; consumers use the public data entry point. */
 export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
 export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();

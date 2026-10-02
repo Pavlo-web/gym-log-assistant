@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { workoutRepository } from "@/data/local-storage-repositories";
+import { workoutRepository } from "@/data";
 import type { NewWorkout } from "@/types/domain";
 
 export const workoutsKey = ["workouts"] as const;
@@ -14,7 +14,7 @@ export function useWorkouts() {
 export function useWorkout(id: string | undefined) {
   return useQuery({
     queryKey: [...workoutsKey, id],
-    queryFn: () => workoutRepository.getById(id!),
+    queryFn: () => id ? workoutRepository.getById(id) : Promise.resolve(null),
     enabled: !!id,
   });
 }

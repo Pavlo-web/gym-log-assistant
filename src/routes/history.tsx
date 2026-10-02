@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, ComingSoon } from "@/components/AppShell";
+import { ComingSoon } from "@/components/AppShell";
 
 export const Route = createFileRoute("/history")({
   head: () => ({
@@ -8,15 +8,13 @@ export const Route = createFileRoute("/history")({
       { name: "description", content: "Browse your past workouts and training volume." },
       { property: "og:title", content: "History — Gym Log" },
       { property: "og:description", content: "Browse your past workouts and training volume." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: HistoryPage,
 });
 
 function HistoryPage() {
-  return (
-    <AppShell>
-      <ComingSoon title="History" />
-    </AppShell>
-  );
+  return <ComingSoon title="History" />;
 }
