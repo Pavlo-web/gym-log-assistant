@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, ComingSoon } from "@/components/AppShell";
+import { ComingSoon } from "@/components/AppShell";
 
 export const Route = createFileRoute("/progress")({
   head: () => ({
@@ -8,15 +8,13 @@ export const Route = createFileRoute("/progress")({
       { name: "description", content: "Track strength progress and training volume over time." },
       { property: "og:title", content: "Progress — Gym Log" },
       { property: "og:description", content: "Track strength progress and training volume over time." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ProgressPage,
 });
 
 function ProgressPage() {
-  return (
-    <AppShell>
-      <ComingSoon title="Progress" />
-    </AppShell>
-  );
+  return <ComingSoon title="Progress" />;
 }

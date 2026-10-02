@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AppShell, PageHeader } from "@/components/AppShell";
+import { PageHeader } from "@/components/AppShell";
 import { brzycki1RM, epley1RM, repsAtPercent, roundToHalf } from "@/lib/calc";
 
 export const Route = createFileRoute("/calculator")({
@@ -18,6 +18,8 @@ export const Route = createFileRoute("/calculator")({
         content:
           "Estimate your one-rep max with the Epley and Brzycki formulas and see a full percentage table.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: CalculatorPage,
@@ -49,7 +51,7 @@ function CalculatorPage() {
   );
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         title="1RM Calculator"
         description="Estimate your one-rep max from a set you have actually done."
@@ -145,6 +147,6 @@ function CalculatorPage() {
           </p>
         )}
       </section>
-    </AppShell>
+    </>
   );
 }

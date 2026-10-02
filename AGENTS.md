@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Render the shared application shell in the root route so leaf pages contain only their own content.
+- Import repositories through `@/data` exclusively so the storage implementation can be exchanged in one place.
+- Persist exercise and workout data locally through repository interfaces because this stage has no backend.
