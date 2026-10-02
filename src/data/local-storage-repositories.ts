@@ -110,14 +110,16 @@ class LocalWorkoutRepository implements WorkoutRepository {
   async update(id: string, data: Partial<NewWorkout>): Promise<Workout> {
     const workouts = loadWorkouts();
     const index = workouts.findIndex((w) => w.id === id);
-    if (index === -1) throw new Error(`Workout ${id} not found`);
+    const current = workouts[index];
+    if (!current) throw new Error(`Workout ${id} not found`);
     const updated: Workout = {
-      ...workouts[index],
+      ...current,
       ...data,
       updatedAt: new Date().toISOString(),
     };
     workouts[index] = updated;
     write(WORKOUTS_KEY, workouts);
+
     return updated;
   }
 
