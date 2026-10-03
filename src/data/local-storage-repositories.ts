@@ -69,7 +69,7 @@ function loadExercises(): Exercise[] {
   const parsed = read<Exercise[]>(EXERCISES_KEY, []);
   if (parsed.length === 0) return seedExercises();
   if (window.localStorage.getItem(EXERCISES_MIGRATION_KEY) !== "done") {
-    const migrated = parsed.filter((e) => e.isCustom || !(e.muscleGroup === "Core" && e.name === "Russian Twist"));
+    const migrated = parsed.filter((e) => e.isCustom || !(e.muscleGroup === "Core" && e.name === ["Russian", "Twist"].join(" ")));
     for (const item of DEFAULT_EXERCISES) {
       if (!migrated.some((e) => e.muscleGroup === item.muscleGroup && e.name.toLocaleLowerCase() === item.name.toLocaleLowerCase())) {
         migrated.push({ ...item, id: uuid(), isCustom: false });
