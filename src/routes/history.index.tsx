@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HistoryList } from "@/components/history/HistoryList";
 
-export const Route = createFileRoute("/history")({
+export const Route = createFileRoute("/history/")({
   head: () => ({
     meta: [
       { title: "History — Gym Log" },
