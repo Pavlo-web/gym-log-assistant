@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/AppShell";
+import { NumberInput } from "@/components/ui/number-input";
 import { brzycki1RM, epley1RM, repsAtPercent, roundToHalf } from "@/lib/calc";
 
 export const Route = createFileRoute("/calculator")({
@@ -61,27 +62,24 @@ function CalculatorPage() {
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-sm text-muted-foreground">Weight (kg)</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.5"
-              min="0"
+            <NumberInput
+              aria-label="Weight (kg)"
+              step={2.5}
+              min={0}
               value={weightInput}
-              onChange={(e) => setWeightInput(e.target.value)}
-              className="tabular w-full rounded-md border border-input bg-surface px-3 py-2 text-lg outline-none transition-colors focus:border-ring"
+              onValueChange={setWeightInput}
+              className="h-11 bg-surface text-lg"
             />
           </label>
           <label className="block">
             <span className="mb-2 block text-sm text-muted-foreground">Reps</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              step="1"
-              min="1"
-              max="20"
+            <NumberInput
+              aria-label="Reps"
+              step={1}
+              min={1}
               value={repsInput}
-              onChange={(e) => setRepsInput(e.target.value)}
-              className="tabular w-full rounded-md border border-input bg-surface px-3 py-2 text-lg outline-none transition-colors focus:border-ring"
+              onValueChange={setRepsInput}
+              className="h-11 bg-surface text-lg"
             />
           </label>
         </div>

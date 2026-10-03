@@ -33,6 +33,8 @@ export interface WorkoutSet {
 export interface WorkoutEntry {
   id: string;
   exerciseId: string;
+  exerciseName?: string;
+  muscleGroup?: MuscleGroup;
   sets: WorkoutSet[];
 }
 
@@ -74,6 +76,8 @@ export interface DraftSet {
 export interface DraftEntry {
   id: string;
   exerciseId: string;
+  exerciseName?: string;
+  muscleGroup?: MuscleGroup;
   sets: DraftSet[];
 }
 

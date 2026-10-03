@@ -16,7 +16,7 @@ interface Props {
 
 export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Props) {
   const [confirming, setConfirming] = useState(false);
-  const name = exercise?.name ?? "Unknown exercise";
+  const name = exercise?.name ?? entry.exerciseName ?? "Deleted exercise";
 
   function addSet(focus = false) {
     const last = entry.sets[entry.sets.length - 1];
@@ -39,7 +39,7 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">{name}</h2>
-          <p className="text-xs text-muted-foreground">{exercise?.muscleGroup}</p>
+          <p className="text-xs text-muted-foreground">{exercise?.muscleGroup ?? entry.muscleGroup}</p>
         </div>
         <Button type="button" size="icon" variant="ghost" aria-label={`Remove ${name}`} onClick={requestRemove} className="text-muted-foreground hover:text-destructive">
           <Trash2 />

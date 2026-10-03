@@ -65,6 +65,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --radius: 0.5rem;
 
   --background: oklch(0.17 0.006 285);
@@ -116,7 +117,15 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
+
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+  *::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+  :where(a, button, input, textarea, select):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 
   body {
     background-color: var(--color-background);
