@@ -63,3 +63,28 @@ export interface WorkoutRepository {
   update(id: string, data: Partial<NewWorkout>): Promise<Workout>;
   delete(id: string): Promise<void>;
 }
+
+/** In-progress workout form state; numeric fields kept as raw input strings. */
+export interface DraftSet {
+  id: string;
+  weight: string;
+  reps: string;
+}
+
+export interface DraftEntry {
+  id: string;
+  exerciseId: string;
+  sets: DraftSet[];
+}
+
+export interface WorkoutDraft {
+  date: string;
+  notes: string;
+  entries: DraftEntry[];
+}
+
+export interface DraftRepository {
+  get(): Promise<WorkoutDraft | null>;
+  set(draft: WorkoutDraft): Promise<void>;
+  clear(): Promise<void>;
+}
