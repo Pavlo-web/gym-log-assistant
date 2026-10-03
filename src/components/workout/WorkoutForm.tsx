@@ -3,10 +3,12 @@ import { Dumbbell, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { useNavigate } from "@tanstack/react-router";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useExercises } from "@/hooks/useExercises";
-import { useCreateWorkout } from "@/hooks/useWorkouts";
+import { useCreateWorkout, useUpdateWorkout } from "@/hooks/useWorkouts";
 import { useClearWorkoutDraft, useSaveWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { ExerciseCard } from "./ExerciseCard";
 import { ExercisePicker } from "./ExercisePicker";
@@ -14,28 +16,37 @@ import { WorkoutSummary } from "./WorkoutSummary";
 import { emptyDraft, isDraftEmpty, newId, setError, toEntries, todayLocal } from "./draft-utils";
 import type { Exercise, Workout, WorkoutDraft } from "@/types/domain";
 
-export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
-  const [draft, setDraft] = useState<WorkoutDraft>(() => initial ?? emptyDraft());
+export function WorkoutForm({ initial, workout }: { initial?: WorkoutDraft | null; workout?: Workout }) {
+  const navigate = useNavigate();
+  const editing = !!workout;
+  const [draft, setDraft] = useState<WorkoutDraft>(() => workout ? { date: workout.date, notes: workout.notes ?? "", entries: workout.entries.map((e) => ({ ...e, sets: e.sets.map((s) => ({ id: s.id, weight: String(s.weight), reps: String(s.reps) })) })) } : initial ?? emptyDraft());
   const [pickerOpen, setPickerOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [formError, setFormError] = useState("");
   const { data: exercises = [] } = useExercises();
   const create = useCreateWorkout();
+  const updateWorkout = useUpdateWorkout();
   const saveDraft = useSaveWorkoutDraft();
   const clearDraft = useClearWorkoutDraft();
   const today = todayLocal();
 
   const first = useRef(true);
   useEffect(() => {
+    if (editing) return;
     if (first.current) { first.current = false; return; }
     if (isDraftEmpty(draft)) clearDraft.mutate();
     else saveDraft.mutate(draft);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft]);
+  }, [draft, editing]);
 
   const byId = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
-  const entries = toEntries(draft);
+  const entries = toEntries(draft).map((entry) => {
+    const exercise = byId.get(entry.exerciseId);
+    const name = exercise?.name ?? entry.exerciseName;
+    const group = exercise?.muscleGroup ?? entry.muscleGroup;
+    return { ...entry, ...(name ? { exerciseName: name } : {}), ...(group ? { muscleGroup: group } : {}) };
+  });
   const preview: Workout = { id: "preview", date: draft.date, entries, createdAt: "", updatedAt: "" };
   const errors: Record<string, string> = {};
   if (showErrors) for (const e of draft.entries) for (const s of e.sets) { const m = setError(s); if (m) errors[s.id] = m; }
@@ -44,7 +55,7 @@ export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
   function update(patch: Partial<WorkoutDraft>) { setDraft((d) => ({ ...d, ...patch })); setFormError(""); }
 
   function addExercise(ex: Exercise) {
-    update({ entries: [...draft.entries, { id: newId(), exerciseId: ex.id, sets: [{ id: newId(), weight: "", reps: "" }] }] });
+    update({ entries: [...draft.entries, { id: newId(), exerciseId: ex.id, exerciseName: ex.name, muscleGroup: ex.muscleGroup, sets: [{ id: newId(), weight: "", reps: "" }] }] });
     setPickerOpen(false);
   }
 
@@ -55,7 +66,13 @@ export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
     if (entries.length === 0) return;
     try {
       const notes = draft.notes.trim();
-      await create.mutateAsync({ date: draft.date, entries, ...(notes ? { notes } : {}) });
+       if (workout) {
+         await updateWorkout.mutateAsync({ id: workout.id, data: { date: draft.date, entries, notes } });
+         toast.success("Workout updated");
+         await navigate({ to: "/history/$workoutId", params: { workoutId: workout.id } });
+         return;
+       }
+       await create.mutateAsync({ date: draft.date, entries, ...(notes ? { notes } : {}) });
       await clearDraft.mutateAsync();
       first.current = true;
       setDraft(emptyDraft());
@@ -71,7 +88,7 @@ export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
       <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
         <div className="space-y-2">
           <Label htmlFor="workout-date">Date</Label>
-          <Input id="workout-date" type="date" max={today} value={draft.date} aria-invalid={!!dateError} onChange={(e) => update({ date: e.target.value })} className="tabular" />
+          <DatePicker id="workout-date" max={today} value={draft.date} onChange={(date) => update({ date })} />
           {dateError && <p role="alert" className="text-xs text-destructive">{dateError}</p>}
         </div>
         <div className="space-y-2">
@@ -108,13 +125,13 @@ export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
 
       {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
       <div className="flex items-center justify-end gap-2 border-t border-border pt-6">
-        <Button variant="ghost" disabled={isDraftEmpty(draft)} onClick={() => setDiscardOpen(true)}>Discard</Button>
-        <Button disabled={entries.length === 0 || create.isPending} onClick={() => void save()}>Save workout</Button>
+         {workout ? <Button variant="ghost" onClick={() => void navigate({ to: "/history/$workoutId", params: { workoutId: workout.id } })}>Cancel</Button> : <Button variant="ghost" disabled={isDraftEmpty(draft)} onClick={() => setDiscardOpen(true)}>Discard</Button>}
+         <Button disabled={entries.length === 0 || create.isPending || updateWorkout.isPending} onClick={() => void save()}>{editing ? "Save changes" : "Save workout"}</Button>
       </div>
 
       <ExercisePicker open={pickerOpen} onOpenChange={setPickerOpen} addedIds={new Set(draft.entries.map((e) => e.exerciseId))} onSelect={addExercise} />
 
-      <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
+       {!editing && <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Discard workout?</AlertDialogTitle>
@@ -125,7 +142,7 @@ export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
             <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => { setDraft(emptyDraft()); setShowErrors(false); setFormError(""); }}>Discard</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+       </AlertDialog>}
     </div>
   );
 }

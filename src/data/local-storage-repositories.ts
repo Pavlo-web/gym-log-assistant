@@ -13,6 +13,7 @@ import type {
 const EXERCISES_KEY = "gymlog.v1.exercises";
 const WORKOUTS_KEY = "gymlog.v1.workouts";
 const DRAFT_KEY = "gymlog.v1.workout-draft";
+const EXERCISES_MIGRATION_KEY = "gymlog.v1.exercises-defaults-v2";
 
 function hasStorage(): boolean {
   try {
@@ -67,6 +68,17 @@ function loadExercises(): Exercise[] {
   if (!existing) return seedExercises();
   const parsed = read<Exercise[]>(EXERCISES_KEY, []);
   if (parsed.length === 0) return seedExercises();
+  if (window.localStorage.getItem(EXERCISES_MIGRATION_KEY) !== "done") {
+    const migrated = parsed.filter((e) => e.isCustom || !(e.muscleGroup === "Core" && e.name === ["Russian", "Twist"].join(" ")));
+    for (const item of DEFAULT_EXERCISES) {
+      if (!migrated.some((e) => e.muscleGroup === item.muscleGroup && e.name.toLocaleLowerCase() === item.name.toLocaleLowerCase())) {
+        migrated.push({ ...item, id: uuid(), isCustom: false });
+      }
+    }
+    write(EXERCISES_KEY, migrated);
+    try { window.localStorage.setItem(EXERCISES_MIGRATION_KEY, "done"); } catch { /* storage unavailable */ }
+    return migrated;
+  }
   return parsed;
 }
 
@@ -102,7 +114,7 @@ function loadWorkouts(): Workout[] {
 
 class LocalWorkoutRepository implements WorkoutRepository {
   async list(): Promise<Workout[]> {
-    return loadWorkouts().sort((a, b) => b.date.localeCompare(a.date));
+    return loadWorkouts().sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
   }
 
   async getById(id: string): Promise<Workout | null> {

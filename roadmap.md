@@ -1,0 +1,4 @@
+- [ ] Polish shared date, number, scrollbar and focus controls.
+- [ ] Migrate default exercise library without changing custom entries.
+- [ ] Add exercise snapshots and History list, details, edit and delete.
+- [ ] Verify type check, build and full browser flow.

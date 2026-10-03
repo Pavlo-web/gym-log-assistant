@@ -41,6 +41,6 @@ export const DEFAULT_EXERCISES: { name: string; muscleGroup: MuscleGroup }[] = [
   { name: "Plank", muscleGroup: "Core" },
   { name: "Hanging Leg Raise", muscleGroup: "Core" },
   { name: "Cable Crunch", muscleGroup: "Core" },
-  { name: "Russian Twist", muscleGroup: "Core" },
+  { name: "Side Plank", muscleGroup: "Core" },
   { name: "Ab Wheel Rollout", muscleGroup: "Core" },
 ];

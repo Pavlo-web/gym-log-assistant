@@ -44,6 +44,8 @@ export function toEntries(d: WorkoutDraft): WorkoutEntry[] {
     .map((e) => ({
       id: e.id,
       exerciseId: e.exerciseId,
+      ...(e.exerciseName ? { exerciseName: e.exerciseName } : {}),
+      ...(e.muscleGroup ? { muscleGroup: e.muscleGroup } : {}),
       sets: e.sets
         .filter((s) => setStatus(s) === "valid")
         .map((s) => ({ id: s.id, weight: Number(s.weight), reps: Number(s.reps) })),
