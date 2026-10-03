@@ -19,7 +19,7 @@ export function DatePicker({ value, onChange, max, id }: { value: string; onChan
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={selected} defaultMonth={selected} disabled={{ after: maximum }} weekStartsOn={1} className="pointer-events-auto p-3" onSelect={(day) => {
+        <Calendar mode="single" selected={selected} {...(selected ? { defaultMonth: selected } : {})} disabled={{ after: maximum }} weekStartsOn={1} className="pointer-events-auto p-3" onSelect={(day) => {
           if (day) { onChange(format(day, "yyyy-MM-dd")); setOpen(false); }
         }} />
       </PopoverContent>

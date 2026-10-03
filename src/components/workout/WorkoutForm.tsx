@@ -43,7 +43,9 @@ export function WorkoutForm({ initial, workout }: { initial?: WorkoutDraft | nul
   const byId = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
   const entries = toEntries(draft).map((entry) => {
     const exercise = byId.get(entry.exerciseId);
-    return { ...entry, exerciseName: exercise?.name ?? entry.exerciseName, muscleGroup: exercise?.muscleGroup ?? entry.muscleGroup };
+    const name = exercise?.name ?? entry.exerciseName;
+    const group = exercise?.muscleGroup ?? entry.muscleGroup;
+    return { ...entry, ...(name ? { exerciseName: name } : {}), ...(group ? { muscleGroup: group } : {}) };
   });
   const preview: Workout = { id: "preview", date: draft.date, entries, createdAt: "", updatedAt: "" };
   const errors: Record<string, string> = {};
