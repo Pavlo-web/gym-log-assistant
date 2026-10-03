@@ -1,5 +1,7 @@
 import { DEFAULT_EXERCISES } from "./default-exercises";
 import type {
+  DraftRepository,
+  WorkoutDraft,
   Exercise,
   ExerciseRepository,
   NewExercise,
@@ -10,6 +12,7 @@ import type {
 
 const EXERCISES_KEY = "gymlog.v1.exercises";
 const WORKOUTS_KEY = "gymlog.v1.workouts";
+const DRAFT_KEY = "gymlog.v1.workout-draft";
 
 function hasStorage(): boolean {
   try {
@@ -140,3 +143,34 @@ class LocalWorkoutRepository implements WorkoutRepository {
 /** Local implementations; consumers use the public data entry point. */
 export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
 export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
+
+class LocalDraftRepository implements DraftRepository {
+  async get(): Promise<WorkoutDraft | null> {
+    if (!hasStorage()) return null;
+    try {
+      const raw = window.localStorage.getItem(DRAFT_KEY);
+      if (!raw) return null;
+      const d = JSON.parse(raw);
+      if (!d || typeof d.date !== "string" || !Array.isArray(d.entries)) return null;
+      return { date: d.date, notes: typeof d.notes === "string" ? d.notes : "", entries: d.entries };
+    } catch {
+      return null;
+    }
+  }
+
+  async set(draft: WorkoutDraft): Promise<void> {
+    if (!hasStorage()) return;
+    try {
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async clear(): Promise<void> {
+    if (!hasStorage()) return;
+    window.localStorage.removeItem(DRAFT_KEY);
+  }
+}
+
+export const draftRepository: DraftRepository = new LocalDraftRepository();
