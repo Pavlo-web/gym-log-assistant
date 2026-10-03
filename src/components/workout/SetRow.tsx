@@ -10,7 +10,7 @@ interface Props {
   error: string | null;
   onChange: (patch: Partial<DraftSet>) => void;
   onRemove: () => void;
-  onRepsEnter?: () => void;
+  onRepsEnter?: (() => void) | undefined;
 }
 
 export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: Props) {

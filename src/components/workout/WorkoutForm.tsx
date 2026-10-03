@@ -54,7 +54,8 @@ export function WorkoutForm({ initial }: { initial: WorkoutDraft | null }) {
     if (dateError) { setFormError(dateError); return; }
     if (entries.length === 0) return;
     try {
-      await create.mutateAsync({ date: draft.date, notes: draft.notes.trim() || undefined, entries });
+      const notes = draft.notes.trim();
+      await create.mutateAsync({ date: draft.date, entries, ...(notes ? { notes } : {}) });
       await clearDraft.mutateAsync();
       first.current = true;
       setDraft(emptyDraft());
