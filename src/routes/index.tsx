@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComingSoon } from "@/components/AppShell";
+import { PageHeader } from "@/components/AppShell";
+import { WorkoutForm } from "@/components/workout/WorkoutForm";
+import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,5 +18,11 @@ export const Route = createFileRoute("/")({
 });
 
 function WorkoutPage() {
-  return <ComingSoon title="Workout" />;
+  const { data, isPending } = useWorkoutDraft();
+  return (
+    <>
+      <PageHeader title="Workout" description="Log a training session" />
+      {isPending ? <p role="status" className="py-12 text-center text-sm text-muted-foreground">Loading…</p> : <WorkoutForm initial={data ?? null} />}
+    </>
+  );
 }
