@@ -20,13 +20,19 @@ export function isDraftEmpty(d: WorkoutDraft): boolean {
   return d.entries.length === 0 && d.notes.trim() === "" && d.date === todayLocal();
 }
 
+/** Parses a decimal that may use a comma separator ("82,5"). */
+export function parseDecimal(v: string): number {
+  const t = v.trim().replace(",", ".");
+  return t === "" ? NaN : Number(t);
+}
+
 export type SetStatus = "empty" | "valid" | "invalid";
 
 export function setError(s: DraftSet): string | null {
   const w = s.weight.trim();
   const r = s.reps.trim();
   if (!w && !r) return null;
-  const weight = Number(w);
+  const weight = parseDecimal(w);
   const reps = Number(r);
   if (!w || !isFinite(weight) || weight < 0 || weight > 1000) return "Weight must be 0–1000 kg.";
   if (!r || !Number.isInteger(reps) || reps < 1 || reps > 100) return "Reps must be a whole number 1–100.";
@@ -48,7 +54,7 @@ export function toEntries(d: WorkoutDraft): WorkoutEntry[] {
       ...(e.muscleGroup ? { muscleGroup: e.muscleGroup } : {}),
       sets: e.sets
         .filter((s) => setStatus(s) === "valid")
-        .map((s) => ({ id: s.id, weight: Number(s.weight), reps: Number(s.reps) })),
+        .map((s) => ({ id: s.id, weight: parseDecimal(s.weight), reps: Number(s.reps) })),
     }))
     .filter((e) => e.sets.length > 0);
 }
