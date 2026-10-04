@@ -3,7 +3,7 @@ import { ProgressPage } from "@/components/progress/ProgressPage";
 
 export const Route = createFileRoute("/progress")({
   validateSearch: (search: Record<string, unknown>): { exercise?: string } =>
-    typeof search.exercise === "string" && search.exercise ? { exercise: search.exercise } : {},
+    typeof search['exercise'] === "string" && search['exercise'] ? { exercise: search['exercise'] } : {},
   head: () => ({
     meta: [
       { title: "Progress — Gym Log" },
