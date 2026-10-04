@@ -15,7 +15,7 @@ import { Route as ExercisesRouteImport } from './routes/exercises'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as HistoryIndexRouteImport } from './routes/history.index'
-import { Route as HistoryWorkoutIdRouteImport } from './routes/history.$workoutId'
+import { Route as HistoryWorkoutIdIndexRouteImport } from './routes/history.$workoutId.index'
 import { Route as HistoryWorkoutIdEditRouteImport } from './routes/history.$workoutId.edit'
 
 const IndexRoute = IndexRouteImport.update({
@@ -48,15 +48,15 @@ const HistoryIndexRoute = HistoryIndexRouteImport.update({
   path: '/',
   getParentRoute: () => HistoryRoute,
 } as any)
-const HistoryWorkoutIdRoute = HistoryWorkoutIdRouteImport.update({
-  id: '/$workoutId',
-  path: '/$workoutId',
+const HistoryWorkoutIdIndexRoute = HistoryWorkoutIdIndexRouteImport.update({
+  id: '/$workoutId/',
+  path: '/$workoutId/',
   getParentRoute: () => HistoryRoute,
 } as any)
 const HistoryWorkoutIdEditRoute = HistoryWorkoutIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => HistoryWorkoutIdRoute,
+  id: '/$workoutId/edit',
+  path: '/$workoutId/edit',
+  getParentRoute: () => HistoryRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -65,18 +65,18 @@ export interface FileRoutesByFullPath {
   '/exercises': typeof ExercisesRoute
   '/history': typeof HistoryRouteWithChildren
   '/progress': typeof ProgressRoute
-  '/history/$workoutId': typeof HistoryWorkoutIdRouteWithChildren
   '/history/': typeof HistoryIndexRoute
   '/history/$workoutId/edit': typeof HistoryWorkoutIdEditRoute
+  '/history/$workoutId/': typeof HistoryWorkoutIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/exercises': typeof ExercisesRoute
   '/progress': typeof ProgressRoute
-  '/history/$workoutId': typeof HistoryWorkoutIdRouteWithChildren
   '/history': typeof HistoryIndexRoute
   '/history/$workoutId/edit': typeof HistoryWorkoutIdEditRoute
+  '/history/$workoutId': typeof HistoryWorkoutIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,9 +85,9 @@ export interface FileRoutesById {
   '/exercises': typeof ExercisesRoute
   '/history': typeof HistoryRouteWithChildren
   '/progress': typeof ProgressRoute
-  '/history/$workoutId': typeof HistoryWorkoutIdRouteWithChildren
   '/history/': typeof HistoryIndexRoute
   '/history/$workoutId/edit': typeof HistoryWorkoutIdEditRoute
+  '/history/$workoutId/': typeof HistoryWorkoutIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,18 +97,18 @@ export interface FileRouteTypes {
     | '/exercises'
     | '/history'
     | '/progress'
-    | '/history/$workoutId'
     | '/history/'
     | '/history/$workoutId/edit'
+    | '/history/$workoutId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calculator'
     | '/exercises'
     | '/progress'
-    | '/history/$workoutId'
     | '/history'
     | '/history/$workoutId/edit'
+    | '/history/$workoutId'
   id:
     | '__root__'
     | '/'
@@ -116,9 +116,9 @@ export interface FileRouteTypes {
     | '/exercises'
     | '/history'
     | '/progress'
-    | '/history/$workoutId'
     | '/history/'
     | '/history/$workoutId/edit'
+    | '/history/$workoutId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -173,42 +173,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryIndexRouteImport
       parentRoute: typeof HistoryRoute
     }
-    '/history/$workoutId': {
-      id: '/history/$workoutId'
+    '/history/$workoutId/': {
+      id: '/history/$workoutId/'
       path: '/$workoutId'
-      fullPath: '/history/$workoutId'
-      preLoaderRoute: typeof HistoryWorkoutIdRouteImport
+      fullPath: '/history/$workoutId/'
+      preLoaderRoute: typeof HistoryWorkoutIdIndexRouteImport
       parentRoute: typeof HistoryRoute
     }
     '/history/$workoutId/edit': {
       id: '/history/$workoutId/edit'
-      path: '/edit'
+      path: '/$workoutId/edit'
       fullPath: '/history/$workoutId/edit'
       preLoaderRoute: typeof HistoryWorkoutIdEditRouteImport
-      parentRoute: typeof HistoryWorkoutIdRoute
+      parentRoute: typeof HistoryRoute
     }
   }
 }
 
-interface HistoryWorkoutIdRouteChildren {
-  HistoryWorkoutIdEditRoute: typeof HistoryWorkoutIdEditRoute
-}
-
-const HistoryWorkoutIdRouteChildren: HistoryWorkoutIdRouteChildren = {
-  HistoryWorkoutIdEditRoute: HistoryWorkoutIdEditRoute,
-}
-
-const HistoryWorkoutIdRouteWithChildren =
-  HistoryWorkoutIdRoute._addFileChildren(HistoryWorkoutIdRouteChildren)
-
 interface HistoryRouteChildren {
-  HistoryWorkoutIdRoute: typeof HistoryWorkoutIdRouteWithChildren
   HistoryIndexRoute: typeof HistoryIndexRoute
+  HistoryWorkoutIdEditRoute: typeof HistoryWorkoutIdEditRoute
+  HistoryWorkoutIdIndexRoute: typeof HistoryWorkoutIdIndexRoute
 }
 
 const HistoryRouteChildren: HistoryRouteChildren = {
-  HistoryWorkoutIdRoute: HistoryWorkoutIdRouteWithChildren,
   HistoryIndexRoute: HistoryIndexRoute,
+  HistoryWorkoutIdEditRoute: HistoryWorkoutIdEditRoute,
+  HistoryWorkoutIdIndexRoute: HistoryWorkoutIdIndexRoute,
 }
 
 const HistoryRouteWithChildren =

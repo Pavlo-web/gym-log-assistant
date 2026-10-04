@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComingSoon } from "@/components/AppShell";
+import { ProgressPage } from "@/components/progress/ProgressPage";
 
 export const Route = createFileRoute("/progress")({
+  validateSearch: (search: Record<string, unknown>): { exercise?: string } =>
+    typeof search.exercise === "string" && search.exercise ? { exercise: search.exercise } : {},
   head: () => ({
     meta: [
       { title: "Progress — Gym Log" },
@@ -12,9 +14,11 @@ export const Route = createFileRoute("/progress")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: ProgressPage,
+  component: ProgressRoute,
 });
 
-function ProgressPage() {
-  return <ComingSoon title="Progress" />;
+function ProgressRoute() {
+  const { exercise } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  return <ProgressPage selectedId={exercise} onSelect={(id) => void navigate({ search: { exercise: id }, replace: true })} />;
 }
