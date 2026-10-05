@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 const NAV = [
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/", label: "Workout" },
   { to: "/history", label: "History" },
   { to: "/exercises", label: "Exercises" },
