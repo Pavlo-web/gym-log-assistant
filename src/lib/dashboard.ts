@@ -1,4 +1,4 @@
-import { addDays, addWeeks, format, startOfMonth, startOfWeek, subDays } from "date-fns";
+import { addWeeks, format, startOfMonth, startOfWeek, subDays } from "date-fns";
 import { MUSCLE_GROUPS, type Exercise, type MuscleGroup, type Workout } from "@/types/domain";
 import { workoutVolume } from "./calc";
 import { personalRecords } from "./progress";
@@ -110,4 +110,3 @@ export function recentPRs(workouts: Workout[], exercises: Exercise[], limit = 5)
   return result.sort((a, b) => b.date.localeCompare(a.date) || b.value - a.value).slice(0, limit);
 }
 
-export { addDays as _addDays };
