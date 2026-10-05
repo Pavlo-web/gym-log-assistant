@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExercisesRouteImport } from './routes/exercises'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ProgressRouteImport } from './routes/progress'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExercisesRoute = ExercisesRouteImport.update({
@@ -62,6 +68,7 @@ const HistoryWorkoutIdEditRoute = HistoryWorkoutIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/dashboard': typeof DashboardRoute
   '/exercises': typeof ExercisesRoute
   '/history': typeof HistoryRouteWithChildren
   '/progress': typeof ProgressRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/dashboard': typeof DashboardRoute
   '/exercises': typeof ExercisesRoute
   '/progress': typeof ProgressRoute
   '/history': typeof HistoryIndexRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/dashboard': typeof DashboardRoute
   '/exercises': typeof ExercisesRoute
   '/history': typeof HistoryRouteWithChildren
   '/progress': typeof ProgressRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calculator'
+    | '/dashboard'
     | '/exercises'
     | '/history'
     | '/progress'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/calculator'
+    | '/dashboard'
     | '/exercises'
     | '/progress'
     | '/history'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/calculator'
+    | '/dashboard'
     | '/exercises'
     | '/history'
     | '/progress'
@@ -124,6 +136,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
+  DashboardRoute: typeof DashboardRoute
   ExercisesRoute: typeof ExercisesRoute
   HistoryRoute: typeof HistoryRouteWithChildren
   ProgressRoute: typeof ProgressRoute
@@ -143,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/calculator'
       fullPath: '/calculator'
       preLoaderRoute: typeof CalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/exercises': {
@@ -208,6 +228,7 @@ const HistoryRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
+  DashboardRoute: DashboardRoute,
   ExercisesRoute: ExercisesRoute,
   HistoryRoute: HistoryRouteWithChildren,
   ProgressRoute: ProgressRoute,

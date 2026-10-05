@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ChevronRight, LayoutDashboard, Plus } from "lucide-react";
@@ -158,7 +158,7 @@ function Tile({ label, value, delta }: { label: string; value: string; delta?: s
   );
 }
 
-function Section({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode }) {
+function Section({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="mb-6 rounded-md border border-border bg-card p-5">
       <div className="mb-4 flex items-baseline justify-between gap-4">
