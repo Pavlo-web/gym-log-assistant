@@ -204,7 +204,9 @@ export function DashboardPage() {
                   </span>
                   <span className="flex items-center gap-4 text-muted-foreground tabular">
                     <span>{stats.exercises} ex</span>
-                    <span>{stats.sets} {stats.sets === 1 ? "set" : "sets"}</span>
+                    <span>
+                      {stats.sets} {stats.sets === 1 ? "set" : "sets"}
+                    </span>
                     <span className="text-foreground">{fmt(workoutVolume(w))} kg</span>
                     <ChevronRight className="size-4" />
                   </span>
