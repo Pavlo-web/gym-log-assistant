@@ -94,7 +94,9 @@ export interface RecentPR {
 /** Sessions that set a new best estimated 1RM for their exercise, newest first. */
 export function recentPRs(workouts: Workout[], exercises: Exercise[], limit = 5): RecentPR[] {
   const names = new Map<string, string>();
-  for (const w of workouts) for (const e of w.entries) if (e.exerciseName && !names.has(e.exerciseId)) names.set(e.exerciseId, e.exerciseName);
+  for (const w of workouts)
+    for (const e of w.entries)
+      if (e.exerciseName && !names.has(e.exerciseId)) names.set(e.exerciseId, e.exerciseName);
   for (const e of exercises) names.set(e.id, e.name);
   const dates = [...new Set(workouts.map((w) => w.date))].sort();
   const result: RecentPR[] = [];
@@ -103,10 +105,16 @@ export function recentPRs(workouts: Workout[], exercises: Exercise[], limit = 5)
       const upTo = workouts.filter((w) => w.date <= date);
       const best = personalRecords(upTo, exerciseId)?.bestE1RM;
       if (best && best.date === date && best.value > 0) {
-        result.push({ exerciseId, name: names.get(exerciseId) ?? "Deleted exercise", value: best.value, weight: best.weight, reps: best.reps, date });
+        result.push({
+          exerciseId,
+          name: names.get(exerciseId) ?? "Deleted exercise",
+          value: best.value,
+          weight: best.weight,
+          reps: best.reps,
+          date,
+        });
       }
     }
   }
   return result.sort((a, b) => b.date.localeCompare(a.date) || b.value - a.value).slice(0, limit);
 }
-

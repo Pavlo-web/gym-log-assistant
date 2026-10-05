@@ -5,7 +5,13 @@ import { localWorkoutDate } from "@/components/history/history-utils";
 
 const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
 
-function TooltipBox({ active, payload }: { active?: boolean; payload?: { payload: WeekBucket }[] }) {
+function TooltipBox({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: WeekBucket }[];
+}) {
   const p = active ? payload?.[0]?.payload : undefined;
   if (!p) return null;
   return (
@@ -24,10 +30,27 @@ export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="week" tick={tick} stroke="var(--border)" tickFormatter={(d: string) => format(localWorkoutDate(d), "d MMM")} />
-          <YAxis tick={tick} stroke="var(--border)" width={64} tickFormatter={(v: number) => fmt(v)} unit=" kg" allowDecimals={false} />
+          <XAxis
+            dataKey="week"
+            tick={tick}
+            stroke="var(--border)"
+            tickFormatter={(d: string) => format(localWorkoutDate(d), "d MMM")}
+          />
+          <YAxis
+            tick={tick}
+            stroke="var(--border)"
+            width={64}
+            tickFormatter={(v: number) => fmt(v)}
+            unit=" kg"
+            allowDecimals={false}
+          />
           <Tooltip content={<TooltipBox />} cursor={{ fill: "var(--accent)", opacity: 0.4 }} />
-          <Bar dataKey="volume" fill="var(--chart-1)" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+          <Bar
+            dataKey="volume"
+            fill="var(--chart-1)"
+            radius={[3, 3, 0, 0]}
+            isAnimationActive={false}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

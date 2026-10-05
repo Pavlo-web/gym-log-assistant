@@ -1,12 +1,37 @@
 import { describe, expect, it } from "vitest";
 import type { Exercise, Workout } from "@/types/domain";
-import { muscleGroupSplit, recentPRs, weekStart, weeklyBuckets, weeklyStreak, workoutsThisMonth } from "./dashboard";
+import {
+  muscleGroupSplit,
+  recentPRs,
+  weekStart,
+  weeklyBuckets,
+  weeklyStreak,
+  workoutsThisMonth,
+} from "./dashboard";
 
 const bench: Exercise = { id: "b", name: "Bench Press", muscleGroup: "Chest", isCustom: false };
 let n = 0;
-function w(date: string, exerciseId = "b", sets: [number, number][] = [[100, 5]], extra: Partial<Workout["entries"][number]> = {}): Workout {
+function w(
+  date: string,
+  exerciseId = "b",
+  sets: [number, number][] = [[100, 5]],
+  extra: Partial<Workout["entries"][number]> = {},
+): Workout {
   n += 1;
-  return { id: `w${n}`, date, createdAt: "", updatedAt: "", entries: [{ id: `e${n}`, exerciseId, ...extra, sets: sets.map(([weight, reps], i) => ({ id: `s${n}-${i}`, weight, reps })) }] };
+  return {
+    id: `w${n}`,
+    date,
+    createdAt: "",
+    updatedAt: "",
+    entries: [
+      {
+        id: `e${n}`,
+        exerciseId,
+        ...extra,
+        sets: sets.map(([weight, reps], i) => ({ id: `s${n}-${i}`, weight, reps })),
+      },
+    ],
+  };
 }
 const today = new Date(2026, 9, 7); // Wed 7 Oct 2026
 
@@ -47,7 +72,18 @@ it("counts workouts this month", () => {
 
 describe("muscleGroupSplit", () => {
   it("includes all groups with zeros and uses snapshots for deleted exercises", () => {
-    const split = muscleGroupSplit([w("2026-10-01", "b", [[1, 1], [1, 1]]), w("2026-10-02", "gone", [[1, 1]], { muscleGroup: "Legs" }), w("2026-08-01")], [bench], today);
+    const split = muscleGroupSplit(
+      [
+        w("2026-10-01", "b", [
+          [1, 1],
+          [1, 1],
+        ]),
+        w("2026-10-02", "gone", [[1, 1]], { muscleGroup: "Legs" }),
+        w("2026-08-01"),
+      ],
+      [bench],
+      today,
+    );
     expect(split).toHaveLength(6);
     expect(split.find((s) => s.group === "Chest")?.sets).toBe(2);
     expect(split.find((s) => s.group === "Legs")?.sets).toBe(1);
@@ -58,7 +94,19 @@ describe("muscleGroupSplit", () => {
 describe("recentPRs", () => {
   it("is empty without workouts", () => expect(recentPRs([], [bench])).toEqual([]));
   it("lists sessions that beat the previous best, newest first, with snapshot names", () => {
-    const prs = recentPRs([w("2026-09-01", "b", [[80, 5]]), w("2026-09-08", "b", [[75, 5]]), w("2026-09-15", "b", [[90, 5]]), w("2026-09-10", "gone", [[50, 1]], { exerciseName: "Old Lift" })], [bench]);
-    expect(prs.map((p) => [p.name, p.date, p.weight])).toEqual([["Bench Press", "2026-09-15", 90], ["Old Lift", "2026-09-10", 50], ["Bench Press", "2026-09-01", 80]]);
+    const prs = recentPRs(
+      [
+        w("2026-09-01", "b", [[80, 5]]),
+        w("2026-09-08", "b", [[75, 5]]),
+        w("2026-09-15", "b", [[90, 5]]),
+        w("2026-09-10", "gone", [[50, 1]], { exerciseName: "Old Lift" }),
+      ],
+      [bench],
+    );
+    expect(prs.map((p) => [p.name, p.date, p.weight])).toEqual([
+      ["Bench Press", "2026-09-15", 90],
+      ["Old Lift", "2026-09-10", 50],
+      ["Bench Press", "2026-09-01", 80],
+    ]);
   });
 });

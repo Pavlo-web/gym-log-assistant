@@ -8,7 +8,13 @@ import { useExercises } from "@/hooks/useExercises";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { workoutVolume } from "@/lib/calc";
-import { muscleGroupSplit, recentPRs, weeklyBuckets, weeklyStreak, workoutsThisMonth } from "@/lib/dashboard";
+import {
+  muscleGroupSplit,
+  recentPRs,
+  weeklyBuckets,
+  weeklyStreak,
+  workoutsThisMonth,
+} from "@/lib/dashboard";
 import { localWorkoutDate, workoutStats } from "@/components/history/history-utils";
 import type { WorkoutDraft } from "@/types/domain";
 
@@ -20,7 +26,11 @@ function Header() {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <PageHeader title="Dashboard" description="An overview of your recent training." />
-      <Button asChild><Link to="/"><Plus /> Log workout</Link></Button>
+      <Button asChild>
+        <Link to="/">
+          <Plus /> Log workout
+        </Link>
+      </Button>
     </div>
   );
 }
@@ -37,18 +47,36 @@ export function DashboardPage() {
   const draftNotice = hasDraft(draft.data) ? (
     <div className="mb-6 flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 text-sm">
       <span className="text-muted-foreground">You have an unfinished workout.</span>
-      <Button asChild variant="link" className="h-auto p-0"><Link to="/">Continue draft</Link></Button>
+      <Button asChild variant="link" className="h-auto p-0">
+        <Link to="/">Continue draft</Link>
+      </Button>
     </div>
   ) : null;
 
   if (workouts.isPending || exercises.isPending)
-    return <><Header /><p role="status" className="py-12 text-center text-sm text-muted-foreground">Loading dashboard…</p></>;
+    return (
+      <>
+        <Header />
+        <p role="status" className="py-12 text-center text-sm text-muted-foreground">
+          Loading dashboard…
+        </p>
+      </>
+    );
   if (workouts.isError || exercises.isError)
     return (
-      <><Header />
+      <>
+        <Header />
         <div role="alert" className="py-12 text-center text-sm text-muted-foreground">
           Could not load dashboard.{" "}
-          <Button variant="link" onClick={() => { void workouts.refetch(); void exercises.refetch(); }}>Try again</Button>
+          <Button
+            variant="link"
+            onClick={() => {
+              void workouts.refetch();
+              void exercises.refetch();
+            }}
+          >
+            Try again
+          </Button>
         </div>
       </>
     );
@@ -56,12 +84,18 @@ export function DashboardPage() {
   const all = workouts.data;
   if (all.length === 0)
     return (
-      <><Header />{draftNotice}
+      <>
+        <Header />
+        {draftNotice}
         <div className="flex flex-col items-center rounded-lg border border-dashed border-border px-6 py-14 text-center">
           <LayoutDashboard aria-hidden="true" className="mb-3 size-6 text-muted-foreground" />
           <p className="text-sm font-medium">No workouts yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">Your overview will appear here once you log a workout.</p>
-          <Button asChild className="mt-5"><Link to="/">Log your first workout</Link></Button>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your overview will appear here once you log a workout.
+          </p>
+          <Button asChild className="mt-5">
+            <Link to="/">Log your first workout</Link>
+          </Button>
         </div>
       </>
     );
@@ -82,15 +116,25 @@ export function DashboardPage() {
       {draftNotice}
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Tile label="Workouts this week" value={String(thisWeek.workouts)} delta={delta(thisWeek.workouts - lastWeek.workouts, "")} />
+        <Tile
+          label="Workouts this week"
+          value={String(thisWeek.workouts)}
+          delta={delta(thisWeek.workouts - lastWeek.workouts, "")}
+        />
         <Tile label="Workouts this month" value={String(workoutsThisMonth(all, today))} />
-        <Tile label="Volume this week" value={`${fmt(thisWeek.volume)} kg`} delta={delta(thisWeek.volume - lastWeek.volume, " kg")} />
+        <Tile
+          label="Volume this week"
+          value={`${fmt(thisWeek.volume)} kg`}
+          delta={delta(thisWeek.volume - lastWeek.volume, " kg")}
+        />
         <Tile label="Weekly streak" value={`${streak} ${streak === 1 ? "week" : "weeks"}`} />
       </div>
 
       <Section title="Weekly volume" subtitle="Last 8 weeks">
         <ClientOnly fallback={<div className="h-64" />}>
-          <Suspense fallback={<div className="h-64" />}><WeeklyVolumeChart data={weeks} /></Suspense>
+          <Suspense fallback={<div className="h-64" />}>
+            <WeeklyVolumeChart data={weeks} />
+          </Suspense>
         </ClientOnly>
       </Section>
 
@@ -100,7 +144,10 @@ export function DashboardPage() {
             <li key={s.group} className="grid grid-cols-[88px_1fr_40px] items-center gap-3 text-sm">
               <span className="text-muted-foreground">{s.group}</span>
               <div className="h-2 rounded-full bg-muted">
-                <div className="h-2 rounded-full bg-primary" style={{ width: `${(s.sets / maxSets) * 100}%` }} />
+                <div
+                  className="h-2 rounded-full bg-primary"
+                  style={{ width: `${(s.sets / maxSets) * 100}%` }}
+                />
               </div>
               <span className="text-right tabular">{s.sets}</span>
             </li>
@@ -109,28 +156,56 @@ export function DashboardPage() {
       </Section>
 
       <Section title="Recent personal records" subtitle="Best estimated 1RM">
-        {prs.length === 0 ? <p className="text-sm text-muted-foreground">No records yet.</p> : (
+        {prs.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No records yet.</p>
+        ) : (
           <ul className="divide-y divide-border text-sm">
             {prs.map((p) => (
-              <li key={`${p.exerciseId}-${p.date}`} className="flex items-center justify-between gap-4 py-2.5">
-                <div className="min-w-0"><p className="truncate font-medium">{p.name}</p><p className="text-xs text-muted-foreground">{day(p.date)}</p></div>
-                <div className="text-right tabular"><p>{fmt(p.weight)} kg × {p.reps}</p><p className="text-xs text-muted-foreground">{fmt(p.value)} kg est. 1RM</p></div>
+              <li
+                key={`${p.exerciseId}-${p.date}`}
+                className="flex items-center justify-between gap-4 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{p.name}</p>
+                  <p className="text-xs text-muted-foreground">{day(p.date)}</p>
+                </div>
+                <div className="text-right tabular">
+                  <p>
+                    {fmt(p.weight)} kg × {p.reps}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{fmt(p.value)} kg est. 1RM</p>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </Section>
 
-      <Section title="Recent workouts" action={<Button asChild variant="link" className="h-auto p-0"><Link to="/history">View all</Link></Button>}>
+      <Section
+        title="Recent workouts"
+        action={
+          <Button asChild variant="link" className="h-auto p-0">
+            <Link to="/history">View all</Link>
+          </Button>
+        }
+      >
         <ul className="divide-y divide-border text-sm">
           {recent.map((w) => {
             const stats = workoutStats(w);
             return (
               <li key={w.id}>
-                <Link to="/history/$workoutId" params={{ workoutId: w.id }} className="flex items-center justify-between gap-4 py-2.5 hover:text-primary">
-                  <span className="font-medium">{format(localWorkoutDate(w.date), "EEE, d MMM yyyy")}</span>
+                <Link
+                  to="/history/$workoutId"
+                  params={{ workoutId: w.id }}
+                  className="flex items-center justify-between gap-4 py-2.5 hover:text-primary"
+                >
+                  <span className="font-medium">
+                    {format(localWorkoutDate(w.date), "EEE, d MMM yyyy")}
+                  </span>
                   <span className="flex items-center gap-4 text-muted-foreground tabular">
-                    <span>{stats.exercises} ex</span><span>{stats.sets} sets</span><span className="text-foreground">{fmt(workoutVolume(w))} kg</span>
+                    <span>{stats.exercises} ex</span>
+                    <span>{stats.sets} sets</span>
+                    <span className="text-foreground">{fmt(workoutVolume(w))} kg</span>
                     <ChevronRight className="size-4" />
                   </span>
                 </Link>
@@ -158,11 +233,24 @@ function Tile({ label, value, delta }: { label: string; value: string; delta?: s
   );
 }
 
-function Section({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: ReactNode; children: ReactNode }) {
+function Section({
+  title,
+  subtitle,
+  action,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="mb-6 rounded-md border border-border bg-card p-5">
       <div className="mb-4 flex items-baseline justify-between gap-4">
-        <div><h2 className="font-semibold">{title}</h2>{subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}</div>
+        <div>
+          <h2 className="font-semibold">{title}</h2>
+          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        </div>
         {action}
       </div>
       {children}
