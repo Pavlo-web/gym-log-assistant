@@ -53,14 +53,14 @@ export function ProgressPage({ selectedId, onSelect }: { selectedId: string | un
     <PageHeader title="Progress" />
     <div className="mb-6"><ExerciseSelect options={options} value={current} onChange={onSelect} /></div>
 
-    {records && <div className="mb-6 grid gap-4 sm:grid-cols-3">
+    {records && <div className="mb-6 grid gap-4 md:grid-cols-3">
       <Stat label="Heaviest weight" value={`${fmt(records.maxWeight.value)} kg × ${records.maxWeight.reps}`} date={records.maxWeight.date} />
       <Stat label="Best estimated 1RM" value={`${fmt(records.bestE1RM.value)} kg`} sub={`from ${fmt(records.bestE1RM.weight)} kg × ${records.bestE1RM.reps}`} date={records.bestE1RM.date} />
       <Stat label="Most volume in a session" value={`${fmt(records.maxVolume.value)} kg`} date={records.maxVolume.date} />
     </div>}
 
-    <section className="mb-6 rounded-md border border-border bg-card p-5">
-      <ToggleGroup type="single" variant="outline" size="sm" value={metric} onValueChange={(v) => v && setMetric(v as Metric)} className="mb-4 justify-start" aria-label="Chart metric">
+    <section className="mb-6 rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
+      <ToggleGroup type="single" variant="outline" size="sm" value={metric} onValueChange={(v) => v && setMetric(v as Metric)} className="mobile-metric mb-4 justify-start" aria-label="Chart metric">
         <ToggleGroupItem value="topWeight">Top weight</ToggleGroupItem>
         <ToggleGroupItem value="bestE1RM">Est. 1RM</ToggleGroupItem>
         <ToggleGroupItem value="volume">Volume</ToggleGroupItem>
@@ -71,15 +71,15 @@ export function ProgressPage({ selectedId, onSelect }: { selectedId: string | un
       {points.length === 1 && <p className="mt-2 text-sm text-muted-foreground">Log more sessions with this exercise to see a trend.</p>}
     </section>
 
-    <section className="rounded-md border border-border bg-card p-5">
+    <section className="rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
       <h2 className="mb-3 font-semibold">Sessions</h2>
-      <div className="overflow-x-auto"><table className="w-full text-sm tabular" aria-label="Sessions">
+      <div className="overflow-x-auto"><table className="mobile-sessions w-full text-sm tabular" aria-label="Sessions">
         <thead><tr className="border-b border-border text-left text-muted-foreground"><th className="pb-2 font-normal">Date</th><th className="pb-2 font-normal">Sets</th><th className="pb-2 font-normal">Top weight</th><th className="pb-2 font-normal">Est. 1RM</th><th className="pb-2 text-right font-normal">Volume</th></tr></thead>
         <tbody>{[...points].reverse().map((p) => {
           const pr = records && (records.maxWeight.date === p.date || records.bestE1RM.date === p.date || records.maxVolume.date === p.date);
           return <tr key={p.date} className="border-t border-border">
             <td className="py-2"><Link to="/history/$workoutId" params={{ workoutId: p.workoutIds[0]! }} className="hover:text-primary hover:underline">{day(p.date)}</Link>{pr && <Badge variant="outline" className="ml-2 border-primary/50 text-primary">PR</Badge>}</td>
-            <td>{p.sets}</td><td>{fmt(p.topWeight)} kg × {p.topReps}</td><td>{fmt(p.bestE1RM)} kg</td><td className="text-right">{fmt(p.volume)} kg</td>
+            <td data-label="Sets">{p.sets}</td><td data-label="Top weight">{fmt(p.topWeight)} kg × {p.topReps}</td><td data-label="Est. 1RM">{fmt(p.bestE1RM)} kg</td><td data-label="Volume" className="text-right">{fmt(p.volume)} kg</td>
           </tr>;
         })}</tbody>
       </table></div>
@@ -88,7 +88,7 @@ export function ProgressPage({ selectedId, onSelect }: { selectedId: string | un
 }
 
 function Stat({ label, value, sub, date }: { label: string; value: string; sub?: string; date: string }) {
-  return <div className="rounded-md border border-border bg-card p-5">
+  return <div className="rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
     <p className="text-xs text-muted-foreground">{label}</p>
     <p className="mt-2 text-2xl font-semibold tabular">{value}</p>
     {sub && <p className="text-xs text-muted-foreground tabular">{sub}</p>}

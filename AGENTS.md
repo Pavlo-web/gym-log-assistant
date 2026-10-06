@@ -13,3 +13,4 @@
 - Import repositories through `@/data` exclusively so the storage implementation can be exchanged in one place.
 - Persist exercise and workout data locally through repository interfaces because this stage has no backend.
 - Store exercise labels on workout entries when saving and prefer live library labels when displaying; historical workouts remain readable after exercise deletion.
+- Keep phone navigation in a dedicated shell component and share safe-area offsets with sticky form actions so navigation and save controls never overlap.

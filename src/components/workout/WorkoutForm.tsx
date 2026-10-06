@@ -85,7 +85,7 @@ export function WorkoutForm({ initial, workout }: { initial?: WorkoutDraft | nul
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
+      <div className="grid gap-4 md:grid-cols-[180px_1fr]">
         <div className="space-y-2">
           <Label htmlFor="workout-date">Date</Label>
           <DatePicker id="workout-date" max={today} value={draft.date} onChange={(date) => update({ date })} />
@@ -124,7 +124,7 @@ export function WorkoutForm({ initial, workout }: { initial?: WorkoutDraft | nul
       )}
 
       {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
-      <div className="flex items-center justify-end gap-2 border-t border-border pt-6">
+      <div className="mobile-save-bar sticky z-30 flex items-center justify-end gap-2 border-t border-border bg-background py-3 md:static md:bg-transparent md:pb-0 md:pt-6">
          {workout ? <Button variant="ghost" onClick={() => void navigate({ to: "/history/$workoutId", params: { workoutId: workout.id } })}>Cancel</Button> : <Button variant="ghost" disabled={isDraftEmpty(draft)} onClick={() => setDiscardOpen(true)}>Discard</Button>}
          <Button disabled={entries.length === 0 || create.isPending || updateWorkout.isPending} onClick={() => void save()}>{editing ? "Save changes" : "Save workout"}</Button>
       </div>

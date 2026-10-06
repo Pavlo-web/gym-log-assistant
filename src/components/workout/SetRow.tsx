@@ -18,8 +18,8 @@ export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: P
   return (
     <>
       <tr className={cn("border-t border-border", invalid && "bg-destructive/10")}>
-        <td className="tabular w-10 py-2 pl-1 text-sm text-muted-foreground">{index + 1}</td>
-        <td className="py-2 pr-3">
+        <td className="tabular w-5 py-2 pl-1 text-sm text-muted-foreground md:w-10">{index + 1}</td>
+        <td className="py-2 pr-1 md:pr-3">
           <NumberInput
             id={`weight-${set.id}`}
             aria-label={`Set ${index + 1} weight in kg`}
@@ -29,11 +29,11 @@ export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: P
             step={2.5}
             value={set.weight}
             onValueChange={(weight) => onChange({ weight })}
-            className="tabular h-9"
+            className="tabular md:h-9"
             placeholder="0"
           />
         </td>
-        <td className="py-2 pr-3">
+        <td className="py-2 pr-1 md:pr-3">
           <NumberInput
             aria-label={`Set ${index + 1} reps`}
             aria-invalid={invalid}
@@ -48,11 +48,11 @@ export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: P
                 onRepsEnter();
               }
             }}
-            className="tabular h-9"
+            className="tabular md:h-9"
             placeholder="0"
           />
         </td>
-        <td className="w-10 py-2 text-right">
+        <td className="w-11 py-2 text-right md:w-10">
           <Button type="button" size="icon" variant="ghost" aria-label={`Remove set ${index + 1}`} onClick={onRemove} className="text-muted-foreground hover:text-destructive">
             <X />
           </Button>

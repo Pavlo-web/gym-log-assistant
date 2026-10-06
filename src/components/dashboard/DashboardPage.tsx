@@ -24,9 +24,9 @@ const day = (d: string) => format(localWorkoutDate(d), "d MMM yyyy");
 
 function Header() {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="grid grid-cols-1 items-start gap-4 md:flex md:flex-wrap md:justify-between">
       <PageHeader title="Dashboard" description="An overview of your recent training." />
-      <Button asChild>
+      <Button asChild className="hidden md:inline-flex">
         <Link to="/">
           <Plus /> Log workout
         </Link>
@@ -45,7 +45,7 @@ export function DashboardPage() {
   const draft = useWorkoutDraft();
 
   const draftNotice = hasDraft(draft.data) ? (
-    <div className="mb-6 flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 text-sm">
+    <div className="mb-6 grid grid-cols-1 items-center gap-2 md:flex md:justify-between md:gap-4 rounded-md border border-border bg-card px-4 py-3 text-sm">
       <span className="text-muted-foreground">You have an unfinished workout.</span>
       <Button asChild variant="link" className="h-auto p-0">
         <Link to="/">Continue draft</Link>
@@ -115,7 +115,7 @@ export function DashboardPage() {
       <Header />
       {draftNotice}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-3 min-[350px]:grid-cols-2 md:gap-4 lg:grid-cols-4">
         <Tile
           label="Workouts this week"
           value={String(thisWeek.workouts)}
@@ -149,7 +149,7 @@ export function DashboardPage() {
                   style={{ width: `${(s.sets / maxSets) * 100}%` }}
                 />
               </div>
-              <span className="text-right tabular">{s.sets}</span>
+              <span className="shrink-0 text-right tabular">{s.sets}</span>
             </li>
           ))}
         </ul>
@@ -163,13 +163,13 @@ export function DashboardPage() {
             {prs.map((p) => (
               <li
                 key={`${p.exerciseId}-${p.date}`}
-                className="flex items-center justify-between gap-4 py-2.5"
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2.5 md:flex md:justify-between md:gap-4"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium">{p.name}</p>
                   <p className="text-xs text-muted-foreground">{day(p.date)}</p>
                 </div>
-                <div className="text-right tabular">
+                <div className="shrink-0 text-right tabular">
                   <p>
                     {fmt(p.weight)} kg × {p.reps}
                   </p>
@@ -197,12 +197,12 @@ export function DashboardPage() {
                 <Link
                   to="/history/$workoutId"
                   params={{ workoutId: w.id }}
-                  className="flex items-center justify-between gap-4 py-2.5 hover:text-primary"
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2.5 md:flex md:justify-between md:gap-4 hover:text-primary"
                 >
                   <span className="font-medium">
                     {format(localWorkoutDate(w.date), "EEE, d MMM yyyy")}
                   </span>
-                  <span className="flex items-center gap-4 text-muted-foreground tabular">
+                  <span className="flex min-w-0 flex-wrap items-center gap-3 text-muted-foreground tabular md:gap-4">
                     <span>{stats.exercises} ex</span>
                     <span>
                       {stats.sets} {stats.sets === 1 ? "set" : "sets"}
@@ -227,9 +227,9 @@ function delta(diff: number, unit: string) {
 
 function Tile({ label, value, delta }: { label: string; value: string; delta?: string }) {
   return (
-    <div className="rounded-md border border-border bg-card p-5">
+    <div className="rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular">{value}</p>
+      <p className="mt-2 break-words text-xl font-semibold tabular md:text-2xl">{value}</p>
       {delta && <p className="mt-1 text-xs text-muted-foreground tabular">{delta}</p>}
     </div>
   );
@@ -247,8 +247,8 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="mb-6 rounded-md border border-border bg-card p-5">
-      <div className="mb-4 flex items-baseline justify-between gap-4">
+    <section className="mb-6 rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-2 md:flex md:justify-between md:gap-4">
         <div>
           <h2 className="font-semibold">{title}</h2>
           {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}

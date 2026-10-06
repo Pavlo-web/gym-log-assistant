@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { MobileNavigation } from "@/components/MobileNavigation";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard" },
@@ -38,25 +39,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <p className="mt-auto text-xs text-muted-foreground">Local data · kg</p>
       </aside>
 
-      <div className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar px-4 py-3 md:hidden">
-        {NAV.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            activeOptions={{ exact: item.to === "/" }}
-            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm text-muted-foreground"
-            activeProps={{
-              className:
-                "whitespace-nowrap rounded-md px-3 py-1.5 text-sm bg-sidebar-accent text-primary",
-            }}
-          >
-            {item.label}
-          </Link>
-        ))}
+      <div className="border-b border-border bg-sidebar px-3 py-3 md:hidden">
+        <span className="text-lg font-semibold text-sidebar-foreground">Gym<span className="text-primary"> Log</span></span>
       </div>
+      <MobileNavigation />
 
       <main className="md:pl-60">
-        <div className="mx-auto w-full max-w-3xl px-6 py-12">{children}</div>
+        <div className="mobile-page mx-auto w-full min-w-0 max-w-3xl px-3 pt-6 md:px-6 md:py-12">{children}</div>
       </main>
     </div>
   );
@@ -65,7 +54,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 export function PageHeader({ title, description }: { title: string; description?: string }) {
   return (
     <header className="mb-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="text-xl font-semibold tracking-tight md:text-2xl">{title}</h1>
       {description ? <p className="mt-1.5 text-sm text-muted-foreground">{description}</p> : null}
     </header>
   );

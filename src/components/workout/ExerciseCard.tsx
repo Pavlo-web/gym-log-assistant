@@ -35,9 +35,9 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
   }
 
   return (
-    <section aria-label={name} className="rounded-lg border border-border bg-card p-5">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
+    <section aria-label={name} className="rounded-lg border border-border bg-card p-3 md:p-5">
+      <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 md:flex md:justify-between">
+        <div className="min-w-0 break-words">
           <h2 className="text-base font-semibold">{name}</h2>
           <p className="text-xs text-muted-foreground">{exercise?.muscleGroup ?? entry.muscleGroup}</p>
         </div>
@@ -45,13 +45,13 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
           <Trash2 />
         </Button>
       </div>
-      <table className="w-full">
+      <table className="w-full table-fixed md:table-auto">
         <thead>
           <tr className="text-left text-xs text-muted-foreground">
-            <th className="pb-2 pl-1 font-normal">#</th>
+            <th className="w-5 pb-2 pl-1 font-normal md:w-auto">#</th>
             <th className="pb-2 font-normal">Weight (kg)</th>
             <th className="pb-2 font-normal">Reps</th>
-            <th className="pb-2"><span className="sr-only">Actions</span></th>
+            <th className="w-11 pb-2 md:w-auto"><span className="sr-only">Actions</span></th>
           </tr>
         </thead>
         <tbody>
