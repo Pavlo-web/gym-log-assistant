@@ -58,8 +58,8 @@ function CalculatorPage() {
         description="Estimate your one-rep max from a set you have actually done."
       />
 
-      <section className="rounded-lg border border-border bg-card p-6">
-        <div className="grid gap-5 sm:grid-cols-2">
+      <section className="rounded-lg border border-border bg-card min-w-0 p-3 md:p-6">
+        <div className="grid gap-5 md:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-sm text-muted-foreground">Weight (kg)</span>
             <NumberInput
@@ -75,6 +75,7 @@ function CalculatorPage() {
             <span className="mb-2 block text-sm text-muted-foreground">Reps</span>
             <NumberInput
               aria-label="Reps"
+              inputMode="numeric"
               step={1}
               min={1}
               value={repsInput}
@@ -90,12 +91,12 @@ function CalculatorPage() {
         ) : null}
       </section>
 
-      <section className="mt-6 rounded-lg border border-border bg-card p-6">
+      <section className="mt-6 rounded-lg border border-border bg-card min-w-0 p-3 md:p-6">
         {valid ? (
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
               <p className="text-sm text-muted-foreground">Estimated 1RM (Epley)</p>
-              <p className="tabular mt-1 text-5xl font-semibold text-primary">
+              <p className="tabular mt-1 break-words text-4xl md:text-5xl font-semibold text-primary">
                 {format(epley)}
                 <span className="ml-2 text-xl font-normal text-muted-foreground">kg</span>
               </p>
@@ -113,26 +114,26 @@ function CalculatorPage() {
       </section>
 
       <section className="mt-6 rounded-lg border border-border bg-card">
-        <div className="border-b border-border px-6 py-4">
+        <div className="border-b border-border px-3 md:px-6 py-4">
           <h2 className="text-sm font-medium">Percentages of your 1RM</h2>
         </div>
         {valid ? (
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground">
-                <th className="px-6 py-3 font-normal">Percent</th>
-                <th className="px-6 py-3 text-right font-normal">Weight (kg)</th>
-                <th className="px-6 py-3 text-right font-normal">Approx. reps</th>
+                <th className="px-3 md:px-6 py-3 font-normal">Percent</th>
+                <th className="px-3 md:px-6 py-3 text-right font-normal">Weight (kg)</th>
+                <th className="px-3 md:px-6 py-3 text-right font-normal">Approx. reps</th>
               </tr>
             </thead>
             <tbody>
               {PERCENTS.map((p) => (
                 <tr key={p} className="border-t border-border">
-                  <td className="tabular px-6 py-2.5">{p}%</td>
-                  <td className="tabular px-6 py-2.5 text-right">
+                  <td className="tabular px-3 md:px-6 py-2.5">{p}%</td>
+                  <td className="tabular px-3 md:px-6 py-2.5 text-right">
                     {format(roundToHalf((epley * p) / 100))}
                   </td>
-                  <td className="tabular px-6 py-2.5 text-right text-muted-foreground">
+                  <td className="tabular px-3 md:px-6 py-2.5 text-right text-muted-foreground">
                     {repsAtPercent(p / 100)}
                   </td>
                 </tr>
@@ -140,7 +141,7 @@ function CalculatorPage() {
             </tbody>
           </table>
         ) : (
-          <p className="px-6 py-10 text-center text-sm text-muted-foreground">
+          <p className="px-3 md:px-6 py-10 text-center text-sm text-muted-foreground">
             No values yet.
           </p>
         )}

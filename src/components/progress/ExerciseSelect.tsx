@@ -15,9 +15,9 @@ export function ExerciseSelect({ options, value, onChange }: { options: Exercise
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} aria-label="Select exercise" className="w-full justify-between sm:w-72">
-          <span className="truncate">{current?.name ?? "Select exercise"}</span>
-          <ChevronsUpDown className="opacity-50" />
+        <Button variant="outline" role="combobox" aria-expanded={open} aria-label="Select exercise" className="w-full justify-between md:w-72">
+          <span className="min-w-0 truncate">{current?.name ?? "Select exercise"}</span>
+          <ChevronsUpDown className="shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-0" align="start">

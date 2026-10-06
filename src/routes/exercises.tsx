@@ -80,7 +80,7 @@ function ExercisesPage() {
 
   return (
     <>
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-4 grid grid-cols-1 items-start gap-0 md:mb-0 md:flex md:flex-wrap md:justify-between md:gap-4">
         <PageHeader title="Exercises" description="Your exercise library" />
         <Button onClick={() => { setFormError(""); setAddOpen(true); }}><Plus /> Add exercise</Button>
       </div>
@@ -89,9 +89,9 @@ function ExercisesPage() {
           <Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input aria-label="Search exercises" placeholder="Search exercises" value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 pl-10" />
         </div>
-        <div className="flex flex-wrap gap-2" aria-label="Filter by muscle group">
+        <div className="flex max-w-full flex-nowrap gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0" aria-label="Filter by muscle group">
           {(["All", ...MUSCLE_GROUPS] as const).map((item) => (
-            <Button key={item} size="sm" variant={filter === item ? "default" : "outline"} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</Button>
+            <Button key={item} size="sm" className="shrink-0" variant={filter === item ? "default" : "outline"} aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</Button>
           ))}
         </div>
       </div>

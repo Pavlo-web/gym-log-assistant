@@ -27,10 +27,10 @@ export function HistoryList() {
           const stats = workoutStats(workout);
           const names = workout.entries.slice(0, 3).map((entry) => exerciseLabel(entry, exercises.data ?? []).name);
           const more = workout.entries.length - names.length;
-          return <Link key={workout.id} to="/history/$workoutId" params={{ workoutId: workout.id }} className="block rounded-md border border-border bg-card p-5 transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="min-w-0 flex-1"><h3 className="font-semibold">{format(localWorkoutDate(workout.date), "EEE, d MMM yyyy")}</h3><p className="mt-1 truncate text-sm text-muted-foreground">{names.join(", ")}{more > 0 ? ` +${more} more` : ""}</p></div>
-              <div className="flex items-center gap-5 text-right text-sm tabular"><div><strong className="block">{stats.exercises}</strong><span className="text-muted-foreground">Exercises</span></div><div><strong className="block">{stats.sets}</strong><span className="text-muted-foreground">Sets</span></div><div><strong className="block">{workoutVolume(workout).toLocaleString("en-US", { maximumFractionDigits: 1 })} kg</strong><span className="text-muted-foreground">Volume</span></div><ChevronRight className="size-4 text-muted-foreground" /></div>
+          return <Link key={workout.id} to="/history/$workoutId" params={{ workoutId: workout.id }} className="block rounded-md border border-border bg-card p-3 md:p-5 transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <div className="grid grid-cols-1 items-center gap-3 md:flex md:flex-wrap md:justify-between md:gap-4">
+              <div className="min-w-0 flex-1"><h3 className="break-words font-semibold">{format(localWorkoutDate(workout.date), "EEE, d MMM yyyy")}</h3><p className="mt-1 truncate text-sm text-muted-foreground">{names.join(", ")}{more > 0 ? ` +${more} more` : ""}</p></div>
+              <div className="grid grid-cols-[1fr_1fr_minmax(0,1.7fr)_auto] items-center gap-2 text-right text-sm tabular md:flex md:gap-5"><div><strong className="block">{stats.exercises}</strong><span className="text-muted-foreground">Exercises</span></div><div><strong className="block">{stats.sets}</strong><span className="text-muted-foreground">Sets</span></div><div><strong className="block">{workoutVolume(workout).toLocaleString("en-US", { maximumFractionDigits: 1 })} kg</strong><span className="text-muted-foreground">Volume</span></div><ChevronRight className="size-4 text-muted-foreground" /></div>
             </div>
           </Link>;
         })}</div>
