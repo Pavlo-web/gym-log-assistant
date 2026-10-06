@@ -156,3 +156,41 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
+
+@media (width < 768px) {
+  :root {
+    --mobile-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+    --mobile-action-offset: calc(var(--mobile-nav-height) + 24px);
+  }
+
+  .mobile-navigation { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .mobile-page { padding-bottom: calc(var(--mobile-action-offset) + 96px); }
+  .mobile-save-bar { bottom: var(--mobile-action-offset); }
+  .mobile-sheet { max-height: 85dvh; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .mobile-dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; border-radius: var(--radius); padding: 20px; }
+  .mobile-popover { max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; }
+  .mobile-calendar { --cell-size: 36px; }
+  .mobile-calendar button { min-height: 44px; }
+  .mobile-control { min-height: 44px; }
+  .mobile-icon-control { min-width: 44px; }
+  .number-input input { height: 88px; padding-left: 6px; padding-right: 44px; font-size: 16px; min-width: 0; }
+  .number-input .number-steppers { right: 0; opacity: 1; }
+  .number-input .number-steppers button { width: 44px; height: 44px; }
+  .mobile-dialog-close { display: grid; width: 44px; height: 44px; place-items: center; right: 6px; top: 6px; }
+  .mobile-dialog header, .mobile-dialog-title { padding-right: 24px; }
+
+  .mobile-detail-table thead { display: none; }
+  .mobile-detail-table tbody { display: block; }
+  .mobile-detail-table tr { display: grid; grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr); gap: 4px 8px; padding: 12px 0; }
+  .mobile-detail-table td { min-width: 0; padding: 0; }
+  .mobile-detail-table td::before { content: attr(data-label); display: block; color: var(--muted-foreground); font-size: 12px; font-weight: normal; }
+  .mobile-detail-table td:last-child { grid-column: 2 / -1; text-align: left; }
+
+  .mobile-sessions thead { display: none; }
+  .mobile-sessions tbody { display: block; }
+  .mobile-sessions tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px 0; }
+  .mobile-sessions td { padding: 0; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+  .mobile-sessions td:first-child { grid-column: 1 / -1; }
+  .mobile-sessions td:first-child a { display: inline-flex; align-items: center; min-height: 44px; }
+  .mobile-sessions td:not(:first-child)::before { content: attr(data-label); display: block; color: var(--muted-foreground); font-size: 12px; }
+}

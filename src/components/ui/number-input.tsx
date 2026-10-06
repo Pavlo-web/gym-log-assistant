@@ -26,9 +26,9 @@ export const NumberInput = forwardRef<HTMLInputElement, Props>(function NumberIn
     }
     onKeyDown?.(event);
   }
-  return <div className="group relative w-full">
+  return <div className="number-input group relative w-full min-w-0">
     <Input {...props} ref={ref} type="text" inputMode={step % 1 === 0 ? "numeric" : "decimal"} value={value} disabled={disabled} onChange={(e) => onValueChange(e.target.value)} onKeyDown={handleKeyDown} className={cn("tabular pr-9", className)} />
-    <div className="absolute inset-y-0 right-1 flex flex-col justify-center opacity-50 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+    <div className="number-steppers absolute inset-y-0 right-1 flex flex-col justify-center opacity-50 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
       <Button type="button" variant="ghost" size="icon" tabIndex={-1} disabled={disabled || (value !== "" && Number(value) >= maximum)} aria-label={`Increase ${props["aria-label"] ?? "value"}`} onClick={() => increment(1)} className="h-4 w-7 rounded-sm p-0 text-muted-foreground hover:text-foreground"><ChevronUp className="size-3" /></Button>
       <Button type="button" variant="ghost" size="icon" tabIndex={-1} disabled={disabled || (value !== "" && Number(value) <= minimum)} aria-label={`Decrease ${props["aria-label"] ?? "value"}`} onClick={() => increment(-1)} className="h-4 w-7 rounded-sm p-0 text-muted-foreground hover:text-foreground"><ChevronDown className="size-3" /></Button>
     </div>
