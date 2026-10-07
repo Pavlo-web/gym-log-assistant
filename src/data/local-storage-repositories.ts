@@ -69,14 +69,26 @@ function loadExercises(): Exercise[] {
   const parsed = read<Exercise[]>(EXERCISES_KEY, []);
   if (parsed.length === 0) return seedExercises();
   if (window.localStorage.getItem(EXERCISES_MIGRATION_KEY) !== "done") {
-    const migrated = parsed.filter((e) => e.isCustom || !(e.muscleGroup === "Core" && e.name === ["Russian", "Twist"].join(" ")));
+    const migrated = parsed.filter(
+      (e) => e.isCustom || !(e.muscleGroup === "Core" && e.name === ["Russian", "Twist"].join(" ")),
+    );
     for (const item of DEFAULT_EXERCISES) {
-      if (!migrated.some((e) => e.muscleGroup === item.muscleGroup && e.name.toLocaleLowerCase() === item.name.toLocaleLowerCase())) {
+      if (
+        !migrated.some(
+          (e) =>
+            e.muscleGroup === item.muscleGroup &&
+            e.name.toLocaleLowerCase() === item.name.toLocaleLowerCase(),
+        )
+      ) {
         migrated.push({ ...item, id: uuid(), isCustom: false });
       }
     }
     write(EXERCISES_KEY, migrated);
-    try { window.localStorage.setItem(EXERCISES_MIGRATION_KEY, "done"); } catch { /* storage unavailable */ }
+    try {
+      window.localStorage.setItem(EXERCISES_MIGRATION_KEY, "done");
+    } catch {
+      /* storage unavailable */
+    }
     return migrated;
   }
   return parsed;
@@ -91,7 +103,13 @@ class LocalExerciseRepository implements ExerciseRepository {
     const exercises = loadExercises();
     const name = data.name.trim();
     if (!name || name.length > 60) throw new Error("Name must be between 1 and 60 characters.");
-    if (exercises.some((e) => e.muscleGroup === data.muscleGroup && e.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+    if (
+      exercises.some(
+        (e) =>
+          e.muscleGroup === data.muscleGroup &&
+          e.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
+      )
+    ) {
       throw new Error("An exercise with this name already exists in this muscle group.");
     }
     const exercise: Exercise = { ...data, name, isCustom: true, id: uuid() };
@@ -104,7 +122,10 @@ class LocalExerciseRepository implements ExerciseRepository {
     const exercise = exercises.find((e) => e.id === id);
     if (!exercise) throw new Error("Exercise not found.");
     if (!exercise.isCustom) throw new Error("Default exercises cannot be deleted.");
-    write(EXERCISES_KEY, exercises.filter((e) => e.id !== id));
+    write(
+      EXERCISES_KEY,
+      exercises.filter((e) => e.id !== id),
+    );
   }
 }
 
@@ -114,7 +135,9 @@ function loadWorkouts(): Workout[] {
 
 class LocalWorkoutRepository implements WorkoutRepository {
   async list(): Promise<Workout[]> {
-    return loadWorkouts().sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+    return loadWorkouts().sort(
+      (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt),
+    );
   }
 
   async getById(id: string): Promise<Workout | null> {
@@ -164,7 +187,11 @@ class LocalDraftRepository implements DraftRepository {
       if (!raw) return null;
       const d = JSON.parse(raw);
       if (!d || typeof d.date !== "string" || !Array.isArray(d.entries)) return null;
-      return { date: d.date, notes: typeof d.notes === "string" ? d.notes : "", entries: d.entries };
+      return {
+        date: d.date,
+        notes: typeof d.notes === "string" ? d.notes : "",
+        entries: d.entries,
+      };
     } catch {
       return null;
     }

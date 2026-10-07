@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SetRow } from "./SetRow";
 import { newId, setStatus } from "./draft-utils";
 import type { DraftEntry, DraftSet, Exercise } from "@/types/domain";
@@ -39,9 +48,18 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
       <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 md:flex md:justify-between">
         <div className="min-w-0 break-words">
           <h2 className="text-base font-semibold">{name}</h2>
-          <p className="text-xs text-muted-foreground">{exercise?.muscleGroup ?? entry.muscleGroup}</p>
+          <p className="text-xs text-muted-foreground">
+            {exercise?.muscleGroup ?? entry.muscleGroup}
+          </p>
         </div>
-        <Button type="button" size="icon" variant="ghost" aria-label={`Remove ${name}`} onClick={requestRemove} className="text-muted-foreground hover:text-destructive">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={`Remove ${name}`}
+          onClick={requestRemove}
+          className="text-muted-foreground hover:text-destructive"
+        >
           <Trash2 />
         </Button>
       </div>
@@ -51,7 +69,9 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
             <th className="w-5 pb-2 pl-1 font-normal md:w-auto">#</th>
             <th className="pb-2 font-normal">Weight (kg)</th>
             <th className="pb-2 font-normal">Reps</th>
-            <th className="w-11 pb-2 md:w-auto"><span className="sr-only">Actions</span></th>
+            <th className="w-11 pb-2 md:w-auto">
+              <span className="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -62,7 +82,9 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
               set={set}
               error={errors[set.id] ?? null}
               onChange={(patch) => updateSet(set.id, patch)}
-              onRemove={() => onChange({ ...entry, sets: entry.sets.filter((s) => s.id !== set.id) })}
+              onRemove={() =>
+                onChange({ ...entry, sets: entry.sets.filter((s) => s.id !== set.id) })
+              }
               onRepsEnter={i === entry.sets.length - 1 ? () => addSet(true) : undefined}
             />
           ))}
@@ -76,11 +98,18 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Remove exercise?</AlertDialogTitle>
-            <AlertDialogDescription>“{name}” has logged sets. Remove it from this workout?</AlertDialogDescription>
+            <AlertDialogDescription>
+              “{name}” has logged sets. Remove it from this workout?
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={onRemove}>Remove</AlertDialogAction>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={onRemove}
+            >
+              Remove
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

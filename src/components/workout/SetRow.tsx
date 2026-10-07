@@ -53,7 +53,14 @@ export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: P
           />
         </td>
         <td className="w-11 py-2 text-right md:w-10">
-          <Button type="button" size="icon" variant="ghost" aria-label={`Remove set ${index + 1}`} onClick={onRemove} className="text-muted-foreground hover:text-destructive">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={`Remove set ${index + 1}`}
+            onClick={onRemove}
+            className="text-muted-foreground hover:text-destructive"
+          >
             <X />
           </Button>
         </td>
@@ -61,7 +68,9 @@ export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: P
       {error && (
         <tr>
           <td />
-          <td colSpan={3} role="alert" className="pb-2 text-xs text-destructive">{error}</td>
+          <td colSpan={3} role="alert" className="pb-2 text-xs text-destructive">
+            {error}
+          </td>
         </tr>
       )}
     </>

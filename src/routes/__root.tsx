@@ -84,7 +84,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Gym Log" },
       { name: "description", content: "Your personal workout diary and strength calculator." },
       { property: "og:title", content: "Gym Log" },
-      { property: "og:description", content: "Your personal workout diary and strength calculator." },
+      {
+        property: "og:description",
+        content: "Your personal workout diary and strength calculator.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -122,7 +125,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <AppShell><Outlet /></AppShell>
+      <AppShell>
+        <Outlet />
+      </AppShell>
       <Toaster theme="dark" />
     </QueryClientProvider>
   );

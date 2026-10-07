@@ -5,7 +5,11 @@ import type { WorkoutDraft } from "@/types/domain";
 export const draftKey = ["workout-draft"] as const;
 
 export function useWorkoutDraft() {
-  return useQuery({ queryKey: draftKey, queryFn: () => draftRepository.get(), staleTime: Infinity });
+  return useQuery({
+    queryKey: draftKey,
+    queryFn: () => draftRepository.get(),
+    staleTime: Infinity,
+  });
 }
 
 export function useSaveWorkoutDraft() {
