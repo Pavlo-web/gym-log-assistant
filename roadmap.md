@@ -1,5 +1,0 @@
-- [ ] Implement five-slot phone navigation and safe-area spacing.
-- [ ] Fit workout/edit rows, sticky actions, and shared pop-ups to phones.
-- [ ] Adapt History, Exercises, Progress, Dashboard, and Calculator presentation below md.
-- [ ] Run changed-file lint and full tests; inspect automatic type/build results.
-- [ ] Check every content route at 320, 375, 430, and 1280px with sample workouts.
