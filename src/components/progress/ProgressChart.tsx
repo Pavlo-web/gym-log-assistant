@@ -1,4 +1,3 @@
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   CartesianGrid,
   Line,
@@ -10,6 +9,7 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import type { ExercisePoint } from "@/lib/progress";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { localWorkoutDate } from "@/components/history/history-utils";
 
 export type Metric = "topWeight" | "bestE1RM" | "volume";

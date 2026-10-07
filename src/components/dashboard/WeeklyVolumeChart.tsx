@@ -1,7 +1,7 @@
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { format } from "date-fns";
 import type { WeekBucket } from "@/lib/dashboard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { localWorkoutDate } from "@/components/history/history-utils";
 
 const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
