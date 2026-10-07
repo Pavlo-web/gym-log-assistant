@@ -39,7 +39,8 @@ export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
             stroke="var(--border)"
             tickFormatter={(d: string) => format(localWorkoutDate(d), "d MMM")}
           />
-          <YAxis tickCount={mobile ? 4 : 5}
+          <YAxis
+            tickCount={mobile ? 4 : 5}
             tick={tick}
             stroke="var(--border)"
             width={mobile ? 56 : 64}

@@ -40,12 +40,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="border-b border-border bg-sidebar px-3 py-3 md:hidden">
-        <span className="text-lg font-semibold text-sidebar-foreground">Gym<span className="text-primary"> Log</span></span>
+        <span className="text-lg font-semibold text-sidebar-foreground">
+          Gym<span className="text-primary"> Log</span>
+        </span>
       </div>
       <MobileNavigation />
 
       <main className="md:pl-60">
-        <div className="mobile-page mx-auto w-full min-w-0 max-w-3xl px-3 pt-6 md:px-6 md:py-12">{children}</div>
+        <div className="mobile-page mx-auto w-full min-w-0 max-w-3xl px-3 pt-6 md:px-6 md:py-12">
+          {children}
+        </div>
       </main>
     </div>
   );
