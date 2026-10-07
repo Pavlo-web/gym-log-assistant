@@ -18,9 +18,7 @@ export function brzycki1RM(weight: number, reps: number): number {
 /** Total volume (sum of weight * reps across all sets) of a workout. */
 export function workoutVolume(workout: Workout): number {
   return workout.entries.reduce(
-    (total, entry) =>
-      total +
-      entry.sets.reduce((sum, set) => sum + set.weight * set.reps, 0),
+    (total, entry) => total + entry.sets.reduce((sum, set) => sum + set.weight * set.reps, 0),
     0,
   );
 }

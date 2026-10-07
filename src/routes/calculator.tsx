@@ -39,8 +39,7 @@ function CalculatorPage() {
   const weight = Number.parseFloat(weightInput.replace(",", "."));
   const reps = Number.parseInt(repsInput, 10);
 
-  const valid =
-    Number.isFinite(weight) && weight > 0 && Number.isFinite(reps) && reps > 0;
+  const valid = Number.isFinite(weight) && weight > 0 && Number.isFinite(reps) && reps > 0;
   const unreliable = valid && reps > 20;
 
   const { epley, brzycki } = useMemo(

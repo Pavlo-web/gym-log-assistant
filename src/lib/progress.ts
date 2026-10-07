@@ -37,8 +37,15 @@ export function exerciseHistory(workouts: Workout[], exerciseId: string): Exerci
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, { sets, workoutIds }]) => {
       let top = sets[0]!;
-      for (const s of sets) if (s.weight > top.weight || (s.weight === top.weight && s.reps > top.reps)) top = s;
-      const volume = workoutVolume({ id: "", date, entries: [{ id: "", exerciseId, sets }], createdAt: "", updatedAt: "" });
+      for (const s of sets)
+        if (s.weight > top.weight || (s.weight === top.weight && s.reps > top.reps)) top = s;
+      const volume = workoutVolume({
+        id: "",
+        date,
+        entries: [{ id: "", exerciseId, sets }],
+        createdAt: "",
+        updatedAt: "",
+      });
       return {
         date,
         topWeight: top.weight,
@@ -60,7 +67,12 @@ export function personalRecords(workouts: Workout[], exerciseId: string): Person
   let maxVolume: PersonalRecords["maxVolume"] | null = null;
   for (const [date, { sets }] of points) {
     for (const s of sets) {
-      if (!maxWeight || s.weight > maxWeight.value || (s.weight === maxWeight.value && date === maxWeight.date && s.reps > maxWeight.reps)) maxWeight = { value: s.weight, reps: s.reps, date };
+      if (
+        !maxWeight ||
+        s.weight > maxWeight.value ||
+        (s.weight === maxWeight.value && date === maxWeight.date && s.reps > maxWeight.reps)
+      )
+        maxWeight = { value: s.weight, reps: s.reps, date };
       const e = epley1RM(s.weight, s.reps);
       if (!best || e > best.value) best = { value: e, weight: s.weight, reps: s.reps, date };
     }

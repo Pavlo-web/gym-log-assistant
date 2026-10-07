@@ -14,7 +14,7 @@ export function useWorkouts() {
 export function useWorkout(id: string | undefined) {
   return useQuery({
     queryKey: [...workoutsKey, id],
-    queryFn: () => id ? workoutRepository.getById(id) : Promise.resolve(null),
+    queryFn: () => (id ? workoutRepository.getById(id) : Promise.resolve(null)),
     enabled: !!id,
   });
 }

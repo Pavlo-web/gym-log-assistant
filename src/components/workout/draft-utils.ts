@@ -35,7 +35,8 @@ export function setError(s: DraftSet): string | null {
   const weight = parseDecimal(w);
   const reps = Number(r);
   if (!w || !isFinite(weight) || weight < 0 || weight > 1000) return "Weight must be 0–1000 kg.";
-  if (!r || !Number.isInteger(reps) || reps < 1 || reps > 100) return "Reps must be a whole number 1–100.";
+  if (!r || !Number.isInteger(reps) || reps < 1 || reps > 100)
+    return "Reps must be a whole number 1–100.";
   return null;
 }
 
