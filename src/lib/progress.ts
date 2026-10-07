@@ -1,5 +1,5 @@
 import type { Workout, WorkoutSet } from "@/types/domain";
-import { epley1RM, workoutVolume } from "./calc";
+import { epley1RM, setsVolume } from "./calc";
 
 export interface ExercisePoint {
   date: string;
@@ -39,13 +39,7 @@ export function exerciseHistory(workouts: Workout[], exerciseId: string): Exerci
       let top = sets[0]!;
       for (const s of sets)
         if (s.weight > top.weight || (s.weight === top.weight && s.reps > top.reps)) top = s;
-      const volume = workoutVolume({
-        id: "",
-        date,
-        entries: [{ id: "", exerciseId, sets }],
-        createdAt: "",
-        updatedAt: "",
-      });
+      const volume = setsVolume(sets);
       return {
         date,
         topWeight: top.weight,
@@ -76,7 +70,7 @@ export function personalRecords(workouts: Workout[], exerciseId: string): Person
       const e = epley1RM(s.weight, s.reps);
       if (!best || e > best.value) best = { value: e, weight: s.weight, reps: s.reps, date };
     }
-    const volume = sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
+    const volume = setsVolume(sets);
     if (!maxVolume || volume > maxVolume.value) maxVolume = { value: volume, date };
   }
   return { maxWeight: maxWeight!, bestE1RM: best!, maxVolume: maxVolume! };

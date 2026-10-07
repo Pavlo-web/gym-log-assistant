@@ -1,4 +1,4 @@
-import type { Workout } from "@/types/domain";
+import type { Workout, WorkoutSet } from "@/types/domain";
 
 /** Epley: weight * (1 + reps / 30). Returns weight itself for 1 rep. */
 export function epley1RM(weight: number, reps: number): number {
@@ -15,12 +15,14 @@ export function brzycki1RM(weight: number, reps: number): number {
   return (weight * 36) / (37 - reps);
 }
 
+/** Sum of weight × reps across sets. */
+export function setsVolume(sets: readonly WorkoutSet[]): number {
+  return sets.reduce((sum, set) => sum + set.weight * set.reps, 0);
+}
+
 /** Total volume (sum of weight * reps across all sets) of a workout. */
 export function workoutVolume(workout: Workout): number {
-  return workout.entries.reduce(
-    (total, entry) => total + entry.sets.reduce((sum, set) => sum + set.weight * set.reps, 0),
-    0,
-  );
+  return workout.entries.reduce((total, entry) => total + setsVolume(entry.sets), 0);
 }
 
 /** Rounds to the nearest 0.5 kg. */
