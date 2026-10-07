@@ -33,7 +33,7 @@ export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
         <BarChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
           <XAxis
-            interval={mobile ? 1 : undefined}
+            {...(mobile ? { interval: 1 } : {})}
             dataKey="week"
             tick={tick}
             stroke="var(--border)"
