@@ -1,7 +1,7 @@
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { format } from "date-fns";
 import type { WeekBucket } from "@/lib/dashboard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { localWorkoutDate } from "@/components/history/history-utils";
 
 const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
@@ -33,13 +33,14 @@ export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
         <BarChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
           <XAxis
-            interval={mobile ? 1 : undefined}
+            {...(mobile ? { interval: 1 } : {})}
             dataKey="week"
             tick={tick}
             stroke="var(--border)"
             tickFormatter={(d: string) => format(localWorkoutDate(d), "d MMM")}
           />
-          <YAxis tickCount={mobile ? 4 : 5}
+          <YAxis
+            tickCount={mobile ? 4 : 5}
             tick={tick}
             stroke="var(--border)"
             width={mobile ? 56 : 64}
