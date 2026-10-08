@@ -1,7 +1,8 @@
+import { epley1RM } from "@/lib/calc";
 import { todayLocal } from "@/lib/date";
 import { SET_REPS_MAX, SET_REPS_MIN, SET_WEIGHT_MAX_KG } from "@/lib/limits";
 import { parseDecimal, parseInteger } from "@/lib/number";
-import type { DraftSet, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
+import type { DraftEntry, DraftSet, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
 
 export type SetStatus = "empty" | "valid" | "invalid";
 
@@ -69,4 +70,31 @@ export function toEntries(draft: WorkoutDraft): WorkoutEntry[] {
         })),
     }))
     .filter((entry) => entry.sets.length > 0);
+}
+
+/** A set in the form that beats the previous best estimated 1RM of its exercise. */
+export interface DraftRecord {
+  setId: string;
+  /** Estimated 1RM of the record set, in kg. */
+  estimate: number;
+  /** The best estimate it beats, in kg. */
+  previous: number;
+}
+
+/**
+ * The record set of a draft entry, if any: its best valid set, when that beats
+ * `previousBest`. An exercise with no history has nothing to beat, so its
+ * first session is not flagged.
+ */
+export function draftRecord(entry: DraftEntry, previousBest: number): DraftRecord | null {
+  if (previousBest <= 0) return null;
+  let record: DraftRecord | null = null;
+  for (const set of entry.sets) {
+    if (setStatus(set) !== "valid") continue;
+    const estimate = epley1RM(parseDecimal(set.weight), parseInteger(set.reps));
+    if (estimate > previousBest && estimate > (record?.estimate ?? 0)) {
+      record = { setId: set.id, estimate, previous: previousBest };
+    }
+  }
+  return record;
 }

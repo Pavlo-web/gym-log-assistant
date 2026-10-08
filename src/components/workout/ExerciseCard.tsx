@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
-import { setStatus } from "@/lib/draft";
+import { setStatus, type DraftRecord } from "@/lib/draft";
 import { newId } from "@/lib/id";
 import { exerciseLabel } from "@/lib/workout";
 import type { DraftEntry, DraftSet, Exercise } from "@/types/domain";
@@ -15,12 +15,21 @@ interface ExerciseCardProps {
   exercise: Exercise | undefined;
   /** Validation messages keyed by set id. */
   errors: Record<string, string>;
+  /** The set that beats the previous best of this exercise, if any. */
+  record: DraftRecord | null;
   onChange: (entry: DraftEntry) => void;
   onRemove: () => void;
 }
 
 /** One exercise of the workout form with its editable list of sets. */
-export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: ExerciseCardProps) {
+export function ExerciseCard({
+  entry,
+  exercise,
+  errors,
+  record,
+  onChange,
+  onRemove,
+}: ExerciseCardProps) {
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const { name, group } = exerciseLabel(entry, exercise ? [exercise] : []);
   const lastSet = entry.sets.at(-1);
@@ -94,6 +103,7 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Ex
               index={index}
               set={set}
               error={errors[set.id] ?? null}
+              record={record?.setId === set.id ? record : null}
               onChange={(patch) => updateSet(set.id, patch)}
               onRemove={() => removeSet(set.id)}
               // Enter in the last set adds the next one and moves focus to it.

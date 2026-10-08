@@ -10,11 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useExercises } from "@/hooks/useExercises";
 import { useClearWorkoutDraft, useSaveWorkoutDraft } from "@/hooks/useWorkoutDraft";
-import { useCreateWorkout, useUpdateWorkout } from "@/hooks/useWorkouts";
+import { useCreateWorkout, useUpdateWorkout, useWorkouts } from "@/hooks/useWorkouts";
 import { todayLocal } from "@/lib/date";
-import { draftFromWorkout, emptyDraft, isDraftEmpty, setError, toEntries } from "@/lib/draft";
+import {
+  draftFromWorkout,
+  draftRecord,
+  emptyDraft,
+  isDraftEmpty,
+  setError,
+  toEntries,
+} from "@/lib/draft";
 import { newId } from "@/lib/id";
 import { WORKOUT_NOTES_MAX_LENGTH } from "@/lib/limits";
+import { bestLoggedE1RM } from "@/lib/progress";
 import type { Exercise, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
 import { ExerciseCard } from "./ExerciseCard";
 import { ExercisePicker } from "./ExercisePicker";
@@ -80,6 +88,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
   const [formError, setFormError] = useState("");
 
   const { data: exercises = [] } = useExercises();
+  const { data: savedWorkouts = [] } = useWorkouts();
   const createWorkout = useCreateWorkout();
   const updateWorkout = useUpdateWorkout();
   const saveDraft = useSaveWorkoutDraft();
@@ -226,6 +235,11 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
                 entry={entry}
                 exercise={exercisesById.get(entry.exerciseId)}
                 errors={setErrors}
+                record={draftRecord(
+                  entry,
+                  // When editing, the saved version of this workout must not count as the record to beat.
+                  bestLoggedE1RM(savedWorkouts, entry.exerciseId, workout?.id),
+                )}
                 onChange={(next) =>
                   update({
                     entries: draft.entries.map((item) => (item.id === next.id ? next : item)),

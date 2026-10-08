@@ -1,7 +1,10 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { NumberInput } from "@/components/ui/number-input";
+import type { DraftRecord } from "@/lib/draft";
 import { SET_REPS_MAX, SET_REPS_MIN, SET_WEIGHT_MAX_KG } from "@/lib/limits";
+import { formatNumber } from "@/lib/number";
 import { cn } from "@/lib/utils";
 import type { DraftSet } from "@/types/domain";
 import { weightInputId } from "./set-input-id";
@@ -13,14 +16,24 @@ interface SetRowProps {
   index: number;
   set: DraftSet;
   error: string | null;
+  /** Set when this set beats the previous best estimated 1RM of the exercise. */
+  record: DraftRecord | null;
   onChange: (patch: Partial<DraftSet>) => void;
   onRemove: () => void;
   /** Called when Enter is pressed in the reps field. */
   onRepsEnter?: (() => void) | undefined;
 }
 
-/** One editable set: weight, reps and a remove button, with its error underneath. */
-export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: SetRowProps) {
+/** One editable set: weight, reps and a remove button, with its error or record note underneath. */
+export function SetRow({
+  index,
+  set,
+  error,
+  record,
+  onChange,
+  onRemove,
+  onRepsEnter,
+}: SetRowProps) {
   const invalid = !!error;
   const number = index + 1;
   return (
@@ -78,6 +91,18 @@ export function SetRow({ index, set, error, onChange, onRemove, onRepsEnter }: S
           <td />
           <td colSpan={3} role="alert" className="pb-2 text-xs text-destructive">
             {error}
+          </td>
+        </tr>
+      )}
+      {record && !error && (
+        <tr>
+          <td />
+          <td colSpan={3} role="status" className="pb-2 text-xs text-muted-foreground tabular">
+            <Badge variant="outline" className="mr-2 border-primary/50 text-primary">
+              PR
+            </Badge>
+            Est. 1RM {formatNumber(record.estimate)} kg, previous best{" "}
+            {formatNumber(record.previous)} kg
           </td>
         </tr>
       )}

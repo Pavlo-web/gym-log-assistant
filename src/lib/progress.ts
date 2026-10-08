@@ -124,3 +124,21 @@ export function loggedExercises(
   }
   return [...logged.values()];
 }
+
+/**
+ * Best estimated 1RM ever logged for an exercise; 0 when it was never logged.
+ * `excludeWorkoutId` leaves one workout out, so a workout being edited is not
+ * compared with its own saved version.
+ */
+export function bestLoggedE1RM(
+  workouts: readonly Workout[],
+  exerciseId: string,
+  excludeWorkoutId?: string,
+): number {
+  const sets = workouts
+    .filter((workout) => workout.id !== excludeWorkoutId)
+    .flatMap((workout) => workout.entries)
+    .filter((entry) => entry.exerciseId === exerciseId)
+    .flatMap((entry) => entry.sets);
+  return bestEpley1RM(sets);
+}
