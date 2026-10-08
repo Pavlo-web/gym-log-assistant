@@ -3,6 +3,7 @@ import { ClientOnly, Link } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
@@ -27,6 +28,9 @@ import { TrainingCalendar } from "./TrainingCalendar";
 // Recharts is heavy and browser-only, so the chart loads on demand on the client.
 const WeeklyVolumeChart = lazy(() => import("./WeeklyVolumeChart"));
 const chartPlaceholder = <div className="h-64" />;
+
+/** Pairs of sections sit side by side once the screen is wide enough for two readable columns. */
+const TWO_COLUMNS = "grid grid-cols-1 gap-x-6 xl:grid-cols-2";
 
 function DashboardHeader() {
   return (
@@ -79,36 +83,40 @@ function Overview({ workouts, exercises }: OverviewProps) {
         />
       )}
 
-      <DashboardSection title="Weekly volume" subtitle="Last 8 weeks">
-        <ClientOnly fallback={chartPlaceholder}>
-          <Suspense fallback={chartPlaceholder}>
-            <WeeklyVolumeChart data={weeks} />
-          </Suspense>
-        </ClientOnly>
-      </DashboardSection>
+      <div className={TWO_COLUMNS}>
+        <DashboardSection title="Weekly volume" subtitle="Last 8 weeks">
+          <ClientOnly fallback={chartPlaceholder}>
+            <Suspense fallback={chartPlaceholder}>
+              <WeeklyVolumeChart data={weeks} />
+            </Suspense>
+          </ClientOnly>
+        </DashboardSection>
+
+        <DashboardSection title="Muscle group split" subtitle="Sets in the last 30 days">
+          <MuscleSplit split={muscleGroupSplit(workouts, exercises, today)} />
+        </DashboardSection>
+      </div>
 
       <DashboardSection title="Training calendar" subtitle="Last 12 months">
         <TrainingCalendar calendar={trainingCalendar(workouts, today)} />
       </DashboardSection>
 
-      <DashboardSection title="Muscle group split" subtitle="Sets in the last 30 days">
-        <MuscleSplit split={muscleGroupSplit(workouts, exercises, today)} />
-      </DashboardSection>
+      <div className={TWO_COLUMNS}>
+        <DashboardSection title="Recent personal records" subtitle="Best estimated 1RM">
+          <RecentRecords records={recentPRs(workouts, exercises)} />
+        </DashboardSection>
 
-      <DashboardSection title="Recent personal records" subtitle="Best estimated 1RM">
-        <RecentRecords records={recentPRs(workouts, exercises)} />
-      </DashboardSection>
-
-      <DashboardSection
-        title="Recent workouts"
-        action={
-          <Button asChild variant="link" className="h-auto p-0">
-            <Link to="/history">View all</Link>
-          </Button>
-        }
-      >
-        <RecentWorkouts workouts={workouts.slice(0, RECENT_ITEMS)} />
-      </DashboardSection>
+        <DashboardSection
+          title="Recent workouts"
+          action={
+            <Button asChild variant="link" className="h-auto p-0">
+              <Link to="/history">View all</Link>
+            </Button>
+          }
+        >
+          <RecentWorkouts workouts={workouts.slice(0, RECENT_ITEMS)} />
+        </DashboardSection>
+      </div>
     </>
   );
 }
@@ -122,9 +130,7 @@ export function DashboardPage() {
     return (
       <>
         <DashboardHeader />
-        <p role="status" className="py-12 text-center text-sm text-muted-foreground">
-          Loading dashboard…
-        </p>
+        <LoadingState label="Loading dashboard…" />
       </>
     );
   }
@@ -133,18 +139,13 @@ export function DashboardPage() {
     return (
       <>
         <DashboardHeader />
-        <div role="alert" className="py-12 text-center text-sm text-muted-foreground">
-          Could not load dashboard.{" "}
-          <Button
-            variant="link"
-            onClick={() => {
-              void workouts.refetch();
-              void exercises.refetch();
-            }}
-          >
-            Try again
-          </Button>
-        </div>
+        <ErrorState
+          message="Could not load dashboard."
+          onRetry={() => {
+            void workouts.refetch();
+            void exercises.refetch();
+          }}
+        />
       </>
     );
   }

@@ -1,9 +1,13 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { NAV_ITEMS } from "@/components/navigation";
+import { cn } from "@/lib/utils";
 
-const SIDEBAR_LINK = "rounded-md px-3 py-2 text-sm";
+const SIDEBAR_LINK = "flex items-center gap-3 rounded-md px-3 py-2 text-sm [&_svg]:size-4";
+
+/** Pages whose content is a grid of cards and can use a wide screen; the rest stay readable-width. */
+const WIDE_PAGES: readonly string[] = ["/dashboard"];
 
 function Wordmark() {
   return (
@@ -32,6 +36,7 @@ function Sidebar() {
               className: `${SIDEBAR_LINK} bg-sidebar-accent text-primary font-medium`,
             }}
           >
+            <item.icon aria-hidden="true" />
             {item.label}
           </Link>
         ))}
@@ -53,13 +58,20 @@ function MobileTopBar() {
 
 /** Page frame: sidebar on desktop, top bar and bottom navigation on phones. */
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const wide = WIDE_PAGES.includes(pathname);
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Sidebar />
       <MobileTopBar />
       <MobileNavigation />
       <main className="md:pl-60">
-        <div className="mobile-page mx-auto w-full min-w-0 max-w-3xl px-3 pt-6 md:px-6 md:py-12">
+        <div
+          className={cn(
+            "mobile-page mx-auto w-full min-w-0 px-3 pt-6 md:px-6 md:py-12",
+            wide ? "max-w-6xl" : "max-w-3xl",
+          )}
+        >
           {children}
         </div>
       </main>

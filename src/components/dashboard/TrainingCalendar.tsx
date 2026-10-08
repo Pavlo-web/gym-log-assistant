@@ -65,10 +65,18 @@ export function TrainingCalendar({ calendar }: { calendar: Calendar }) {
   const { weeks, months, activeDays } = calendar;
   const scroller = useRef<HTMLDivElement>(null);
 
-  // On phones the grid is wider than the screen: start at the right, on the current week.
+  // On phones the grid is wider than the screen: keep it scrolled to the right, on the
+  // current week, when the page opens and whenever the available width changes.
   useEffect(() => {
     const element = scroller.current;
-    if (element) element.scrollLeft = element.scrollWidth;
+    if (!element) return;
+    const scrollToCurrentWeek = () => {
+      element.scrollLeft = element.scrollWidth;
+    };
+    scrollToCurrentWeek();
+    const observer = new ResizeObserver(scrollToCurrentWeek);
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
   return (
