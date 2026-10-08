@@ -8,8 +8,6 @@ import { useExercises } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
 import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@/types/domain";
 
-const TITLE = "Add exercise";
-
 interface ExerciseGroup {
   group: MuscleGroup;
   items: Exercise[];
@@ -108,6 +106,8 @@ function ExerciseList({ groups, addedIds, onSelect, rowClassName }: ExerciseList
 }
 
 interface ExercisePickerProps {
+  /** Heading of the picker, e.g. "Add exercise" or "Change exercise". */
+  title: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   addedIds: Set<string>;
@@ -115,7 +115,13 @@ interface ExercisePickerProps {
 }
 
 /** Searchable exercise list: a bottom sheet on phones, a dialog on larger screens. */
-export function ExercisePicker({ open, onOpenChange, addedIds, onSelect }: ExercisePickerProps) {
+export function ExercisePicker({
+  title,
+  open,
+  onOpenChange,
+  addedIds,
+  onSelect,
+}: ExercisePickerProps) {
   const { data: exercises = [] } = useExercises();
   const [search, setSearch] = useState("");
   const mobile = useIsMobile();
@@ -136,7 +142,7 @@ export function ExercisePicker({ open, onOpenChange, addedIds, onSelect }: Exerc
       <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
         <DrawerContent className="mobile-sheet flex flex-col" aria-describedby={undefined}>
           <DrawerHeader>
-            <DrawerTitle>{TITLE}</DrawerTitle>
+            <DrawerTitle>{title}</DrawerTitle>
           </DrawerHeader>
           <div className="shrink-0 px-4 pb-3">
             {/* No autofocus: it would open the keyboard over the list. */}
@@ -159,7 +165,7 @@ export function ExercisePicker({ open, onOpenChange, addedIds, onSelect }: Exerc
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{TITLE}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <SearchField value={search} onChange={setSearch} autoFocus />
         <div className="max-h-[55vh] space-y-5 overflow-y-auto pr-1">

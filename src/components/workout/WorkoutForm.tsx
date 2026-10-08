@@ -84,6 +84,8 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     workout ? draftFromWorkout(workout) : (initial ?? emptyDraft()),
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Entry whose exercise the picker will replace; null when the picker adds a new one.
+  const [changingEntryId, setChangingEntryId] = useState<string | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [formError, setFormError] = useState("");
@@ -130,6 +132,12 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     setFormError("");
   }
 
+  /** Opens the picker to add an exercise, or to replace the exercise of `entryId`. */
+  function openPicker(entryId: string | null = null) {
+    setChangingEntryId(entryId);
+    setPickerOpen(true);
+  }
+
   function addExercise(exercise: Exercise) {
     update({
       entries: [
@@ -143,6 +151,27 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
         },
       ],
     });
+  }
+
+  /** Swaps the exercise of an entry and keeps the sets already typed in. */
+  function changeExercise(entryId: string, exercise: Exercise) {
+    update({
+      entries: draft.entries.map((entry) =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              exerciseId: exercise.id,
+              exerciseName: exercise.name,
+              muscleGroup: exercise.muscleGroup,
+            }
+          : entry,
+      ),
+    });
+  }
+
+  function selectExercise(exercise: Exercise) {
+    if (changingEntryId) changeExercise(changingEntryId, exercise);
+    else addExercise(exercise);
     setPickerOpen(false);
   }
 
@@ -225,7 +254,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
           title="No exercises yet"
           description="Add your first exercise to start logging sets."
         >
-          <Button className="mt-5" onClick={() => setPickerOpen(true)}>
+          <Button className="mt-5" onClick={() => openPicker()}>
             <Plus /> Add exercise
           </Button>
         </EmptyState>
@@ -248,13 +277,14 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
                     entries: draft.entries.map((item) => (item.id === next.id ? next : item)),
                   })
                 }
+                onChangeExercise={() => openPicker(entry.id)}
                 onRemove={() =>
                   update({ entries: draft.entries.filter((item) => item.id !== entry.id) })
                 }
               />
             ))}
           </div>
-          <Button variant="outline" onClick={() => setPickerOpen(true)}>
+          <Button variant="outline" onClick={() => openPicker()}>
             <Plus /> Add exercise
           </Button>
           <WorkoutSummary entries={entries} exerciseCount={draft.entries.length} />
@@ -299,10 +329,11 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
       </div>
 
       <ExercisePicker
+        title={changingEntryId ? "Change exercise" : "Add exercise"}
         open={pickerOpen}
         onOpenChange={setPickerOpen}
         addedIds={new Set(draft.entries.map((entry) => entry.exerciseId))}
-        onSelect={addExercise}
+        onSelect={selectExercise}
       />
 
       {!editing && (

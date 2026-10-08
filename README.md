@@ -15,7 +15,8 @@ Single user, English UI, weights in kilograms. All data stays in the browser
   muscle group over 30 days, latest personal records and workouts.
 - **Workout** — log a session: date, notes, exercises, and weight × reps for every
   set. A set that beats your best estimated 1RM for the exercise is marked **PR** as
-  you type. An unfinished workout is saved as a draft and restored on the next visit.
+  you type. Picked the wrong exercise? Swap it for another and keep the sets you
+  entered. An unfinished workout is saved as a draft and restored on the next visit.
 - **History** — past workouts grouped by month, with a details page, editing and
   deletion.
 - **Exercises** — a library of default exercises in six muscle groups, with search,

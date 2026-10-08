@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { ArrowLeftRight, Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { setStatus, type DraftRecord } from "@/lib/draft";
@@ -18,6 +18,8 @@ interface ExerciseCardProps {
   /** The set that beats the previous best of this exercise, if any. */
   record: DraftRecord | null;
   onChange: (entry: DraftEntry) => void;
+  /** Asks the form to open the picker and replace this exercise, keeping the sets. */
+  onChangeExercise: () => void;
   onRemove: () => void;
 }
 
@@ -28,6 +30,7 @@ export function ExerciseCard({
   errors,
   record,
   onChange,
+  onChangeExercise,
   onRemove,
 }: ExerciseCardProps) {
   const [confirmingRemove, setConfirmingRemove] = useState(false);
@@ -73,16 +76,30 @@ export function ExerciseCard({
           <h2 className="text-base font-semibold">{name}</h2>
           <p className="text-xs text-muted-foreground">{group}</p>
         </div>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          aria-label={`Remove ${name}`}
-          onClick={requestRemove}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 />
-        </Button>
+        <div className="flex shrink-0 items-center">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={`Change ${name} to another exercise`}
+            title="Change exercise"
+            onClick={onChangeExercise}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeftRight />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={`Remove ${name}`}
+            title="Remove exercise"
+            onClick={requestRemove}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 />
+          </Button>
+        </div>
       </div>
 
       <table className="w-full table-fixed md:table-auto">
