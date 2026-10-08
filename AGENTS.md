@@ -20,7 +20,7 @@ below are the conventions to keep when changing code.
 - Keep route files thin: page metadata via `pageMeta()` plus one page component from `src/components/<page>/`.
 - One component per file. Split a component when it grows past one clear responsibility.
 - Define navigation items once in `src/components/navigation.ts`; the sidebar and the phone bottom bar are both derived from it.
-- Use the shared `ConfirmDialog` for destructive confirmations, `EmptyState` for empty pages and `PageHeader` for page titles.
+- Use the shared `ConfirmDialog` for destructive confirmations, `EmptyState` for empty pages, `PageHeader` for page titles, and `LoadingState` / `ErrorState` (with a retry) while a page loads or fails.
 
 ## Data
 
@@ -29,6 +29,8 @@ below are the conventions to keep when changing code.
 - Components read and change data only through the hooks in `src/hooks`; they never touch `localStorage`.
 - Store exercise labels on workout entries when saving and prefer live library labels when displaying (`exerciseLabel()` in `src/lib/workout.ts`); historical workouts remain readable after exercise deletion.
 - Body weight has one entry per day: saving a day that exists replaces it.
+- Read and write storage only through `src/data/storage.ts`. Give every stored type a zod schema in `src/data/schemas.ts` and pass it to `readList` / `readObject`.
+- Use `writeList` / `writeItem` for anything the user asked to save, so a failure reaches the UI as `StorageWriteError`; use the `tryWrite…` variants only for housekeeping done while reading.
 - Do not rename the `gymlog.v1.*` storage keys. To drop a default exercise, add it to `REMOVED_DEFAULT_EXERCISES` and bump the migration key.
 
 ## Logic
@@ -44,6 +46,7 @@ below are the conventions to keep when changing code.
 - Keep phone navigation in a dedicated shell component and share safe-area offsets with sticky form actions so navigation and save controls never overlap.
 - Desktop (768px and up) and phone layouts come from the same components: use Tailwind `md:` classes and the `mobile-*` rules in `src/styles.css`, not separate components or user-agent checks.
 - Use the semantic color tokens from `src/styles.css`; no hard-coded colors.
+- `NumberInput` steppers: use `stepperLayout="sides"` where the field has the full row on phones; keep the default inside table cells.
 
 ## Before finishing
 

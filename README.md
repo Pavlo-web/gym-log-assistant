@@ -39,6 +39,7 @@ Works on desktop (sidebar navigation) and on phones (bottom navigation bar).
 | Styling     | Tailwind CSS 4, [shadcn/ui](https://ui.shadcn.com) components |
 | Charts      | Recharts                                                      |
 | Dates       | date-fns                                                      |
+| Validation  | zod, for data read back from storage                          |
 | Tooling     | ESLint, Prettier                                              |
 
 ## Getting started
@@ -77,7 +78,7 @@ src/
     ui/         shadcn/ui primitives and two app inputs (number-input, date-picker).
     charts/     Styling and tooltip shared by the charts.
   hooks/        TanStack Query hooks: the only way components read or change data.
-  data/         Repository implementations (localStorage) and the default exercises.
+  data/         Repositories (localStorage), storage access with validation, default exercises.
   lib/          Pure functions with no React: calculations, dates, numbers, validation.
   types/        Domain types and the repository interfaces.
   styles.css    Theme tokens and the phone-only layout rules.
@@ -153,6 +154,16 @@ Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts`,
 - **Default exercises are migrated.** When the default list changes, existing
   libraries are updated once (`src/data/default-exercises.ts`); custom exercises are
   never touched.
+- **Stored data is checked when it is read.** Every record is validated against the
+  zod schemas in `src/data/schemas.ts`. A damaged record is skipped instead of
+  breaking the page, and the original text is copied to a `<key>.backup` entry before
+  anything overwrites it.
+- **A failed save is never silent.** When the browser refuses a write (storage full
+  or turned off), the repository throws `StorageWriteError` and the form shows the
+  message. Only housekeeping writes, such as seeding the default exercises, are best
+  effort.
+- **Most pages keep a readable width; the dashboard is wide.** It is a grid of cards,
+  so on large screens it uses two columns.
 - **Phone layout is CSS-only.** The same components render at every width; rules for
   screens narrower than 768px live in Tailwind `md:` classes and the `mobile-*`
   section of `src/styles.css`.
@@ -163,8 +174,6 @@ Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts`,
   checks; behaviour is verified by hand.
 - Data lives in one browser. Clearing site data deletes it, and there is no export
   or import.
-- Stored data is not validated beyond basic shape checks, so hand-edited
-  `localStorage` can break a page.
 - Kilograms only.
 
 ## Lovable
