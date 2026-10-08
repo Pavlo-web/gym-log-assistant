@@ -79,3 +79,19 @@ export interface DraftRepository {
   set(draft: WorkoutDraft): Promise<void>;
   clear(): Promise<void>;
 }
+
+/** One body weight measurement; there is at most one per day. */
+export interface BodyWeightEntry {
+  id: string;
+  /** ISO date, yyyy-mm-dd */
+  date: string;
+  /** kilograms */
+  weight: number;
+}
+
+export interface BodyWeightRepository {
+  list(): Promise<BodyWeightEntry[]>;
+  /** Saves the weight for a day, replacing an existing entry for that day. */
+  save(date: string, weight: number): Promise<BodyWeightEntry>;
+  delete(id: string): Promise<void>;
+}

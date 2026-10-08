@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BodyWeightRouteImport } from './routes/body-weight'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExercisesRouteImport } from './routes/exercises'
@@ -22,6 +23,11 @@ import { Route as HistoryWorkoutIdEditRouteImport } from './routes/history.$work
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BodyWeightRoute = BodyWeightRouteImport.update({
+  id: '/body-weight',
+  path: '/body-weight',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculatorRoute = CalculatorRouteImport.update({
@@ -67,6 +73,7 @@ const HistoryWorkoutIdEditRoute = HistoryWorkoutIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/body-weight': typeof BodyWeightRoute
   '/calculator': typeof CalculatorRoute
   '/dashboard': typeof DashboardRoute
   '/exercises': typeof ExercisesRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/body-weight': typeof BodyWeightRoute
   '/calculator': typeof CalculatorRoute
   '/dashboard': typeof DashboardRoute
   '/exercises': typeof ExercisesRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/body-weight': typeof BodyWeightRoute
   '/calculator': typeof CalculatorRoute
   '/dashboard': typeof DashboardRoute
   '/exercises': typeof ExercisesRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/body-weight'
     | '/calculator'
     | '/dashboard'
     | '/exercises'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/body-weight'
     | '/calculator'
     | '/dashboard'
     | '/exercises'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/body-weight'
     | '/calculator'
     | '/dashboard'
     | '/exercises'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BodyWeightRoute: typeof BodyWeightRoute
   CalculatorRoute: typeof CalculatorRoute
   DashboardRoute: typeof DashboardRoute
   ExercisesRoute: typeof ExercisesRoute
@@ -149,6 +162,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/body-weight': {
+      id: '/body-weight'
+      path: '/body-weight'
+      fullPath: '/body-weight'
+      preLoaderRoute: typeof BodyWeightRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculator': {
@@ -227,6 +247,7 @@ const HistoryRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BodyWeightRoute: BodyWeightRoute,
   CalculatorRoute: CalculatorRoute,
   DashboardRoute: DashboardRoute,
   ExercisesRoute: ExercisesRoute,

@@ -22,3 +22,15 @@ export interface TooltipProps<Row> {
 export function activeRow<Row>({ active, payload }: TooltipProps<Row>): Row | undefined {
   return active ? payload?.[0]?.payload : undefined;
 }
+
+/**
+ * Y-axis range with headroom around the data so the line does not hug the edges.
+ * `minShare` is the least headroom as a share of the largest value: lower it for
+ * data that moves little, such as body weight, or the trend flattens out.
+ */
+export function paddedDomain(values: readonly number[], minShare = 0.05): [number, number] {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const padding = Math.max((max - min) * 0.15, max * minShare, 1);
+  return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
+}

@@ -1,7 +1,7 @@
 import {
+  CartesianGrid,
   Line,
   LineChart,
-  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -22,40 +22,40 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatDay, formatDayMonth } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
-import type { ExercisePoint } from "@/lib/progress";
-
-export type Metric = "topWeight" | "bestE1RM" | "volume";
+import type { BodyWeightEntry } from "@/types/domain";
 
 /** Minimum pixel gap between x-axis labels. */
-const TICK_GAP = { mobile: 50, desktop: 5 };
+const TICK_GAP = { mobile: 50, desktop: 20 };
 
-function PointTooltip(props: TooltipProps<ExercisePoint>) {
-  const point = activeRow(props);
-  if (!point) return null;
+/** Body weight moves by a kilo or two, so the axis stays tight around the data. */
+const AXIS_HEADROOM_SHARE = 0.01;
+
+function EntryTooltip(props: TooltipProps<BodyWeightEntry>) {
+  const entry = activeRow(props);
+  if (!entry) return null;
   return (
-    <ChartTooltip title={formatDay(point.date)}>
-      <p>
-        Top: {formatNumber(point.topWeight)} kg × {point.topReps}
-      </p>
-      <p>Est. 1RM: {formatNumber(point.bestE1RM)} kg</p>
-      <p>Volume: {formatNumber(point.volume)} kg</p>
+    <ChartTooltip title={formatDay(entry.date)}>
+      <p>{formatNumber(entry.weight)} kg</p>
     </ChartTooltip>
   );
 }
 
-interface ProgressChartProps {
-  points: ExercisePoint[];
-  metric: Metric;
+interface BodyWeightChartProps {
+  /** Oldest first. */
+  entries: BodyWeightEntry[];
 }
 
-/** Line chart of one metric over time. Default export so the page can lazy-load Recharts. */
-export default function ProgressChart({ points, metric }: ProgressChartProps) {
+/** Line chart of body weight over time. Default export so the page can lazy-load Recharts. */
+export default function BodyWeightChart({ entries }: BodyWeightChartProps) {
   const mobile = useIsMobile();
-  const domain = paddedDomain(points.map((point) => point[metric]));
+  const domain = paddedDomain(
+    entries.map((entry) => entry.weight),
+    AXIS_HEADROOM_SHARE,
+  );
   return (
-    <div className="h-72 w-full">
+    <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={CHART_MARGIN}>
+        <LineChart data={entries} margin={CHART_MARGIN}>
           <CartesianGrid {...GRID_PROPS} />
           <XAxis
             minTickGap={mobile ? TICK_GAP.mobile : TICK_GAP.desktop}
@@ -73,14 +73,14 @@ export default function ProgressChart({ points, metric }: ProgressChartProps) {
             tickFormatter={formatNumber}
             unit=" kg"
           />
-          <Tooltip content={<PointTooltip />} cursor={{ stroke: AXIS_STROKE }} />
+          <Tooltip content={<EntryTooltip />} cursor={{ stroke: AXIS_STROKE }} />
           <Line
             type="monotone"
-            dataKey={metric}
+            dataKey="weight"
             stroke={SERIES_COLOR}
             strokeWidth={2}
-            dot={{ r: 4, fill: SERIES_COLOR, stroke: SERIES_COLOR }}
-            activeDot={{ r: 6 }}
+            dot={{ r: 3, fill: SERIES_COLOR, stroke: SERIES_COLOR }}
+            activeDot={{ r: 5 }}
             isAnimationActive={false}
           />
         </LineChart>

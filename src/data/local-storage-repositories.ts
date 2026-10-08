@@ -1,7 +1,10 @@
+import { isIsoDate } from "@/lib/date";
 import { newId } from "@/lib/id";
-import { EXERCISE_NAME_MAX_LENGTH } from "@/lib/limits";
+import { BODY_WEIGHT_MAX_KG, BODY_WEIGHT_MIN_KG, EXERCISE_NAME_MAX_LENGTH } from "@/lib/limits";
 import { isSameExercise } from "@/lib/workout";
 import type {
+  BodyWeightEntry,
+  BodyWeightRepository,
   DraftRepository,
   Exercise,
   ExerciseRepository,
@@ -20,6 +23,7 @@ import {
 const EXERCISES_KEY = "gymlog.v1.exercises";
 const WORKOUTS_KEY = "gymlog.v1.workouts";
 const DRAFT_KEY = "gymlog.v1.workout-draft";
+const BODY_WEIGHT_KEY = "gymlog.v1.body-weight";
 const EXERCISES_MIGRATION_KEY = "gymlog.v1.exercises-defaults-v2";
 const MIGRATION_DONE = "done";
 
@@ -229,3 +233,31 @@ class LocalDraftRepository implements DraftRepository {
 export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
 export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
 export const draftRepository: DraftRepository = new LocalDraftRepository();
+
+class LocalBodyWeightRepository implements BodyWeightRepository {
+  /** Newest first. */
+  async list(): Promise<BodyWeightEntry[]> {
+    return readList<BodyWeightEntry>(BODY_WEIGHT_KEY).sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  async save(date: string, weight: number): Promise<BodyWeightEntry> {
+    if (!isIsoDate(date)) throw new Error("Pick a valid date.");
+    if (!(weight >= BODY_WEIGHT_MIN_KG && weight <= BODY_WEIGHT_MAX_KG)) {
+      throw new Error(`Weight must be ${BODY_WEIGHT_MIN_KG}–${BODY_WEIGHT_MAX_KG} kg.`);
+    }
+    const entries = readList<BodyWeightEntry>(BODY_WEIGHT_KEY);
+    const existing = entries.find((entry) => entry.date === date);
+    const saved: BodyWeightEntry = { id: existing?.id ?? newId(), date, weight };
+    writeList(BODY_WEIGHT_KEY, [...entries.filter((entry) => entry.date !== date), saved]);
+    return saved;
+  }
+
+  async delete(id: string): Promise<void> {
+    writeList(
+      BODY_WEIGHT_KEY,
+      readList<BodyWeightEntry>(BODY_WEIGHT_KEY).filter((entry) => entry.id !== id),
+    );
+  }
+}
+
+export const bodyWeightRepository: BodyWeightRepository = new LocalBodyWeightRepository();

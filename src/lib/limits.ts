@@ -4,3 +4,5 @@ export const WORKOUT_NOTES_MAX_LENGTH = 200;
 export const SET_WEIGHT_MAX_KG = 1000;
 export const SET_REPS_MIN = 1;
 export const SET_REPS_MAX = 100;
+export const BODY_WEIGHT_MIN_KG = 20;
+export const BODY_WEIGHT_MAX_KG = 400;

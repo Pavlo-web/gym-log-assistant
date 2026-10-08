@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Plus,
   TrendingUp,
+  Weight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,7 +18,7 @@ import {
 type MobilePlacement = "tab" | "action" | "more";
 
 export interface NavItem {
-  to: "/dashboard" | "/" | "/history" | "/exercises" | "/progress" | "/calculator";
+  to: "/dashboard" | "/" | "/history" | "/exercises" | "/progress" | "/body-weight" | "/calculator";
   label: string;
   /** Label used in the phone bottom bar when it differs from the sidebar. */
   mobileLabel?: string;
@@ -32,6 +33,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { to: "/history", label: "History", icon: History, mobile: "tab" },
   { to: "/exercises", label: "Exercises", icon: Dumbbell, mobile: "more" },
   { to: "/progress", label: "Progress", icon: TrendingUp, mobile: "tab" },
+  { to: "/body-weight", label: "Body weight", icon: Weight, mobile: "more" },
   { to: "/calculator", label: "1RM Calculator", icon: Calculator, mobile: "more" },
 ];
 

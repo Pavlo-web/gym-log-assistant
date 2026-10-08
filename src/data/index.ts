@@ -3,4 +3,5 @@ export {
   exerciseRepository,
   workoutRepository,
   draftRepository,
+  bodyWeightRepository,
 } from "./local-storage-repositories";
