@@ -5,3 +5,4 @@ export {
   draftRepository,
   bodyWeightRepository,
 } from "./local-storage-repositories";
+export { StorageWriteError } from "./storage";

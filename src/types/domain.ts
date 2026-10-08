@@ -1,6 +1,6 @@
-export type MuscleGroup = "Chest" | "Back" | "Legs" | "Shoulders" | "Arms" | "Core";
+export const MUSCLE_GROUPS = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"] as const;
 
-export const MUSCLE_GROUPS: MuscleGroup[] = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"];
+export type MuscleGroup = (typeof MUSCLE_GROUPS)[number];
 
 export interface Exercise {
   id: string;

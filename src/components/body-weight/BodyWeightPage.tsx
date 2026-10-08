@@ -4,8 +4,9 @@ import { Weight } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { StatTile } from "@/components/StatTile";
-import { Button } from "@/components/ui/button";
+import { StorageWriteError } from "@/data";
 import { useBodyWeight, useDeleteBodyWeight } from "@/hooks/useBodyWeight";
 import {
   bodyWeightRows,
@@ -63,8 +64,12 @@ export function BodyWeightPage() {
       setDeleteError("");
       await remove.mutateAsync(deleting.id);
       setDeleting(null);
-    } catch {
-      setDeleteError("Could not delete the entry. Try again.");
+    } catch (cause) {
+      setDeleteError(
+        cause instanceof StorageWriteError
+          ? cause.message
+          : "Could not delete the entry. Try again.",
+      );
     }
   }
 
@@ -72,9 +77,7 @@ export function BodyWeightPage() {
     return (
       <>
         {HEADER}
-        <p role="status" className="py-12 text-center text-sm text-muted-foreground">
-          Loading body weight…
-        </p>
+        <LoadingState label="Loading body weight…" />
       </>
     );
   }
@@ -83,12 +86,7 @@ export function BodyWeightPage() {
     return (
       <>
         {HEADER}
-        <div role="alert" className="py-12 text-center text-sm text-muted-foreground">
-          Could not load body weight.{" "}
-          <Button variant="link" onClick={() => void refetch()}>
-            Try again
-          </Button>
-        </div>
+        <ErrorState message="Could not load body weight." onRetry={() => void refetch()} />
       </>
     );
   }

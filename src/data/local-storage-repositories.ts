@@ -19,6 +19,23 @@ import {
   REMOVED_DEFAULT_EXERCISES,
   type ExerciseSeed,
 } from "./default-exercises";
+import {
+  bodyWeightEntrySchema,
+  exerciseSchema,
+  workoutDraftSchema,
+  workoutSchema,
+} from "./schemas";
+import {
+  hasStorage,
+  readItem,
+  readList,
+  readObject,
+  removeItem,
+  tryWriteItem,
+  tryWriteList,
+  writeItem,
+  writeList,
+} from "./storage";
 
 const EXERCISES_KEY = "gymlog.v1.exercises";
 const WORKOUTS_KEY = "gymlog.v1.workouts";
@@ -27,57 +44,14 @@ const BODY_WEIGHT_KEY = "gymlog.v1.body-weight";
 const EXERCISES_MIGRATION_KEY = "gymlog.v1.exercises-defaults-v2";
 const MIGRATION_DONE = "done";
 
-/** False during server rendering and when the browser blocks storage (e.g. private mode). */
-function hasStorage(): boolean {
-  try {
-    return typeof window !== "undefined" && !!window.localStorage;
-  } catch {
-    return false;
-  }
-}
-
-function readItem(key: string): string | null {
-  if (!hasStorage()) return null;
-  try {
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-/** Writes are best effort: a full or blocked storage must not crash the app. */
-function writeItem(key: string, value: string): void {
-  if (!hasStorage()) return;
-  try {
-    window.localStorage.setItem(key, value);
-  } catch {
-    /* quota exceeded or storage unavailable */
-  }
-}
-
-/** Reads a stored JSON array; missing, corrupted or non-array data yields an empty list. */
-function readList<T>(key: string): T[] {
-  const raw = readItem(key);
-  if (!raw) return [];
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as T[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeList<T>(key: string, value: readonly T[]): void {
-  writeItem(key, JSON.stringify(value));
-}
-
 function toDefaultExercise(seed: ExerciseSeed): Exercise {
   return { id: newId(), name: seed.name, muscleGroup: seed.muscleGroup, isCustom: false };
 }
 
+/** Seeding and migrating happen while reading, so their writes are best effort. */
 function seedExercises(): Exercise[] {
   const seeded = DEFAULT_EXERCISES.map(toDefaultExercise);
-  writeList(EXERCISES_KEY, seeded);
+  tryWriteList(EXERCISES_KEY, seeded);
   return seeded;
 }
 
@@ -108,18 +82,19 @@ function isRemovedDefault(exercise: Exercise): boolean {
 
 function loadExercises(): Exercise[] {
   if (!hasStorage()) return [];
-  const stored = readList<Exercise>(EXERCISES_KEY);
+  const stored = readList<Exercise>(EXERCISES_KEY, exerciseSchema);
   if (stored.length === 0) return seedExercises();
   if (readItem(EXERCISES_MIGRATION_KEY) === MIGRATION_DONE) return stored;
 
   const migrated = migrateDefaultExercises(stored);
-  writeList(EXERCISES_KEY, migrated);
-  writeItem(EXERCISES_MIGRATION_KEY, MIGRATION_DONE);
+  if (tryWriteList(EXERCISES_KEY, migrated)) {
+    tryWriteItem(EXERCISES_MIGRATION_KEY, MIGRATION_DONE);
+  }
   return migrated;
 }
 
 function loadWorkouts(): Workout[] {
-  return readList<Workout>(WORKOUTS_KEY);
+  return readList<Workout>(WORKOUTS_KEY, workoutSchema);
 }
 
 class LocalExerciseRepository implements ExerciseRepository {
@@ -192,31 +167,10 @@ class LocalWorkoutRepository implements WorkoutRepository {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/** Accepts stored draft data only when it has the expected shape. */
-function parseDraft(raw: string): WorkoutDraft | null {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed)) return null;
-    const { date, notes, entries } = parsed;
-    if (typeof date !== "string" || !Array.isArray(entries)) return null;
-    return {
-      date,
-      notes: typeof notes === "string" ? notes : "",
-      entries: entries as WorkoutDraft["entries"],
-    };
-  } catch {
-    return null;
-  }
-}
-
 class LocalDraftRepository implements DraftRepository {
+  /** Null when there is no draft or the stored one does not have the expected shape. */
   async get(): Promise<WorkoutDraft | null> {
-    const raw = readItem(DRAFT_KEY);
-    return raw ? parseDraft(raw) : null;
+    return readObject<WorkoutDraft>(DRAFT_KEY, workoutDraftSchema);
   }
 
   async set(draft: WorkoutDraft): Promise<void> {
@@ -224,20 +178,18 @@ class LocalDraftRepository implements DraftRepository {
   }
 
   async clear(): Promise<void> {
-    if (!hasStorage()) return;
-    window.localStorage.removeItem(DRAFT_KEY);
+    removeItem(DRAFT_KEY);
   }
 }
 
-/** Local implementations; consumers import them through `@/data`. */
-export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
-export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
-export const draftRepository: DraftRepository = new LocalDraftRepository();
+function loadBodyWeight(): BodyWeightEntry[] {
+  return readList<BodyWeightEntry>(BODY_WEIGHT_KEY, bodyWeightEntrySchema);
+}
 
 class LocalBodyWeightRepository implements BodyWeightRepository {
   /** Newest first. */
   async list(): Promise<BodyWeightEntry[]> {
-    return readList<BodyWeightEntry>(BODY_WEIGHT_KEY).sort((a, b) => b.date.localeCompare(a.date));
+    return loadBodyWeight().sort((a, b) => b.date.localeCompare(a.date));
   }
 
   async save(date: string, weight: number): Promise<BodyWeightEntry> {
@@ -245,7 +197,7 @@ class LocalBodyWeightRepository implements BodyWeightRepository {
     if (!(weight >= BODY_WEIGHT_MIN_KG && weight <= BODY_WEIGHT_MAX_KG)) {
       throw new Error(`Weight must be ${BODY_WEIGHT_MIN_KG}–${BODY_WEIGHT_MAX_KG} kg.`);
     }
-    const entries = readList<BodyWeightEntry>(BODY_WEIGHT_KEY);
+    const entries = loadBodyWeight();
     const existing = entries.find((entry) => entry.date === date);
     const saved: BodyWeightEntry = { id: existing?.id ?? newId(), date, weight };
     writeList(BODY_WEIGHT_KEY, [...entries.filter((entry) => entry.date !== date), saved]);
@@ -255,9 +207,13 @@ class LocalBodyWeightRepository implements BodyWeightRepository {
   async delete(id: string): Promise<void> {
     writeList(
       BODY_WEIGHT_KEY,
-      readList<BodyWeightEntry>(BODY_WEIGHT_KEY).filter((entry) => entry.id !== id),
+      loadBodyWeight().filter((entry) => entry.id !== id),
     );
   }
 }
 
+/** Local implementations; consumers import them through `@/data`. */
+export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
+export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
+export const draftRepository: DraftRepository = new LocalDraftRepository();
 export const bodyWeightRepository: BodyWeightRepository = new LocalBodyWeightRepository();

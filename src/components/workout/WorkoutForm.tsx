@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { StorageWriteError } from "@/data";
 import { useExercises } from "@/hooks/useExercises";
 import { useClearWorkoutDraft, useSaveWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { useCreateWorkout, useUpdateWorkout, useWorkouts } from "@/hooks/useWorkouts";
@@ -178,8 +179,10 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     try {
       if (workout) await saveEdited(workout);
       else await saveNew();
-    } catch {
-      setFormError("Could not save workout. Try again.");
+    } catch (cause) {
+      setFormError(
+        cause instanceof StorageWriteError ? cause.message : "Could not save workout. Try again.",
+      );
     }
   }
 
@@ -261,6 +264,12 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
       {formError && (
         <p role="alert" className="text-sm text-destructive">
           {formError}
+        </p>
+      )}
+      {saveDraft.isError && (
+        <p role="status" className="text-xs text-muted-foreground">
+          This browser is not saving your draft, so it will be lost if you leave the page. Saving
+          the workout may fail too.
         </p>
       )}
 
