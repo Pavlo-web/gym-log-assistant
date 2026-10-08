@@ -34,6 +34,7 @@ export function CalculatorPage() {
             <NumberInput
               aria-label="Weight (kg)"
               step={2.5}
+              stepperLayout="sides"
               min={0}
               value={weightInput}
               onValueChange={setWeightInput}
@@ -46,6 +47,7 @@ export function CalculatorPage() {
               aria-label="Reps"
               inputMode="numeric"
               step={1}
+              stepperLayout="sides"
               min={1}
               value={repsInput}
               onValueChange={setRepsInput}

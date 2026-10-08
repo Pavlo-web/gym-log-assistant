@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentProps, type KeyboardEvent } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { parseDecimal } from "@/lib/number";
@@ -13,6 +13,12 @@ type NumberInputProps = Omit<
   value: string;
   onValueChange: (value: string) => void;
   step?: number;
+  /**
+   * Where the steppers sit on phones: "stacked" inside the field, which fits
+   * narrow table cells, or "sides" as full-size − and + buttons around it.
+   * Desktop always shows them stacked inside the field.
+   */
+  stepperLayout?: "stacked" | "sides";
 };
 
 const STEPPER_BUTTON = "h-4 w-7 rounded-sm p-0 text-muted-foreground hover:text-foreground";
@@ -28,7 +34,18 @@ function stepPrecision(step: number): number {
  * the decimal separator and no browser spinner or scroll-to-change appears.
  */
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(function NumberInput(
-  { value, onValueChange, min, max, step = 1, className, onKeyDown, disabled, ...props },
+  {
+    value,
+    onValueChange,
+    min,
+    max,
+    step = 1,
+    stepperLayout = "stacked",
+    className,
+    onKeyDown,
+    disabled,
+    ...props
+  },
   ref,
 ) {
   const minimum = min === undefined ? -Infinity : Number(min);
@@ -53,7 +70,12 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   }
 
   return (
-    <div className="number-input group relative w-full min-w-0">
+    <div
+      className={cn(
+        "number-input group relative w-full min-w-0",
+        stepperLayout === "sides" && "number-input-sides",
+      )}
+    >
       <Input
         {...props}
         ref={ref}
@@ -76,7 +98,8 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           onClick={() => stepBy(1)}
           className={STEPPER_BUTTON}
         >
-          <ChevronUp className="size-3" />
+          <ChevronUp className="stepper-chevron size-3" />
+          <Plus className="stepper-sign hidden" />
         </Button>
         <Button
           type="button"
@@ -88,7 +111,8 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           onClick={() => stepBy(-1)}
           className={STEPPER_BUTTON}
         >
-          <ChevronDown className="size-3" />
+          <ChevronDown className="stepper-chevron size-3" />
+          <Minus className="stepper-sign hidden" />
         </Button>
       </div>
     </div>

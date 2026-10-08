@@ -71,6 +71,7 @@ export function BodyWeightForm({ entries }: BodyWeightFormProps) {
             min={BODY_WEIGHT_MIN_KG}
             max={BODY_WEIGHT_MAX_KG}
             step={WEIGHT_STEP_KG}
+            stepperLayout="sides"
             value={weight}
             onValueChange={(next) => {
               setWeight(next);
