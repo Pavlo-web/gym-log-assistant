@@ -3,7 +3,7 @@
 A personal workout diary for strength training. Log workouts set by set, look back
 through your history, follow your progress per exercise and estimate your one-rep max.
 
-Live app: <https://max-out-journal.lovable.app>
+Live app: <https://gym-log-assistant.lovable.app>
 
 Single user, English UI, weights in kilograms. All data stays in the browser
 (`localStorage`): there is no account, no backend and no sync between devices.
