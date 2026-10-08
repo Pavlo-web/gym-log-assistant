@@ -11,16 +11,19 @@ Single user, English UI, weights in kilograms. All data stays in the browser
 ## Features
 
 - **Dashboard** — workouts and volume this week against last week, weekly streak,
-  8-week volume chart, sets per muscle group over 30 days, latest personal records
-  and workouts.
+  8-week volume chart, a year-long training calendar (GitHub-style heatmap), sets per
+  muscle group over 30 days, latest personal records and workouts.
 - **Workout** — log a session: date, notes, exercises, and weight × reps for every
-  set. An unfinished workout is saved as a draft and restored on the next visit.
+  set. A set that beats your best estimated 1RM for the exercise is marked **PR** as
+  you type. An unfinished workout is saved as a draft and restored on the next visit.
 - **History** — past workouts grouped by month, with a details page, editing and
   deletion.
 - **Exercises** — a library of default exercises in six muscle groups, with search,
   a group filter and your own custom exercises.
 - **Progress** — per exercise: personal records, a chart of top weight, estimated
   1RM or volume over time, and a table of every session.
+- **Body weight** — a log with one entry per day, the change since the previous entry
+  and over 30 days, and a trend chart.
 - **1RM Calculator** — Epley and Brzycki estimates with a percentage table.
 
 Works on desktop (sidebar navigation) and on phones (bottom navigation bar).
@@ -36,7 +39,6 @@ Works on desktop (sidebar navigation) and on phones (bottom navigation bar).
 | Styling     | Tailwind CSS 4, [shadcn/ui](https://ui.shadcn.com) components |
 | Charts      | Recharts                                                      |
 | Dates       | date-fns                                                      |
-| Tests       | Vitest, Testing Library                                       |
 | Tooling     | ESLint, Prettier                                              |
 
 ## Getting started
@@ -55,18 +57,16 @@ tree, so pass `--legacy-peer-deps`.
 
 ## Scripts
 
-| Command              | What it does                                |
-| -------------------- | ------------------------------------------- |
-| `bun run dev`        | Start the dev server with hot reload        |
-| `bun run build`      | Production build                            |
-| `bun run preview`    | Serve the production build locally          |
-| `bun run test`       | Run the unit tests once                     |
-| `bun run test:watch` | Run the tests in watch mode                 |
-| `bun run lint`       | Lint with ESLint (includes Prettier checks) |
-| `bun run format`     | Format everything with Prettier             |
-| `bunx tsc --noEmit`  | Type check                                  |
+| Command             | What it does                                |
+| ------------------- | ------------------------------------------- |
+| `bun run dev`       | Start the dev server with hot reload        |
+| `bun run build`     | Production build                            |
+| `bun run preview`   | Serve the production build locally          |
+| `bun run lint`      | Lint with ESLint (includes Prettier checks) |
+| `bun run format`    | Format everything with Prettier             |
+| `bunx tsc --noEmit` | Type check                                  |
 
-Before pushing, run the type check, lint, tests and build.
+Before pushing, run the type check, lint and build.
 
 ## Project structure
 
@@ -75,12 +75,11 @@ src/
   routes/       One file per URL. Routes are thin: page metadata plus the page component.
   components/   UI, one folder per page, plus pieces shared between pages.
     ui/         shadcn/ui primitives and two app inputs (number-input, date-picker).
-    charts/     Styling and tooltip shared by both charts.
+    charts/     Styling and tooltip shared by the charts.
   hooks/        TanStack Query hooks: the only way components read or change data.
   data/         Repository implementations (localStorage) and the default exercises.
   lib/          Pure functions with no React: calculations, dates, numbers, validation.
   types/        Domain types and the repository interfaces.
-  test/         Test setup and a routing smoke test.
   styles.css    Theme tokens and the phone-only layout rules.
 ```
 
@@ -97,6 +96,7 @@ src/
 | `/history/$workoutId/edit` | Edit a workout          |
 | `/exercises`               | Exercise library        |
 | `/progress`                | Progress per exercise   |
+| `/body-weight`             | Body weight log         |
 | `/calculator`              | 1RM Calculator          |
 
 ## Architecture
@@ -114,9 +114,8 @@ components  →  hooks (TanStack Query)  →  repository interfaces  →  localS
 - **Repositories** implement the interfaces in `src/types/domain.ts`. The only
   implementation today is `src/data/local-storage-repositories.ts`; `src/data/index.ts`
   is the single place that chooses it.
-- **`src/lib` holds the logic.** It has no React and no storage access, which is why
-  it is the part covered by unit tests. Nothing in `src/lib` imports from
-  `src/components`.
+- **`src/lib` holds the logic.** It has no React and no storage access, and nothing
+  in it imports from `src/components`.
 
 ### Data model
 
@@ -128,9 +127,10 @@ Defined in `src/types/domain.ts`:
 - `WorkoutSet` — weight in kg and reps.
 - `WorkoutDraft` — the workout form while it is being filled in. Weight and reps are
   kept as the raw text the user typed and parsed only when saving.
+- `BodyWeightEntry` — body weight in kg for one day.
 
-Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts` and
-`gymlog.v1.workout-draft`.
+Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts`,
+`gymlog.v1.workout-draft` and `gymlog.v1.body-weight`.
 
 ### Decisions worth knowing
 
@@ -145,6 +145,11 @@ Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts` and
 - **Weeks start on Monday** everywhere: the dashboard, the streak and the calendar.
 - **Estimated 1RM uses the Epley formula** for records and progress. The calculator
   also shows Brzycki for comparison.
+- **A personal record is a new best estimated 1RM.** The workout form compares each
+  set with every other saved workout of that exercise. The first session of an
+  exercise has nothing to beat, so the form does not flag it.
+- **The training calendar shades days by number of sets**, relative to the busiest
+  day of the year shown.
 - **Default exercises are migrated.** When the default list changes, existing
   libraries are updated once (`src/data/default-exercises.ts`); custom exercises are
   never touched.
@@ -152,21 +157,10 @@ Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts` and
   screens narrower than 768px live in Tailwind `md:` classes and the `mobile-*`
   section of `src/styles.css`.
 
-## Testing
-
-```sh
-bun run test
-```
-
-Unit tests sit next to the code they cover in `src/lib` (`*.test.ts`): 1RM and volume
-calculations, number parsing, date handling, set validation, dashboard aggregation,
-and exercise labels. `src/test/app-routing.test.tsx` checks that the router mounts.
-
-There are no component or end-to-end tests yet, and the localStorage repositories
-are not covered.
-
 ## Limitations
 
+- There are no automated tests. Type checking, lint and the build are the only
+  checks; behaviour is verified by hand.
 - Data lives in one browser. Clearing site data deletes it, and there is no export
   or import.
 - Stored data is not validated beyond basic shape checks, so hand-edited

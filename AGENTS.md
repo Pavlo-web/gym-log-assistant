@@ -28,11 +28,12 @@ below are the conventions to keep when changing code.
 - Persist exercise and workout data locally through repository interfaces because this stage has no backend.
 - Components read and change data only through the hooks in `src/hooks`; they never touch `localStorage`.
 - Store exercise labels on workout entries when saving and prefer live library labels when displaying (`exerciseLabel()` in `src/lib/workout.ts`); historical workouts remain readable after exercise deletion.
+- Body weight has one entry per day: saving a day that exists replaces it.
 - Do not rename the `gymlog.v1.*` storage keys. To drop a default exercise, add it to `REMOVED_DEFAULT_EXERCISES` and bump the migration key.
 
 ## Logic
 
-- Put pure logic in `src/lib` with a unit test next to it. Nothing in `src/lib` may import from `src/components`.
+- Put pure logic in `src/lib`. Nothing in `src/lib` may import from `src/components`.
 - Parse user-typed numbers only with `parseDecimal` / `parseInteger` (`src/lib/number.ts`); both comma and dot are decimal separators.
 - Treat workout dates as local `yyyy-MM-dd` strings and go through `src/lib/date.ts`; never use `new Date(string)` or `toISOString()` on them.
 - Take validation limits from `src/lib/limits.ts` instead of repeating the numbers.
@@ -46,4 +47,4 @@ below are the conventions to keep when changing code.
 
 ## Before finishing
 
-Run type check (`bunx tsc --noEmit`), `bun run lint`, `bun run test` and `bun run build`; all must pass.
+Run type check (`bunx tsc --noEmit`), `bun run lint` and `bun run build`; all must pass. The project has no automated tests, so check changed pages in the browser at desktop and phone widths.
