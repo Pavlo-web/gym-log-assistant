@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "tanstack_start_ts",
+      "name": "gym-log-assistant",
       "dependencies": {
         "@fontsource-variable/geist": "^5.3.0",
         "@hookform/resolvers": "^5.2.2",
