@@ -36,7 +36,6 @@ function Sidebar() {
           </Link>
         ))}
       </nav>
-      <p className="mt-auto text-xs text-muted-foreground">Local data · kg</p>
     </aside>
   );
 }
