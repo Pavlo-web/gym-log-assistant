@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { useWorkouts } from "@/hooks/useWorkouts";
+import { trainingCalendar } from "@/lib/calendar";
 import {
   muscleGroupSplit,
   RECENT_ITEMS,
@@ -21,6 +22,7 @@ import { MuscleSplit } from "./MuscleSplit";
 import { RecentRecords } from "./RecentRecords";
 import { RecentWorkouts } from "./RecentWorkouts";
 import { SummaryTiles } from "./SummaryTiles";
+import { TrainingCalendar } from "./TrainingCalendar";
 
 // Recharts is heavy and browser-only, so the chart loads on demand on the client.
 const WeeklyVolumeChart = lazy(() => import("./WeeklyVolumeChart"));
@@ -83,6 +85,10 @@ function Overview({ workouts, exercises }: OverviewProps) {
             <WeeklyVolumeChart data={weeks} />
           </Suspense>
         </ClientOnly>
+      </DashboardSection>
+
+      <DashboardSection title="Training calendar" subtitle="Last 12 months">
+        <TrainingCalendar calendar={trainingCalendar(workouts, today)} />
       </DashboardSection>
 
       <DashboardSection title="Muscle group split" subtitle="Sets in the last 30 days">
