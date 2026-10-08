@@ -1,61 +1,182 @@
-# Gym Log Assistant
+# Gym Log
 
-Build the foundation of "Gym Log" — a personal gym workout diary with a 1RM calculator. Single user, desktop-first, English UI. In this first step build ONLY the app shell, the data layer, and the 1RM Calculator page. The other pages are placeholders for now; I will request them one at a time later.
+A personal workout diary for strength training. Log workouts set by set, look back
+through your history, follow your progress per exercise and estimate your one-rep max.
 
-DESIGN
-- Dark theme only, minimalist: near-black background, subtle card surfaces, thin borders, one accent color (a muted lime/green), generous spacing, clean sans-serif type, tabular numbers for weights/reps. No gradients, no decorative imagery.
-- Desktop-first layout: fixed left sidebar with the app name "Gym Log" and nav items: Workout, History, Exercises, Progress, 1RM Calculator. Main content in a centered max-width container. It should not break on narrow screens, but mobile polish is not a goal.
-- Define all colors as semantic design tokens in the theme; no hard-coded colors in components.
+Live app: <https://max-out-journal.lovable.app>
 
-ROUTES
-- /            Workout (placeholder: "Coming soon")
-- /history     History (placeholder)
-- /exercises   Exercises (placeholder)
-- /progress    Progress (placeholder)
-- /calculator  1RM Calculator (fully working)
-Placeholders should be simple, consistent empty-state pages with the page title.
+Single user, English UI, weights in kilograms. All data stays in the browser
+(`localStorage`): there is no account, no backend and no sync between devices.
 
-DATA LAYER (important — build it now even though the placeholder pages do not use it yet)
-Data is stored in the browser's localStorage for now, but must be easy to swap for a real database with authentication later. Therefore:
-- Domain types in one file:
-  - Exercise { id, name, muscleGroup: "Chest" | "Back" | "Legs" | "Shoulders" | "Arms" | "Core", isCustom, userId? }
-  - WorkoutSet { id, weight (kg), reps }
-  - WorkoutEntry { id, exerciseId, sets: WorkoutSet[] }
-  - Workout { id, date (ISO yyyy-mm-dd), notes?, entries: WorkoutEntry[], userId?, createdAt, updatedAt }
-- Repository interfaces with async (Promise-returning) methods: ExerciseRepository (list, create, delete) and WorkoutRepository (list, getById, create, update, delete).
-- localStorage implementations of these interfaces, exported from a single module so the implementation can be replaced in one place. UI components must NEVER touch localStorage directly — only through the repositories, wrapped in React Query hooks (e.g. useExercises, useWorkouts).
-- IDs are UUIDs (crypto.randomUUID). Use versioned storage keys. Handle corrupted/missing storage gracefully.
-- Seed about 30 common default exercises (isCustom: false) spread across the six muscle groups, e.g. Bench Press, Incline Dumbbell Press, Squat, Deadlift, Romanian Deadlift, Leg Press, Overhead Press, Lateral Raise, Pull-Up, Barbell Row, Lat Pulldown, Barbell Curl, Triceps Pushdown, Plank, etc.
-- Pure calculation helpers in a separate lib file (no React): epley1RM(weight, reps), brzycki1RM(weight, reps), workoutVolume(workout). These will be reused by the Progress page later.
+## Features
 
-1RM CALCULATOR PAGE
-- Inputs: Weight (kg, decimals allowed) and Reps (integer 1–20). Results update live, no submit button.
-- Show estimated 1RM by the Epley formula (weight × (1 + reps/30)) as the primary large number, and the Brzycki estimate (weight × 36 / (37 − reps)) as a secondary smaller value. If reps = 1, the 1RM equals the entered weight.
-- Percentage table based on the Epley 1RM: rows from 100% down to 50% in 5% steps, columns: Percent, Weight (kg, rounded to nearest 0.5), Approx. reps possible at that load.
-- Validate input: empty, zero or negative values show a neutral empty state rather than NaN; reps above 20 show a small hint that estimates are unreliable.
-- Sanity check: 100 kg × 5 reps → Epley ≈ 116.7 kg.
+- **Dashboard** — workouts and volume this week against last week, weekly streak,
+  8-week volume chart, sets per muscle group over 30 days, latest personal records
+  and workouts.
+- **Workout** — log a session: date, notes, exercises, and weight × reps for every
+  set. An unfinished workout is saved as a draft and restored on the next visit.
+- **History** — past workouts grouped by month, with a details page, editing and
+  deletion.
+- **Exercises** — a library of default exercises in six muscle groups, with search,
+  a group filter and your own custom exercises.
+- **Progress** — per exercise: personal records, a chart of top weight, estimated
+  1RM or volume over time, and a table of every session.
+- **1RM Calculator** — Epley and Brzycki estimates with a percentage table.
 
-OUT OF SCOPE: authentication, backend/database, AI features, social features, payments. Do not add them.
+Works on desktop (sidebar navigation) and on phones (bottom navigation bar).
 
-This project was built with [Lovable](https://lovable.dev).
+## Tech stack
 
-**Live app**: https://gym-log-assistant.lovable.app
+| Area        | Choice                                                        |
+| ----------- | ------------------------------------------------------------- |
+| Framework   | [TanStack Start](https://tanstack.com/start) (React 19, Vite) |
+| Language    | TypeScript, strict mode                                       |
+| Routing     | TanStack Router, file-based                                   |
+| Data access | TanStack Query over repository interfaces                     |
+| Styling     | Tailwind CSS 4, [shadcn/ui](https://ui.shadcn.com) components |
+| Charts      | Recharts                                                      |
+| Dates       | date-fns                                                      |
+| Tests       | Vitest, Testing Library                                       |
+| Tooling     | ESLint, Prettier                                              |
 
-## Build with Lovable
+## Getting started
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/d43f0fa9-f454-42a8-ba8c-a42ba164506f).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+The project uses [Bun](https://bun.sh) (the lockfile is `bun.lock`).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install
+bun run dev
 ```
+
+The dev server prints its local URL when it starts.
+
+npm also works, with one caveat: a plain `npm install` fails on this dependency
+tree, so pass `--legacy-peer-deps`.
+
+## Scripts
+
+| Command              | What it does                                |
+| -------------------- | ------------------------------------------- |
+| `bun run dev`        | Start the dev server with hot reload        |
+| `bun run build`      | Production build                            |
+| `bun run preview`    | Serve the production build locally          |
+| `bun run test`       | Run the unit tests once                     |
+| `bun run test:watch` | Run the tests in watch mode                 |
+| `bun run lint`       | Lint with ESLint (includes Prettier checks) |
+| `bun run format`     | Format everything with Prettier             |
+| `bunx tsc --noEmit`  | Type check                                  |
+
+Before pushing, run the type check, lint, tests and build.
+
+## Project structure
+
+```
+src/
+  routes/       One file per URL. Routes are thin: page metadata plus the page component.
+  components/   UI, one folder per page, plus pieces shared between pages.
+    ui/         shadcn/ui primitives and two app inputs (number-input, date-picker).
+    charts/     Styling and tooltip shared by both charts.
+  hooks/        TanStack Query hooks: the only way components read or change data.
+  data/         Repository implementations (localStorage) and the default exercises.
+  lib/          Pure functions with no React: calculations, dates, numbers, validation.
+  types/        Domain types and the repository interfaces.
+  test/         Test setup and a routing smoke test.
+  styles.css    Theme tokens and the phone-only layout rules.
+```
+
+`src/routeTree.gen.ts` is generated by the router plugin; do not edit it.
+
+### Routes
+
+| URL                        | Page                    |
+| -------------------------- | ----------------------- |
+| `/`                        | Workout (log a session) |
+| `/dashboard`               | Dashboard               |
+| `/history`                 | History list            |
+| `/history/$workoutId`      | Workout details         |
+| `/history/$workoutId/edit` | Edit a workout          |
+| `/exercises`               | Exercise library        |
+| `/progress`                | Progress per exercise   |
+| `/calculator`              | 1RM Calculator          |
+
+## Architecture
+
+Data flows in one direction, and each layer only knows the one below it:
+
+```
+components  →  hooks (TanStack Query)  →  repository interfaces  →  localStorage
+```
+
+- **Components never touch storage.** They call hooks such as `useWorkouts()` or
+  `useCreateExercise()`.
+- **Hooks call repositories** imported from `@/data` and handle caching and
+  invalidation.
+- **Repositories** implement the interfaces in `src/types/domain.ts`. The only
+  implementation today is `src/data/local-storage-repositories.ts`; `src/data/index.ts`
+  is the single place that chooses it.
+- **`src/lib` holds the logic.** It has no React and no storage access, which is why
+  it is the part covered by unit tests. Nothing in `src/lib` imports from
+  `src/components`.
+
+### Data model
+
+Defined in `src/types/domain.ts`:
+
+- `Exercise` — name, muscle group, and whether the user created it.
+- `Workout` — a date, optional notes and a list of entries.
+- `WorkoutEntry` — one exercise within a workout, with its sets.
+- `WorkoutSet` — weight in kg and reps.
+- `WorkoutDraft` — the workout form while it is being filled in. Weight and reps are
+  kept as the raw text the user typed and parsed only when saving.
+
+Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts` and
+`gymlog.v1.workout-draft`.
+
+### Decisions worth knowing
+
+- **Dates are local calendar days**, stored as `yyyy-MM-dd` strings. They are parsed
+  and formatted only through `src/lib/date.ts`, never with `new Date(string)` or
+  `toISOString()`, which would shift the day in some time zones.
+- **Decimals accept a comma or a dot.** All user-typed numbers go through
+  `parseDecimal` / `parseInteger` in `src/lib/number.ts`.
+- **Workout entries keep a copy of the exercise name and muscle group.** The live
+  library values win when displaying, but a workout stays readable after its exercise
+  is deleted.
+- **Weeks start on Monday** everywhere: the dashboard, the streak and the calendar.
+- **Estimated 1RM uses the Epley formula** for records and progress. The calculator
+  also shows Brzycki for comparison.
+- **Default exercises are migrated.** When the default list changes, existing
+  libraries are updated once (`src/data/default-exercises.ts`); custom exercises are
+  never touched.
+- **Phone layout is CSS-only.** The same components render at every width; rules for
+  screens narrower than 768px live in Tailwind `md:` classes and the `mobile-*`
+  section of `src/styles.css`.
+
+## Testing
+
+```sh
+bun run test
+```
+
+Unit tests sit next to the code they cover in `src/lib` (`*.test.ts`): 1RM and volume
+calculations, number parsing, date handling, set validation, dashboard aggregation,
+and exercise labels. `src/test/app-routing.test.tsx` checks that the router mounts.
+
+There are no component or end-to-end tests yet, and the localStorage repositories
+are not covered.
+
+## Limitations
+
+- Data lives in one browser. Clearing site data deletes it, and there is no export
+  or import.
+- Stored data is not validated beyond basic shape checks, so hand-edited
+  `localStorage` can break a page.
+- Kilograms only.
+
+## Lovable
+
+The project was started in [Lovable](https://lovable.dev) and is still connected to
+it: commits pushed to `main` sync to the Lovable editor, and edits made there are
+committed back here. Do not rewrite published history on `main` (no force pushes or
+rebases of pushed commits). See `AGENTS.md` for the conventions AI agents follow in
+this repository.
