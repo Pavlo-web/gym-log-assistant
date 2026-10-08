@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDecimal, parseInteger } from "./number";
+import { formatFixed, formatNumber, parseDecimal, parseInteger } from "./number";
 
 describe("parseDecimal", () => {
   it("accepts dot, comma and whitespace", () => {
@@ -11,6 +11,17 @@ describe("parseDecimal", () => {
     expect(parseDecimal("")).toBeNaN();
     expect(parseDecimal("abc")).toBeNaN();
     expect(parseDecimal("1.2.3")).toBeNaN();
+  });
+});
+
+describe("formatNumber / formatFixed", () => {
+  it("formats display numbers with separators and at most one decimal", () => {
+    expect(formatNumber(1234.56)).toBe("1,234.6");
+    expect(formatNumber(100)).toBe("100");
+  });
+  it("drops a trailing .0 from fixed decimals", () => {
+    expect(formatFixed(116.666)).toBe("116.7");
+    expect(formatFixed(100)).toBe("100");
   });
 });
 

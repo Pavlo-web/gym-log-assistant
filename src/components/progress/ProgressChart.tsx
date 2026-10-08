@@ -1,83 +1,92 @@
 import {
-  CartesianGrid,
   Line,
   LineChart,
+  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { format } from "date-fns";
-import type { ExercisePoint } from "@/lib/progress";
+import { ChartTooltip } from "@/components/charts/ChartTooltip";
+import {
+  activeRow,
+  AXIS_STROKE,
+  AXIS_TICK,
+  CHART_MARGIN,
+  GRID_PROPS,
+  SERIES_COLOR,
+  yTickCount,
+  type TooltipProps,
+} from "@/components/charts/chart-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { localWorkoutDate } from "@/components/history/history-utils";
+import { formatDay, formatDayMonth } from "@/lib/date";
+import { formatNumber } from "@/lib/number";
+import type { ExercisePoint } from "@/lib/progress";
 
 export type Metric = "topWeight" | "bestE1RM" | "volume";
-const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
 
-function TooltipBox({
-  active,
-  payload,
-}: {
-  active?: boolean;
-  payload?: { payload: ExercisePoint }[];
-}) {
-  const p = active ? payload?.[0]?.payload : undefined;
-  if (!p) return null;
+/** Minimum pixel gap between x-axis labels. */
+const TICK_GAP = { mobile: 50, desktop: 5 };
+
+function PointTooltip(props: TooltipProps<ExercisePoint>) {
+  const point = activeRow(props);
+  if (!point) return null;
   return (
-    <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md tabular">
-      <p className="mb-1 font-medium">{format(localWorkoutDate(p.date), "d MMM yyyy")}</p>
+    <ChartTooltip title={formatDay(point.date)}>
       <p>
-        Top: {fmt(p.topWeight)} kg × {p.topReps}
+        Top: {formatNumber(point.topWeight)} kg × {point.topReps}
       </p>
-      <p>Est. 1RM: {fmt(p.bestE1RM)} kg</p>
-      <p>Volume: {fmt(p.volume)} kg</p>
-    </div>
+      <p>Est. 1RM: {formatNumber(point.bestE1RM)} kg</p>
+      <p>Volume: {formatNumber(point.volume)} kg</p>
+    </ChartTooltip>
   );
 }
 
-export default function ProgressChart({
-  points,
-  metric,
-}: {
+/** Y-axis range with headroom around the data so the line does not hug the edges. */
+function paddedDomain(values: number[]): [number, number] {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const padding = Math.max((max - min) * 0.15, max * 0.05, 1);
+  return [Math.max(0, Math.floor(min - padding)), Math.ceil(max + padding)];
+}
+
+interface ProgressChartProps {
   points: ExercisePoint[];
   metric: Metric;
-}) {
-  const values = points.map((p) => p[metric]);
-  const min = Math.min(...values),
-    max = Math.max(...values);
-  const pad = Math.max((max - min) * 0.15, max * 0.05, 1);
-  const domain: [number, number] = [Math.max(0, Math.floor(min - pad)), Math.ceil(max + pad)];
+}
+
+/** Line chart of one metric over time. Default export so the page can lazy-load Recharts. */
+export default function ProgressChart({ points, metric }: ProgressChartProps) {
   const mobile = useIsMobile();
-  const tick = { fill: "var(--muted-foreground)", fontSize: 12 };
+  const domain = paddedDomain(points.map((point) => point[metric]));
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+        <LineChart data={points} margin={CHART_MARGIN}>
+          <CartesianGrid {...GRID_PROPS} />
           <XAxis
-            minTickGap={mobile ? 50 : 5}
+            minTickGap={mobile ? TICK_GAP.mobile : TICK_GAP.desktop}
             dataKey="date"
-            tick={tick}
-            stroke="var(--border)"
-            tickFormatter={(d: string) => format(localWorkoutDate(d), "d MMM")}
+            tick={AXIS_TICK}
+            stroke={AXIS_STROKE}
+            tickFormatter={formatDayMonth}
           />
           <YAxis
-            tickCount={mobile ? 4 : 5}
+            tickCount={yTickCount(mobile)}
             domain={domain}
-            tick={tick}
-            stroke="var(--border)"
+            tick={AXIS_TICK}
+            stroke={AXIS_STROKE}
             width={56}
-            tickFormatter={(v: number) => `${fmt(v)}`}
+            tickFormatter={formatNumber}
             unit=" kg"
           />
-          <Tooltip content={<TooltipBox />} cursor={{ stroke: "var(--border)" }} />
+          <Tooltip content={<PointTooltip />} cursor={{ stroke: AXIS_STROKE }} />
           <Line
             type="monotone"
             dataKey={metric}
-            stroke="var(--chart-1)"
+            stroke={SERIES_COLOR}
             strokeWidth={2}
-            dot={{ r: 4, fill: "var(--chart-1)", stroke: "var(--chart-1)" }}
+            dot={{ r: 4, fill: SERIES_COLOR, stroke: SERIES_COLOR }}
             activeDot={{ r: 6 }}
             isAnimationActive={false}
           />

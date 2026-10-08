@@ -1,77 +1,53 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Dumbbell, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
-import { useNavigate } from "@tanstack/react-router";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useExercises } from "@/hooks/useExercises";
-import { useCreateWorkout, useUpdateWorkout } from "@/hooks/useWorkouts";
 import { useClearWorkoutDraft, useSaveWorkoutDraft } from "@/hooks/useWorkoutDraft";
+import { useCreateWorkout, useUpdateWorkout } from "@/hooks/useWorkouts";
+import { todayLocal } from "@/lib/date";
+import { draftFromWorkout, emptyDraft, isDraftEmpty, setError, toEntries } from "@/lib/draft";
+import { newId } from "@/lib/id";
+import { WORKOUT_NOTES_MAX_LENGTH } from "@/lib/limits";
+import type { Exercise, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
 import { ExerciseCard } from "./ExerciseCard";
 import { ExercisePicker } from "./ExercisePicker";
 import { WorkoutSummary } from "./WorkoutSummary";
-import { emptyDraft, isDraftEmpty, newId, setError, toEntries, todayLocal } from "./draft-utils";
-import type { Exercise, Workout, WorkoutDraft } from "@/types/domain";
 
-export function WorkoutForm({
-  initial,
-  workout,
-}: {
-  initial?: WorkoutDraft | null;
-  workout?: Workout;
-}) {
-  const navigate = useNavigate();
-  const editing = !!workout;
-  const [draft, setDraft] = useState<WorkoutDraft>(() =>
-    workout
-      ? {
-          date: workout.date,
-          notes: workout.notes ?? "",
-          entries: workout.entries.map((e) => ({
-            ...e,
-            sets: e.sets.map((s) => ({ id: s.id, weight: String(s.weight), reps: String(s.reps) })),
-          })),
-        }
-      : (initial ?? emptyDraft()),
-  );
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [discardOpen, setDiscardOpen] = useState(false);
-  const [showErrors, setShowErrors] = useState(false);
-  const [formError, setFormError] = useState("");
-  const { data: exercises = [] } = useExercises();
-  const create = useCreateWorkout();
-  const updateWorkout = useUpdateWorkout();
-  const saveDraft = useSaveWorkoutDraft();
-  const clearDraft = useClearWorkoutDraft();
-  const today = todayLocal();
-
-  const first = useRef(true);
-  useEffect(() => {
-    if (editing) return;
-    if (first.current) {
-      first.current = false;
-      return;
+/** Validation messages for every invalid set, keyed by set id. */
+function collectSetErrors(draft: WorkoutDraft): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const entry of draft.entries) {
+    for (const set of entry.sets) {
+      const message = setError(set);
+      if (message) errors[set.id] = message;
     }
-    if (isDraftEmpty(draft)) clearDraft.mutate();
-    else saveDraft.mutate(draft);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft, editing]);
+  }
+  return errors;
+}
 
-  const byId = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises]);
-  const entries = toEntries(draft).map((entry) => {
-    const exercise = byId.get(entry.exerciseId);
+function validateDate(date: string, today: string): string {
+  if (!date) return "Pick a date.";
+  if (date > today) return "Future dates are not allowed.";
+  return "";
+}
+
+/**
+ * Stores the exercise name and muscle group on each entry, preferring the live
+ * library values, so the workout stays readable if the exercise is deleted.
+ */
+function withExerciseSnapshots(
+  entries: WorkoutEntry[],
+  exercisesById: ReadonlyMap<string, Exercise>,
+): WorkoutEntry[] {
+  return entries.map((entry) => {
+    const exercise = exercisesById.get(entry.exerciseId);
     const name = exercise?.name ?? entry.exerciseName;
     const group = exercise?.muscleGroup ?? entry.muscleGroup;
     return {
@@ -80,40 +56,79 @@ export function WorkoutForm({
       ...(group ? { muscleGroup: group } : {}),
     };
   });
-  const preview: Workout = {
-    id: "preview",
-    date: draft.date,
-    entries,
-    createdAt: "",
-    updatedAt: "",
-  };
-  const errors: Record<string, string> = {};
-  if (showErrors)
-    for (const e of draft.entries)
-      for (const s of e.sets) {
-        const m = setError(s);
-        if (m) errors[s.id] = m;
-      }
-  const dateError = !draft.date
-    ? "Pick a date."
-    : draft.date > today
-      ? "Future dates are not allowed."
-      : "";
+}
+
+interface WorkoutFormProps {
+  /** Unsaved draft to resume when logging a new workout. */
+  initial?: WorkoutDraft | null;
+  /** Saved workout to edit. When set, the form updates it instead of creating one. */
+  workout?: Workout;
+}
+
+/** Form for logging a new workout or editing a saved one. */
+export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
+  const navigate = useNavigate();
+  const editing = !!workout;
+  const today = todayLocal();
+
+  const [draft, setDraft] = useState<WorkoutDraft>(() =>
+    workout ? draftFromWorkout(workout) : (initial ?? emptyDraft()),
+  );
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const { data: exercises = [] } = useExercises();
+  const createWorkout = useCreateWorkout();
+  const updateWorkout = useUpdateWorkout();
+  const saveDraft = useSaveWorkoutDraft();
+  const clearDraft = useClearWorkoutDraft();
+
+  // Autosave a new workout as the user types, so a reload does not lose it.
+  // The first run is skipped: the draft was just loaded and has not changed.
+  const skipNextAutosave = useRef(true);
+  useEffect(() => {
+    if (editing) return;
+    if (skipNextAutosave.current) {
+      skipNextAutosave.current = false;
+      return;
+    }
+    if (isDraftEmpty(draft)) clearDraft.mutate();
+    else saveDraft.mutate(draft);
+    // The mutation objects change identity on every render; only the draft matters here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, editing]);
+
+  const exercisesById = useMemo(
+    () => new Map(exercises.map((exercise) => [exercise.id, exercise])),
+    [exercises],
+  );
+  const entries = withExerciseSnapshots(toEntries(draft), exercisesById);
+  const setErrors = showErrors ? collectSetErrors(draft) : {};
+  const dateError = validateDate(draft.date, today);
+  const saving = createWorkout.isPending || updateWorkout.isPending;
 
   function update(patch: Partial<WorkoutDraft>) {
-    setDraft((d) => ({ ...d, ...patch }));
+    setDraft((current) => ({ ...current, ...patch }));
     setFormError("");
   }
 
-  function addExercise(ex: Exercise) {
+  function resetForm() {
+    setDraft(emptyDraft());
+    setShowErrors(false);
+    setFormError("");
+  }
+
+  function addExercise(exercise: Exercise) {
     update({
       entries: [
         ...draft.entries,
         {
           id: newId(),
-          exerciseId: ex.id,
-          exerciseName: ex.name,
-          muscleGroup: ex.muscleGroup,
+          exerciseId: exercise.id,
+          exerciseName: exercise.name,
+          muscleGroup: exercise.muscleGroup,
           sets: [{ id: newId(), weight: "", reps: "" }],
         },
       ],
@@ -121,9 +136,27 @@ export function WorkoutForm({
     setPickerOpen(false);
   }
 
+  async function saveEdited(saved: Workout) {
+    await updateWorkout.mutateAsync({
+      id: saved.id,
+      data: { date: draft.date, entries, notes: draft.notes.trim() },
+    });
+    toast.success("Workout updated");
+    await navigate({ to: "/history/$workoutId", params: { workoutId: saved.id } });
+  }
+
+  async function saveNew() {
+    const notes = draft.notes.trim();
+    await createWorkout.mutateAsync({ date: draft.date, entries, ...(notes ? { notes } : {}) });
+    await clearDraft.mutateAsync();
+    // The reset below is not a user edit, so it must not be autosaved as a draft.
+    skipNextAutosave.current = true;
+    resetForm();
+    toast.success("Workout saved");
+  }
+
   async function save() {
-    const invalid = draft.entries.some((e) => e.sets.some((s) => setError(s)));
-    if (invalid) {
+    if (Object.keys(collectSetErrors(draft)).length > 0) {
       setShowErrors(true);
       setFormError("Fix the highlighted sets before saving.");
       return;
@@ -134,22 +167,8 @@ export function WorkoutForm({
     }
     if (entries.length === 0) return;
     try {
-      const notes = draft.notes.trim();
-      if (workout) {
-        await updateWorkout.mutateAsync({
-          id: workout.id,
-          data: { date: draft.date, entries, notes },
-        });
-        toast.success("Workout updated");
-        await navigate({ to: "/history/$workoutId", params: { workoutId: workout.id } });
-        return;
-      }
-      await create.mutateAsync({ date: draft.date, entries, ...(notes ? { notes } : {}) });
-      await clearDraft.mutateAsync();
-      first.current = true;
-      setDraft(emptyDraft());
-      setShowErrors(false);
-      toast.success("Workout saved");
+      if (workout) await saveEdited(workout);
+      else await saveNew();
     } catch {
       setFormError("Could not save workout. Try again.");
     }
@@ -178,25 +197,26 @@ export function WorkoutForm({
           </Label>
           <Input
             id="workout-notes"
-            maxLength={200}
+            maxLength={WORKOUT_NOTES_MAX_LENGTH}
             value={draft.notes}
-            onChange={(e) => update({ notes: e.target.value.slice(0, 200) })}
+            onChange={(event) =>
+              update({ notes: event.target.value.slice(0, WORKOUT_NOTES_MAX_LENGTH) })
+            }
             placeholder="How did it feel?"
           />
         </div>
       </div>
 
       {draft.entries.length === 0 ? (
-        <div className="flex flex-col items-center rounded-lg border border-dashed border-border px-6 py-14 text-center">
-          <Dumbbell aria-hidden="true" className="mb-3 size-6 text-muted-foreground" />
-          <p className="text-sm font-medium">No exercises yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add your first exercise to start logging sets.
-          </p>
+        <EmptyState
+          icon={Dumbbell}
+          title="No exercises yet"
+          description="Add your first exercise to start logging sets."
+        >
           <Button className="mt-5" onClick={() => setPickerOpen(true)}>
             <Plus /> Add exercise
           </Button>
-        </div>
+        </EmptyState>
       ) : (
         <>
           <div className="space-y-4">
@@ -204,19 +224,23 @@ export function WorkoutForm({
               <ExerciseCard
                 key={entry.id}
                 entry={entry}
-                exercise={byId.get(entry.exerciseId)}
-                errors={errors}
+                exercise={exercisesById.get(entry.exerciseId)}
+                errors={setErrors}
                 onChange={(next) =>
-                  update({ entries: draft.entries.map((e) => (e.id === next.id ? next : e)) })
+                  update({
+                    entries: draft.entries.map((item) => (item.id === next.id ? next : item)),
+                  })
                 }
-                onRemove={() => update({ entries: draft.entries.filter((e) => e.id !== entry.id) })}
+                onRemove={() =>
+                  update({ entries: draft.entries.filter((item) => item.id !== entry.id) })
+                }
               />
             ))}
           </div>
           <Button variant="outline" onClick={() => setPickerOpen(true)}>
             <Plus /> Add exercise
           </Button>
-          <WorkoutSummary workout={preview} exerciseCount={draft.entries.length} />
+          <WorkoutSummary entries={entries} exerciseCount={draft.entries.length} />
         </>
       )}
 
@@ -225,6 +249,8 @@ export function WorkoutForm({
           {formError}
         </p>
       )}
+
+      {/* Sticks above the bottom navigation on phones; see `.mobile-save-bar` in styles.css. */}
       <div className="mobile-save-bar sticky z-30 flex items-center justify-end gap-2 border-t border-border bg-background py-3 md:static md:bg-transparent md:pb-0 md:pt-6">
         {workout ? (
           <Button
@@ -244,10 +270,7 @@ export function WorkoutForm({
             Discard
           </Button>
         )}
-        <Button
-          disabled={entries.length === 0 || create.isPending || updateWorkout.isPending}
-          onClick={() => void save()}
-        >
+        <Button disabled={entries.length === 0 || saving} onClick={() => void save()}>
           {editing ? "Save changes" : "Save workout"}
         </Button>
       </div>
@@ -255,34 +278,19 @@ export function WorkoutForm({
       <ExercisePicker
         open={pickerOpen}
         onOpenChange={setPickerOpen}
-        addedIds={new Set(draft.entries.map((e) => e.exerciseId))}
+        addedIds={new Set(draft.entries.map((entry) => entry.exerciseId))}
         onSelect={addExercise}
       />
 
       {!editing && (
-        <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
-          <AlertDialogContent className="max-w-sm">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Discard workout?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Your unsaved exercises and sets will be lost.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => {
-                  setDraft(emptyDraft());
-                  setShowErrors(false);
-                  setFormError("");
-                }}
-              >
-                Discard
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog
+          open={discardOpen}
+          onOpenChange={setDiscardOpen}
+          title="Discard workout?"
+          description="Your unsaved exercises and sets will be lost."
+          confirmLabel="Discard"
+          onConfirm={resetForm}
+        />
       )}
     </div>
   );

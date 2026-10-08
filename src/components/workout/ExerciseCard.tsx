@@ -1,45 +1,59 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { SetRow } from "./SetRow";
-import { newId, setStatus } from "./draft-utils";
+import { setStatus } from "@/lib/draft";
+import { newId } from "@/lib/id";
+import { exerciseLabel } from "@/lib/workout";
 import type { DraftEntry, DraftSet, Exercise } from "@/types/domain";
+import { SetRow } from "./SetRow";
+import { weightInputId } from "./set-input-id";
 
-interface Props {
+interface ExerciseCardProps {
   entry: DraftEntry;
+  /** Live library exercise; undefined when it has been deleted. */
   exercise: Exercise | undefined;
+  /** Validation messages keyed by set id. */
   errors: Record<string, string>;
   onChange: (entry: DraftEntry) => void;
   onRemove: () => void;
 }
 
-export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Props) {
-  const [confirming, setConfirming] = useState(false);
-  const name = exercise?.name ?? entry.exerciseName ?? "Deleted exercise";
+/** One exercise of the workout form with its editable list of sets. */
+export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: ExerciseCardProps) {
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const { name, group } = exerciseLabel(entry, exercise ? [exercise] : []);
+  const lastSet = entry.sets.at(-1);
 
-  function addSet(focus = false) {
-    const last = entry.sets[entry.sets.length - 1];
-    const set: DraftSet = { id: newId(), weight: last?.weight ?? "", reps: last?.reps ?? "" };
+  /** Adds a set prefilled from the previous one, since sets usually repeat. */
+  function addSet({ focus = false } = {}) {
+    const set: DraftSet = {
+      id: newId(),
+      weight: lastSet?.weight ?? "",
+      reps: lastSet?.reps ?? "",
+    };
     onChange({ ...entry, sets: [...entry.sets, set] });
-    if (focus) requestAnimationFrame(() => document.getElementById(`weight-${set.id}`)?.focus());
+    if (focus) {
+      // Wait for the new row to render before moving focus into it.
+      requestAnimationFrame(() => document.getElementById(weightInputId(set.id))?.focus());
+    }
   }
 
   function updateSet(id: string, patch: Partial<DraftSet>) {
-    onChange({ ...entry, sets: entry.sets.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
+    onChange({
+      ...entry,
+      sets: entry.sets.map((set) => (set.id === id ? { ...set, ...patch } : set)),
+    });
   }
 
+  function removeSet(id: string) {
+    onChange({ ...entry, sets: entry.sets.filter((set) => set.id !== id) });
+  }
+
+  /** Asks first only when there is entered data to lose. */
   function requestRemove() {
-    if (entry.sets.some((s) => setStatus(s) !== "empty")) setConfirming(true);
+    const hasData = entry.sets.some((set) => setStatus(set) !== "empty");
+    if (hasData) setConfirmingRemove(true);
     else onRemove();
   }
 
@@ -48,9 +62,7 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
       <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 md:flex md:justify-between">
         <div className="min-w-0 break-words">
           <h2 className="text-base font-semibold">{name}</h2>
-          <p className="text-xs text-muted-foreground">
-            {exercise?.muscleGroup ?? entry.muscleGroup}
-          </p>
+          <p className="text-xs text-muted-foreground">{group}</p>
         </div>
         <Button
           type="button"
@@ -63,6 +75,7 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
           <Trash2 />
         </Button>
       </div>
+
       <table className="w-full table-fixed md:table-auto">
         <thead>
           <tr className="text-left text-xs text-muted-foreground">
@@ -75,17 +88,16 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
           </tr>
         </thead>
         <tbody>
-          {entry.sets.map((set, i) => (
+          {entry.sets.map((set, index) => (
             <SetRow
               key={set.id}
-              index={i}
+              index={index}
               set={set}
               error={errors[set.id] ?? null}
               onChange={(patch) => updateSet(set.id, patch)}
-              onRemove={() =>
-                onChange({ ...entry, sets: entry.sets.filter((s) => s.id !== set.id) })
-              }
-              onRepsEnter={i === entry.sets.length - 1 ? () => addSet(true) : undefined}
+              onRemove={() => removeSet(set.id)}
+              // Enter in the last set adds the next one and moves focus to it.
+              onRepsEnter={set === lastSet ? () => addSet({ focus: true }) : undefined}
             />
           ))}
         </tbody>
@@ -94,25 +106,14 @@ export function ExerciseCard({ entry, exercise, errors, onChange, onRemove }: Pr
         <Plus /> Add set
       </Button>
 
-      <AlertDialog open={confirming} onOpenChange={setConfirming}>
-        <AlertDialogContent className="max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove exercise?</AlertDialogTitle>
-            <AlertDialogDescription>
-              “{name}” has logged sets. Remove it from this workout?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={onRemove}
-            >
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirmingRemove}
+        onOpenChange={setConfirmingRemove}
+        title="Remove exercise?"
+        description={`“${name}” has logged sets. Remove it from this workout?`}
+        confirmLabel="Remove"
+        onConfirm={onRemove}
+      />
     </section>
   );
 }

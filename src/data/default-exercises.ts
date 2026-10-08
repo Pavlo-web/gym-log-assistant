@@ -1,6 +1,20 @@
 import type { MuscleGroup } from "@/types/domain";
 
-export const DEFAULT_EXERCISES: { name: string; muscleGroup: MuscleGroup }[] = [
+export interface ExerciseSeed {
+  name: string;
+  muscleGroup: MuscleGroup;
+}
+
+/**
+ * Defaults that were dropped from the library. The migration removes them from
+ * existing libraries unless the user created the entry themselves.
+ */
+export const REMOVED_DEFAULT_EXERCISES: readonly ExerciseSeed[] = [
+  { name: "Russian Twist", muscleGroup: "Core" },
+];
+
+/** Exercises every library starts with. Users cannot delete them. */
+export const DEFAULT_EXERCISES: readonly ExerciseSeed[] = [
   // Chest
   { name: "Bench Press", muscleGroup: "Chest" },
   { name: "Incline Dumbbell Press", muscleGroup: "Chest" },

@@ -1,22 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HistoryEdit } from "@/components/history/HistoryEdit";
+import { pageMeta } from "@/lib/page-meta";
 
 export const Route = createFileRoute("/history/$workoutId/edit")({
   head: () => ({
-    meta: [
-      { title: "Edit workout — Gym Log" },
-      {
-        name: "description",
-        content: "Edit the date, notes, exercises and sets in a saved workout.",
-      },
-      { property: "og:title", content: "Edit workout — Gym Log" },
-      {
-        property: "og:description",
-        content: "Edit the date, notes, exercises and sets in a saved workout.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
+    meta: pageMeta("Edit workout", "Edit the date, notes, exercises and sets in a saved workout."),
   }),
-  component: () => <HistoryEdit workoutId={Route.useParams().workoutId} />,
+  component: EditWorkoutRoute,
 });
+
+function EditWorkoutRoute() {
+  const { workoutId } = Route.useParams();
+  return <HistoryEdit workoutId={workoutId} />;
+}

@@ -1,164 +1,169 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useExercises } from "@/hooks/useExercises";
-import { MUSCLE_GROUPS, type Exercise } from "@/types/domain";
+import { cn } from "@/lib/utils";
+import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@/types/domain";
 
-interface Props {
+const TITLE = "Add exercise";
+
+interface ExerciseGroup {
+  group: MuscleGroup;
+  items: Exercise[];
+}
+
+/** Exercises matching the search, grouped by muscle group and sorted by name. */
+function groupExercises(exercises: readonly Exercise[], search: string): ExerciseGroup[] {
+  const query = search.trim().toLocaleLowerCase();
+  return MUSCLE_GROUPS.map((group) => ({
+    group,
+    items: exercises
+      .filter(
+        (exercise) =>
+          exercise.muscleGroup === group && exercise.name.toLocaleLowerCase().includes(query),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  })).filter(({ items }) => items.length > 0);
+}
+
+interface SearchFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  autoFocus?: boolean;
+}
+
+function SearchField({ value, onChange, autoFocus = false }: SearchFieldProps) {
+  return (
+    <div className="relative">
+      <Search
+        aria-hidden="true"
+        className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+      />
+      <Input
+        autoFocus={autoFocus}
+        aria-label="Search exercises"
+        placeholder="Search exercises"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="pl-10"
+      />
+    </div>
+  );
+}
+
+function ListMessage({ role, children }: { role?: "status" | "alert"; children: string }) {
+  return (
+    <p role={role} className="py-8 text-center text-sm text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
+interface ExerciseListProps {
+  groups: ExerciseGroup[];
+  /** Exercises already in the workout; shown as "Added" and not selectable. */
+  addedIds: Set<string>;
+  onSelect: (exercise: Exercise) => void;
+  /** Extra classes for each row, e.g. a taller tap target on phones. */
+  rowClassName?: string;
+}
+
+function ExerciseList({ groups, addedIds, onSelect, rowClassName }: ExerciseListProps) {
+  const { isPending, isError } = useExercises();
+  if (isPending) return <ListMessage role="status">Loading exercises…</ListMessage>;
+  if (isError) return <ListMessage role="alert">Could not load exercises.</ListMessage>;
+  if (groups.length === 0) return <ListMessage>No exercises found.</ListMessage>;
+
+  return groups.map(({ group, items }) => (
+    <div key={group}>
+      <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {group}
+      </h3>
+      <ul>
+        {items.map((exercise) => {
+          const added = addedIds.has(exercise.id);
+          return (
+            <li key={exercise.id}>
+              <button
+                type="button"
+                disabled={added}
+                onClick={() => onSelect(exercise)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40",
+                  rowClassName,
+                )}
+              >
+                {exercise.name}
+                {added && <span className="text-xs text-muted-foreground">Added</span>}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  ));
+}
+
+interface ExercisePickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   addedIds: Set<string>;
   onSelect: (exercise: Exercise) => void;
 }
 
-export function ExercisePicker({ open, onOpenChange, addedIds, onSelect }: Props) {
-  const { data: exercises = [], isPending, isError } = useExercises();
+/** Searchable exercise list: a bottom sheet on phones, a dialog on larger screens. */
+export function ExercisePicker({ open, onOpenChange, addedIds, onSelect }: ExercisePickerProps) {
+  const { data: exercises = [] } = useExercises();
   const [search, setSearch] = useState("");
   const mobile = useIsMobile();
-  const q = search.trim().toLocaleLowerCase();
-  const groups = MUSCLE_GROUPS.map((g) => ({
-    group: g,
-    items: exercises
-      .filter((e) => e.muscleGroup === g && e.name.toLocaleLowerCase().includes(q))
-      .sort((a, b) => a.name.localeCompare(b.name)),
-  })).filter((g) => g.items.length > 0);
+  const groups = groupExercises(exercises, search);
 
-  const change = (o: boolean) => {
-    onOpenChange(o);
-    if (!o) setSearch("");
-  };
+  function handleOpenChange(next: boolean) {
+    onOpenChange(next);
+    if (!next) setSearch("");
+  }
+
+  function handleSelect(exercise: Exercise) {
+    onSelect(exercise);
+    setSearch("");
+  }
+
   if (mobile) {
     return (
-      <Drawer open={open} onOpenChange={change} shouldScaleBackground={false}>
+      <Drawer open={open} onOpenChange={handleOpenChange} shouldScaleBackground={false}>
         <DrawerContent className="mobile-sheet flex flex-col" aria-describedby={undefined}>
           <DrawerHeader>
-            <DrawerTitle>Add exercise</DrawerTitle>
+            <DrawerTitle>{TITLE}</DrawerTitle>
           </DrawerHeader>
           <div className="shrink-0 px-4 pb-3">
-            <div className="relative">
-              <Search
-                aria-hidden="true"
-                className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                aria-label="Search exercises"
-                placeholder="Search exercises"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+            {/* No autofocus: it would open the keyboard over the list. */}
+            <SearchField value={search} onChange={setSearch} />
           </div>
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pb-4">
-            {isPending ? (
-              <p role="status" className="py-8 text-center text-sm text-muted-foreground">
-                Loading exercises…
-              </p>
-            ) : isError ? (
-              <p role="alert" className="py-8 text-center text-sm text-muted-foreground">
-                Could not load exercises.
-              </p>
-            ) : groups.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No exercises found.</p>
-            ) : (
-              groups.map(({ group, items }) => (
-                <div key={group}>
-                  <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {group}
-                  </h3>
-                  <ul>
-                    {items.map((ex) => {
-                      const added = addedIds.has(ex.id);
-                      return (
-                        <li key={ex.id}>
-                          <button
-                            type="button"
-                            disabled={added}
-                            onClick={() => {
-                              onSelect(ex);
-                              setSearch("");
-                            }}
-                            className="flex w-full items-center justify-between rounded-md px-2 py-2 min-h-11 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40"
-                          >
-                            {ex.name}
-                            {added && <span className="text-xs text-muted-foreground">Added</span>}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))
-            )}
+            <ExerciseList
+              groups={groups}
+              addedIds={addedIds}
+              onSelect={handleSelect}
+              rowClassName="min-h-11"
+            />
           </div>
         </DrawerContent>
       </Drawer>
     );
   }
+
   return (
-    <Dialog open={open} onOpenChange={change}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add exercise</DialogTitle>
+          <DialogTitle>{TITLE}</DialogTitle>
         </DialogHeader>
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            autoFocus
-            aria-label="Search exercises"
-            placeholder="Search exercises"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <SearchField value={search} onChange={setSearch} autoFocus />
         <div className="max-h-[55vh] space-y-5 overflow-y-auto pr-1">
-          {isPending ? (
-            <p role="status" className="py-8 text-center text-sm text-muted-foreground">
-              Loading exercises…
-            </p>
-          ) : isError ? (
-            <p role="alert" className="py-8 text-center text-sm text-muted-foreground">
-              Could not load exercises.
-            </p>
-          ) : groups.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No exercises found.</p>
-          ) : (
-            groups.map(({ group, items }) => (
-              <div key={group}>
-                <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {group}
-                </h3>
-                <ul>
-                  {items.map((ex) => {
-                    const added = addedIds.has(ex.id);
-                    return (
-                      <li key={ex.id}>
-                        <button
-                          type="button"
-                          disabled={added}
-                          onClick={() => {
-                            onSelect(ex);
-                            setSearch("");
-                          }}
-                          className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40"
-                        >
-                          {ex.name}
-                          {added && <span className="text-xs text-muted-foreground">Added</span>}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))
-          )}
+          <ExerciseList groups={groups} addedIds={addedIds} onSelect={handleSelect} />
         </div>
       </DialogContent>
     </Dialog>

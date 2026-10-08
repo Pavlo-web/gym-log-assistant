@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -10,32 +9,34 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { MUSCLE_GROUPS, type MuscleGroup } from "@/types/domain";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { LoggedExercise } from "@/lib/progress";
 import { cn } from "@/lib/utils";
+import { MUSCLE_GROUPS } from "@/types/domain";
 
-export interface ExerciseOption {
-  id: string;
-  name: string;
-  group?: MuscleGroup;
-}
+/** Heading for exercises whose muscle group is unknown (deleted, with no stored group). */
+const UNGROUPED = "Other";
 
-export function ExerciseSelect({
-  options,
-  value,
-  onChange,
-}: {
-  options: ExerciseOption[];
+interface ExerciseSelectProps {
+  options: LoggedExercise[];
+  /** Id of the selected exercise. */
   value: string;
   onChange: (id: string) => void;
-}) {
+}
+
+/** Searchable dropdown of exercises, grouped by muscle group. */
+export function ExerciseSelect({ options, value, onChange }: ExerciseSelectProps) {
   const [open, setOpen] = useState(false);
-  const current = options.find((o) => o.id === value);
+  const current = options.find((option) => option.id === value);
   const groups = [...MUSCLE_GROUPS, undefined]
-    .map((g) => ({
-      g,
-      items: options.filter((o) => o.group === g).sort((a, b) => a.name.localeCompare(b.name)),
+    .map((group) => ({
+      group,
+      items: options
+        .filter((option) => option.group === group)
+        .sort((a, b) => a.name.localeCompare(b.name)),
     }))
-    .filter((x) => x.items.length);
+    .filter(({ items }) => items.length > 0);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -55,19 +56,22 @@ export function ExerciseSelect({
           <CommandInput placeholder="Search exercises…" />
           <CommandList>
             <CommandEmpty>No exercises found.</CommandEmpty>
-            {groups.map(({ g, items }) => (
-              <CommandGroup key={g ?? "other"} heading={g ?? "Other"}>
-                {items.map((o) => (
+            {groups.map(({ group, items }) => (
+              <CommandGroup key={group ?? UNGROUPED} heading={group ?? UNGROUPED}>
+                {items.map((option) => (
                   <CommandItem
-                    key={o.id}
-                    value={`${o.name} ${o.id}`}
+                    key={option.id}
+                    // The id keeps same-named exercises distinct in cmdk's search index.
+                    value={`${option.name} ${option.id}`}
                     onSelect={() => {
-                      onChange(o.id);
+                      onChange(option.id);
                       setOpen(false);
                     }}
                   >
-                    <Check className={cn("mr-1", o.id === value ? "opacity-100" : "opacity-0")} />
-                    {o.name}
+                    <Check
+                      className={cn("mr-1", option.id === value ? "opacity-100" : "opacity-0")}
+                    />
+                    {option.name}
                   </CommandItem>
                 ))}
               </CommandGroup>

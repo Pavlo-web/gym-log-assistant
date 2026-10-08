@@ -1,23 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProgressPage } from "@/components/progress/ProgressPage";
+import { pageMeta } from "@/lib/page-meta";
+
+interface ProgressSearch {
+  /** Id of the exercise to show; kept in the URL so the view can be linked and reloaded. */
+  exercise?: string;
+}
 
 export const Route = createFileRoute("/progress")({
-  validateSearch: (search: Record<string, unknown>): { exercise?: string } =>
-    typeof search["exercise"] === "string" && search["exercise"]
-      ? { exercise: search["exercise"] }
-      : {},
+  validateSearch: (search: Record<string, unknown>): ProgressSearch => {
+    const exercise = search["exercise"];
+    return typeof exercise === "string" && exercise ? { exercise } : {};
+  },
   head: () => ({
-    meta: [
-      { title: "Progress — Gym Log" },
-      { name: "description", content: "Track strength progress and training volume over time." },
-      { property: "og:title", content: "Progress — Gym Log" },
-      {
-        property: "og:description",
-        content: "Track strength progress and training volume over time.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
+    meta: pageMeta("Progress", "Track strength progress and training volume over time."),
   }),
   component: ProgressRoute,
 });

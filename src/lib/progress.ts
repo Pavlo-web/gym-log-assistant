@@ -1,6 +1,8 @@
-import type { Workout, WorkoutSet } from "@/types/domain";
-import { epley1RM, setsVolume } from "./calc";
+import type { Exercise, MuscleGroup, Workout, WorkoutSet } from "@/types/domain";
+import { bestEpley1RM, epley1RM, setsVolume } from "./calc";
+import { exerciseLabel } from "./workout";
 
+/** One training day of a single exercise. */
 export interface ExercisePoint {
   date: string;
   topWeight: number;
@@ -18,60 +20,107 @@ export interface PersonalRecords {
   maxVolume: { value: number; date: string };
 }
 
-function setsByDate(workouts: Workout[], exerciseId: string) {
-  const map = new Map<string, { sets: WorkoutSet[]; workoutIds: string[] }>();
-  for (const w of workouts) {
-    const sets = w.entries.filter((e) => e.exerciseId === exerciseId).flatMap((e) => e.sets);
+/** An exercise that appears in at least one saved workout. */
+export interface LoggedExercise {
+  id: string;
+  name: string;
+  group?: MuscleGroup;
+}
+
+interface DayBucket {
+  sets: WorkoutSet[];
+  workoutIds: string[];
+}
+
+/** Sets of one exercise grouped by date, ascending by date. */
+function setsByDate(workouts: readonly Workout[], exerciseId: string): [string, DayBucket][] {
+  const byDate = new Map<string, DayBucket>();
+  for (const workout of workouts) {
+    const sets = workout.entries
+      .filter((entry) => entry.exerciseId === exerciseId)
+      .flatMap((entry) => entry.sets);
     if (sets.length === 0) continue;
-    const bucket = map.get(w.date) ?? { sets: [], workoutIds: [] };
+    const bucket = byDate.get(workout.date) ?? { sets: [], workoutIds: [] };
     bucket.sets.push(...sets);
-    bucket.workoutIds.push(w.id);
-    map.set(w.date, bucket);
+    bucket.workoutIds.push(workout.id);
+    byDate.set(workout.date, bucket);
   }
-  return map;
+  return [...byDate].sort(([a], [b]) => a.localeCompare(b));
+}
+
+/** The heaviest set; more reps wins a tie on weight. */
+function heaviestSet(sets: readonly WorkoutSet[]): WorkoutSet | undefined {
+  return sets.reduce<WorkoutSet | undefined>((top, set) => {
+    if (!top) return set;
+    const heavier = set.weight > top.weight;
+    const sameWeightMoreReps = set.weight === top.weight && set.reps > top.reps;
+    return heavier || sameWeightMoreReps ? set : top;
+  }, undefined);
 }
 
 /** One point per date containing the exercise, ascending by date. */
-export function exerciseHistory(workouts: Workout[], exerciseId: string): ExercisePoint[] {
-  return [...setsByDate(workouts, exerciseId)]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, { sets, workoutIds }]) => {
-      let top = sets[0]!;
-      for (const s of sets)
-        if (s.weight > top.weight || (s.weight === top.weight && s.reps > top.reps)) top = s;
-      const volume = setsVolume(sets);
-      return {
-        date,
-        topWeight: top.weight,
-        topReps: top.reps,
-        bestE1RM: Math.max(...sets.map((s) => epley1RM(s.weight, s.reps))),
-        volume,
-        sets: sets.length,
-        workoutIds,
-      };
-    });
+export function exerciseHistory(workouts: readonly Workout[], exerciseId: string): ExercisePoint[] {
+  return setsByDate(workouts, exerciseId).map(([date, { sets, workoutIds }]) => {
+    const top = heaviestSet(sets);
+    return {
+      date,
+      topWeight: top?.weight ?? 0,
+      topReps: top?.reps ?? 0,
+      bestE1RM: bestEpley1RM(sets),
+      volume: setsVolume(sets),
+      sets: sets.length,
+      workoutIds,
+    };
+  });
 }
 
-/** Personal records; earliest date wins ties. */
-export function personalRecords(workouts: Workout[], exerciseId: string): PersonalRecords | null {
-  const points = [...setsByDate(workouts, exerciseId)].sort(([a], [b]) => a.localeCompare(b));
-  if (points.length === 0) return null;
+/** Personal records; earliest date wins ties. Null when the exercise was never logged. */
+export function personalRecords(
+  workouts: readonly Workout[],
+  exerciseId: string,
+): PersonalRecords | null {
   let maxWeight: PersonalRecords["maxWeight"] | null = null;
-  let best: PersonalRecords["bestE1RM"] | null = null;
+  let bestE1RM: PersonalRecords["bestE1RM"] | null = null;
   let maxVolume: PersonalRecords["maxVolume"] | null = null;
-  for (const [date, { sets }] of points) {
-    for (const s of sets) {
-      if (
-        !maxWeight ||
-        s.weight > maxWeight.value ||
-        (s.weight === maxWeight.value && date === maxWeight.date && s.reps > maxWeight.reps)
-      )
-        maxWeight = { value: s.weight, reps: s.reps, date };
-      const e = epley1RM(s.weight, s.reps);
-      if (!best || e > best.value) best = { value: e, weight: s.weight, reps: s.reps, date };
+
+  for (const [date, { sets }] of setsByDate(workouts, exerciseId)) {
+    for (const set of sets) {
+      const heavier = !maxWeight || set.weight > maxWeight.value;
+      const sameDayMoreReps =
+        !!maxWeight &&
+        set.weight === maxWeight.value &&
+        date === maxWeight.date &&
+        set.reps > maxWeight.reps;
+      if (heavier || sameDayMoreReps) {
+        maxWeight = { value: set.weight, reps: set.reps, date };
+      }
+
+      const estimate = epley1RM(set.weight, set.reps);
+      if (!bestE1RM || estimate > bestE1RM.value) {
+        bestE1RM = { value: estimate, weight: set.weight, reps: set.reps, date };
+      }
     }
+
     const volume = setsVolume(sets);
     if (!maxVolume || volume > maxVolume.value) maxVolume = { value: volume, date };
   }
-  return { maxWeight: maxWeight!, bestE1RM: best!, maxVolume: maxVolume! };
+
+  if (!maxWeight || !bestE1RM || !maxVolume) return null;
+  return { maxWeight, bestE1RM, maxVolume };
+}
+
+/** Exercises with at least one logged set, most recently trained first. */
+export function loggedExercises(
+  workouts: readonly Workout[],
+  exercises: readonly Exercise[],
+): LoggedExercise[] {
+  const logged = new Map<string, LoggedExercise>();
+  for (const workout of workouts) {
+    for (const entry of workout.entries) {
+      if (logged.has(entry.exerciseId) || entry.sets.length === 0) continue;
+      const { name, group } = exerciseLabel(entry, exercises);
+      logged.set(entry.exerciseId, { id: entry.exerciseId, name, ...(group ? { group } : {}) });
+    }
+  }
+  return [...logged.values()];
 }

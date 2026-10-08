@@ -1,20 +1,29 @@
-import { DEFAULT_EXERCISES } from "./default-exercises";
+import { newId } from "@/lib/id";
+import { EXERCISE_NAME_MAX_LENGTH } from "@/lib/limits";
+import { isSameExercise } from "@/lib/workout";
 import type {
   DraftRepository,
-  WorkoutDraft,
   Exercise,
   ExerciseRepository,
   NewExercise,
   NewWorkout,
   Workout,
+  WorkoutDraft,
   WorkoutRepository,
 } from "@/types/domain";
+import {
+  DEFAULT_EXERCISES,
+  REMOVED_DEFAULT_EXERCISES,
+  type ExerciseSeed,
+} from "./default-exercises";
 
 const EXERCISES_KEY = "gymlog.v1.exercises";
 const WORKOUTS_KEY = "gymlog.v1.workouts";
 const DRAFT_KEY = "gymlog.v1.workout-draft";
 const EXERCISES_MIGRATION_KEY = "gymlog.v1.exercises-defaults-v2";
+const MIGRATION_DONE = "done";
 
+/** False during server rendering and when the browser blocks storage (e.g. private mode). */
 function hasStorage(): boolean {
   try {
     return typeof window !== "undefined" && !!window.localStorage;
@@ -23,75 +32,90 @@ function hasStorage(): boolean {
   }
 }
 
-function read<T>(key: string, fallback: T): T {
-  if (!hasStorage()) return fallback;
+function readItem(key: string): string | null {
+  if (!hasStorage()) return null;
   try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as T) : fallback;
+    return window.localStorage.getItem(key);
   } catch {
-    return fallback;
+    return null;
   }
 }
 
-function write<T>(key: string, value: T): void {
+/** Writes are best effort: a full or blocked storage must not crash the app. */
+function writeItem(key: string, value: string): void {
   if (!hasStorage()) return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(key, value);
   } catch {
-    /* quota or private mode — ignore */
+    /* quota exceeded or storage unavailable */
   }
 }
 
-function uuid(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+/** Reads a stored JSON array; missing, corrupted or non-array data yields an empty list. */
+function readList<T>(key: string): T[] {
+  const raw = readItem(key);
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    return [];
   }
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function writeList<T>(key: string, value: readonly T[]): void {
+  writeItem(key, JSON.stringify(value));
+}
+
+function toDefaultExercise(seed: ExerciseSeed): Exercise {
+  return { id: newId(), name: seed.name, muscleGroup: seed.muscleGroup, isCustom: false };
 }
 
 function seedExercises(): Exercise[] {
-  const seeded: Exercise[] = DEFAULT_EXERCISES.map((e) => ({
-    id: uuid(),
-    name: e.name,
-    muscleGroup: e.muscleGroup,
-    isCustom: false,
-  }));
-  write(EXERCISES_KEY, seeded);
+  const seeded = DEFAULT_EXERCISES.map(toDefaultExercise);
+  writeList(EXERCISES_KEY, seeded);
   return seeded;
+}
+
+/**
+ * Brings an existing library in line with the current defaults: drops defaults
+ * that were removed and adds the ones that are missing. Custom exercises are
+ * never touched.
+ */
+function migrateDefaultExercises(exercises: readonly Exercise[]): Exercise[] {
+  const migrated = exercises.filter((exercise) => !isRemovedDefault(exercise));
+
+  for (const seed of DEFAULT_EXERCISES) {
+    const exists = migrated.some((exercise) =>
+      isSameExercise(exercise, seed.name, seed.muscleGroup),
+    );
+    if (!exists) migrated.push(toDefaultExercise(seed));
+  }
+  return migrated;
+}
+
+/** Stored defaults keep their original spelling, so removed ones are matched exactly. */
+function isRemovedDefault(exercise: Exercise): boolean {
+  if (exercise.isCustom) return false;
+  return REMOVED_DEFAULT_EXERCISES.some(
+    (removed) => removed.muscleGroup === exercise.muscleGroup && removed.name === exercise.name,
+  );
 }
 
 function loadExercises(): Exercise[] {
   if (!hasStorage()) return [];
-  const existing = window.localStorage.getItem(EXERCISES_KEY);
-  if (!existing) return seedExercises();
-  const parsed = read<Exercise[]>(EXERCISES_KEY, []);
-  if (parsed.length === 0) return seedExercises();
-  if (window.localStorage.getItem(EXERCISES_MIGRATION_KEY) !== "done") {
-    const migrated = parsed.filter(
-      (e) => e.isCustom || !(e.muscleGroup === "Core" && e.name === ["Russian", "Twist"].join(" ")),
-    );
-    for (const item of DEFAULT_EXERCISES) {
-      if (
-        !migrated.some(
-          (e) =>
-            e.muscleGroup === item.muscleGroup &&
-            e.name.toLocaleLowerCase() === item.name.toLocaleLowerCase(),
-        )
-      ) {
-        migrated.push({ ...item, id: uuid(), isCustom: false });
-      }
-    }
-    write(EXERCISES_KEY, migrated);
-    try {
-      window.localStorage.setItem(EXERCISES_MIGRATION_KEY, "done");
-    } catch {
-      /* storage unavailable */
-    }
-    return migrated;
-  }
-  return parsed;
+  const stored = readList<Exercise>(EXERCISES_KEY);
+  if (stored.length === 0) return seedExercises();
+  if (readItem(EXERCISES_MIGRATION_KEY) === MIGRATION_DONE) return stored;
+
+  const migrated = migrateDefaultExercises(stored);
+  writeList(EXERCISES_KEY, migrated);
+  writeItem(EXERCISES_MIGRATION_KEY, MIGRATION_DONE);
+  return migrated;
+}
+
+function loadWorkouts(): Workout[] {
+  return readList<Workout>(WORKOUTS_KEY);
 }
 
 class LocalExerciseRepository implements ExerciseRepository {
@@ -102,38 +126,31 @@ class LocalExerciseRepository implements ExerciseRepository {
   async create(data: NewExercise): Promise<Exercise> {
     const exercises = loadExercises();
     const name = data.name.trim();
-    if (!name || name.length > 60) throw new Error("Name must be between 1 and 60 characters.");
-    if (
-      exercises.some(
-        (e) =>
-          e.muscleGroup === data.muscleGroup &&
-          e.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
-      )
-    ) {
+    if (!name || name.length > EXERCISE_NAME_MAX_LENGTH) {
+      throw new Error(`Name must be between 1 and ${EXERCISE_NAME_MAX_LENGTH} characters.`);
+    }
+    if (exercises.some((exercise) => isSameExercise(exercise, name, data.muscleGroup))) {
       throw new Error("An exercise with this name already exists in this muscle group.");
     }
-    const exercise: Exercise = { ...data, name, isCustom: true, id: uuid() };
-    write(EXERCISES_KEY, [...exercises, exercise]);
+    const exercise: Exercise = { ...data, name, isCustom: true, id: newId() };
+    writeList(EXERCISES_KEY, [...exercises, exercise]);
     return exercise;
   }
 
   async delete(id: string): Promise<void> {
     const exercises = loadExercises();
-    const exercise = exercises.find((e) => e.id === id);
+    const exercise = exercises.find((item) => item.id === id);
     if (!exercise) throw new Error("Exercise not found.");
     if (!exercise.isCustom) throw new Error("Default exercises cannot be deleted.");
-    write(
+    writeList(
       EXERCISES_KEY,
-      exercises.filter((e) => e.id !== id),
+      exercises.filter((item) => item.id !== id),
     );
   }
 }
 
-function loadWorkouts(): Workout[] {
-  return read<Workout[]>(WORKOUTS_KEY, []);
-}
-
 class LocalWorkoutRepository implements WorkoutRepository {
+  /** Newest first; workouts on the same date are ordered by creation time. */
   async list(): Promise<Workout[]> {
     return loadWorkouts().sort(
       (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt),
@@ -141,69 +158,65 @@ class LocalWorkoutRepository implements WorkoutRepository {
   }
 
   async getById(id: string): Promise<Workout | null> {
-    return loadWorkouts().find((w) => w.id === id) ?? null;
+    return loadWorkouts().find((workout) => workout.id === id) ?? null;
   }
 
   async create(data: NewWorkout): Promise<Workout> {
     const now = new Date().toISOString();
-    const workout: Workout = { ...data, id: uuid(), createdAt: now, updatedAt: now };
-    write(WORKOUTS_KEY, [...loadWorkouts(), workout]);
+    const workout: Workout = { ...data, id: newId(), createdAt: now, updatedAt: now };
+    writeList(WORKOUTS_KEY, [...loadWorkouts(), workout]);
     return workout;
   }
 
   async update(id: string, data: Partial<NewWorkout>): Promise<Workout> {
     const workouts = loadWorkouts();
-    const index = workouts.findIndex((w) => w.id === id);
+    const index = workouts.findIndex((workout) => workout.id === id);
     const current = workouts[index];
     if (!current) throw new Error(`Workout ${id} not found`);
-    const updated: Workout = {
-      ...current,
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    workouts[index] = updated;
-    write(WORKOUTS_KEY, workouts);
 
+    const updated: Workout = { ...current, ...data, updatedAt: new Date().toISOString() };
+    workouts[index] = updated;
+    writeList(WORKOUTS_KEY, workouts);
     return updated;
   }
 
   async delete(id: string): Promise<void> {
-    write(
+    writeList(
       WORKOUTS_KEY,
-      loadWorkouts().filter((w) => w.id !== id),
+      loadWorkouts().filter((workout) => workout.id !== id),
     );
   }
 }
 
-/** Local implementations; consumers use the public data entry point. */
-export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
-export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Accepts stored draft data only when it has the expected shape. */
+function parseDraft(raw: string): WorkoutDraft | null {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) return null;
+    const { date, notes, entries } = parsed;
+    if (typeof date !== "string" || !Array.isArray(entries)) return null;
+    return {
+      date,
+      notes: typeof notes === "string" ? notes : "",
+      entries: entries as WorkoutDraft["entries"],
+    };
+  } catch {
+    return null;
+  }
+}
 
 class LocalDraftRepository implements DraftRepository {
   async get(): Promise<WorkoutDraft | null> {
-    if (!hasStorage()) return null;
-    try {
-      const raw = window.localStorage.getItem(DRAFT_KEY);
-      if (!raw) return null;
-      const d = JSON.parse(raw);
-      if (!d || typeof d.date !== "string" || !Array.isArray(d.entries)) return null;
-      return {
-        date: d.date,
-        notes: typeof d.notes === "string" ? d.notes : "",
-        entries: d.entries,
-      };
-    } catch {
-      return null;
-    }
+    const raw = readItem(DRAFT_KEY);
+    return raw ? parseDraft(raw) : null;
   }
 
   async set(draft: WorkoutDraft): Promise<void> {
-    if (!hasStorage()) return;
-    try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    } catch {
-      /* ignore */
-    }
+    writeItem(DRAFT_KEY, JSON.stringify(draft));
   }
 
   async clear(): Promise<void> {
@@ -212,4 +225,7 @@ class LocalDraftRepository implements DraftRepository {
   }
 }
 
+/** Local implementations; consumers import them through `@/data`. */
+export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
+export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
 export const draftRepository: DraftRepository = new LocalDraftRepository();

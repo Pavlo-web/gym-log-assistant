@@ -1,35 +1,33 @@
-import { Link } from "@tanstack/react-router";
-import { PageHeader } from "@/components/AppShell";
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 import { WorkoutForm } from "@/components/workout/WorkoutForm";
 import { useWorkout } from "@/hooks/useWorkouts";
+import { WorkoutNotFound } from "./WorkoutNotFound";
 
 export function HistoryEdit({ workoutId }: { workoutId: string }) {
   const { data: workout, isPending, isError } = useWorkout(workoutId);
-  if (isPending)
+
+  if (isPending) {
     return (
       <p role="status" className="py-12 text-muted-foreground">
         Loading workout…
       </p>
     );
-  if (isError)
+  }
+
+  if (isError) {
     return (
       <p role="alert" className="py-12 text-destructive">
         Could not load workout. Please try again.
       </p>
     );
-  if (!workout)
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Workout not found</h1>
-        <Button asChild variant="outline">
-          <Link to="/history">Back to history</Link>
-        </Button>
-      </div>
-    );
+  }
+
+  if (!workout) return <WorkoutNotFound />;
+
   return (
     <>
       <PageHeader title="Edit workout" />
+      {/* The key resets the form state when navigating between workouts. */}
       <WorkoutForm key={workout.id} workout={workout} />
     </>
   );
