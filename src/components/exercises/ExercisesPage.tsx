@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PageHeader } from "@/components/PageHeader";
+import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
 import { useDeleteExercise, useExercises } from "@/hooks/useExercises";
 import { MUSCLE_GROUPS, type Exercise } from "@/types/domain";
@@ -76,16 +77,9 @@ export function ExercisesPage() {
       />
 
       {isPending ? (
-        <p role="status" className="py-12 text-center text-sm text-muted-foreground">
-          Loading exercises…
-        </p>
+        <LoadingState label="Loading exercises…" />
       ) : isError ? (
-        <div role="alert" className="py-12 text-center text-sm text-muted-foreground">
-          Could not load exercises.{" "}
-          <Button variant="link" onClick={() => void refetch()}>
-            Try again
-          </Button>
-        </div>
+        <ErrorState message="Could not load exercises." onRetry={() => void refetch()} />
       ) : groups.length === 0 ? (
         <p className="border-t border-border py-12 text-center text-sm text-muted-foreground">
           No exercises found.

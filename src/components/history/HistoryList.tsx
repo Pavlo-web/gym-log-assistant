@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { History } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkouts } from "@/hooks/useWorkouts";
@@ -25,9 +28,7 @@ export function HistoryList() {
     return (
       <>
         <PageHeader title="History" />
-        <p role="status" className="py-12 text-center text-muted-foreground">
-          Loading workouts…
-        </p>
+        <LoadingState label="Loading workouts…" />
       </>
     );
   }
@@ -36,9 +37,13 @@ export function HistoryList() {
     return (
       <>
         <PageHeader title="History" />
-        <p role="alert" className="py-12 text-center text-destructive">
-          Could not load history. Please try again.
-        </p>
+        <ErrorState
+          message="Could not load history."
+          onRetry={() => {
+            void workouts.refetch();
+            void exercises.refetch();
+          }}
+        />
       </>
     );
   }
@@ -47,12 +52,15 @@ export function HistoryList() {
     return (
       <>
         <PageHeader title="History" />
-        <div className="py-16 text-center">
-          <p className="mb-5 text-muted-foreground">No workouts yet.</p>
-          <Button asChild>
+        <EmptyState
+          icon={History}
+          title="No workouts yet"
+          description="Workouts you save will be listed here."
+        >
+          <Button asChild className="mt-5">
             <Link to="/">Log a workout</Link>
           </Button>
-        </div>
+        </EmptyState>
       </>
     );
   }

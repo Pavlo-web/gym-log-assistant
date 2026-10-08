@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/PageHeader";
+import { LoadingState } from "@/components/PageStatus";
 import { WorkoutForm } from "@/components/workout/WorkoutForm";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { pageMeta } from "@/lib/page-meta";
@@ -17,9 +18,7 @@ function WorkoutPage() {
     <>
       <PageHeader title="Workout" description="Log a training session" />
       {draft.isPending ? (
-        <p role="status" className="py-12 text-center text-sm text-muted-foreground">
-          Loading…
-        </p>
+        <LoadingState label="Loading…" />
       ) : (
         // Rendered only once the stored draft is known, because the form reads it on mount.
         <WorkoutForm initial={draft.data ?? null} />

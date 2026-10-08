@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { StorageWriteError } from "@/data";
 import { useDeleteWorkout } from "@/hooks/useWorkouts";
 
 interface DeleteWorkoutDialogProps {
@@ -17,8 +18,8 @@ export function DeleteWorkoutDialog({ workoutId, open, onOpenChange }: DeleteWor
   async function deleteWorkout() {
     try {
       await remove.mutateAsync(workoutId);
-    } catch {
-      toast.error("Could not delete workout");
+    } catch (cause) {
+      toast.error(cause instanceof StorageWriteError ? cause.message : "Could not delete workout");
       return;
     }
     toast.success("Workout deleted");

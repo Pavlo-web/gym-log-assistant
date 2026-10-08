@@ -3,6 +3,7 @@ import { ClientOnly, Link } from "@tanstack/react-router";
 import { LineChart as ChartIcon } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useExercises } from "@/hooks/useExercises";
@@ -47,9 +48,7 @@ export function ProgressPage({ selectedId, onSelect }: ProgressPageProps) {
     return (
       <>
         <PageHeader title="Progress" />
-        <p role="status" className="py-12 text-muted-foreground">
-          Loading progress…
-        </p>
+        <LoadingState label="Loading progress…" />
       </>
     );
   }
@@ -58,9 +57,13 @@ export function ProgressPage({ selectedId, onSelect }: ProgressPageProps) {
     return (
       <>
         <PageHeader title="Progress" />
-        <p role="alert" className="py-12 text-destructive">
-          Could not load progress. Please try again.
-        </p>
+        <ErrorState
+          message="Could not load progress."
+          onRetry={() => {
+            void workouts.refetch();
+            void exercises.refetch();
+          }}
+        />
       </>
     );
   }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
 import { WorkoutSummary } from "@/components/workout/WorkoutSummary";
 import { useExercises } from "@/hooks/useExercises";
@@ -17,18 +18,18 @@ export function HistoryDetail({ workoutId }: { workoutId: string }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (workout.isPending || exercises.isPending) {
-    return (
-      <p role="status" className="py-12 text-muted-foreground">
-        Loading workout…
-      </p>
-    );
+    return <LoadingState label="Loading workout…" />;
   }
 
   if (workout.isError || exercises.isError) {
     return (
-      <p role="alert" className="py-12 text-destructive">
-        Could not load workout. Please try again.
-      </p>
+      <ErrorState
+        message="Could not load workout."
+        onRetry={() => {
+          void workout.refetch();
+          void exercises.refetch();
+        }}
+      />
     );
   }
 
