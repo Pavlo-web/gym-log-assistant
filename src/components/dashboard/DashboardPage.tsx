@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
-import { DemoDataNotice, LoadDemoDataButton } from "@/components/DemoData";
+import { DemoDataNotice, DemoDataOffer, LoadDemoDataButton } from "@/components/DemoData";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
@@ -21,6 +21,7 @@ import {
 import type { Exercise, Workout, WorkoutDraft } from "@/types/domain";
 import { DashboardSection } from "./DashboardSection";
 import { MuscleSplit } from "./MuscleSplit";
+import { NextWorkoutNotice } from "./NextWorkoutNotice";
 import { RecentRecords } from "./RecentRecords";
 import { RecentWorkouts } from "./RecentWorkouts";
 import { SummaryTiles } from "./SummaryTiles";
@@ -118,6 +119,7 @@ function Overview({ workouts, exercises }: OverviewProps) {
           <RecentWorkouts workouts={workouts.slice(0, RECENT_ITEMS)} />
         </DashboardSection>
       </div>
+      <DemoDataOffer />
     </>
   );
 }
@@ -155,6 +157,7 @@ export function DashboardPage() {
     <>
       <DashboardHeader />
       <DemoDataNotice />
+      <NextWorkoutNotice />
       {hasUnfinishedDraft(draft.data) && <DraftNotice />}
       {workouts.data.length === 0 ? (
         <EmptyState

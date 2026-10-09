@@ -33,7 +33,12 @@ export function useCountUp(target: number): number {
       );
       if (progress < 1) frame = requestAnimationFrame(tick);
     });
-    return () => cancelAnimationFrame(frame);
+    // Frames do not run in a background tab, so a timer makes sure the figure still lands.
+    const fallback = setTimeout(() => setValue(target), DURATION_MS + 100);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(fallback);
+    };
   }, [target, reducedMotion]);
 
   return value;

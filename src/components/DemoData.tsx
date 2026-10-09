@@ -64,3 +64,16 @@ export function DemoDataNotice() {
     </div>
   );
 }
+
+/** Quiet offer under a page that already has records; hidden once sample data is loaded. */
+export function DemoDataOffer() {
+  const { data: hasDemoData, isPending } = useHasDemoData();
+  if (isPending || hasDemoData) return null;
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 pb-2 text-sm text-muted-foreground">
+      <span>Want to see the app with three months of training?</span>
+      <LoadDemoDataButton />
+    </div>
+  );
+}

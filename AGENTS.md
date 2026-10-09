@@ -31,6 +31,8 @@ below are the conventions to keep when changing code.
 - Body weight has one entry per day: saving a day that exists replaces it.
 - Read and write storage only through `src/data/storage.ts`. Give every stored type a zod schema in `src/data/schemas.ts` and pass it to `readList` / `readObject`.
 - Use `writeList` / `writeItem` for anything the user asked to save, so a failure reaches the UI as `StorageWriteError`; use the `tryWrite…` variants only for housekeeping done while reading.
+- A planned workout (`PlannedWorkout`) is not a workout: it has no sets and must never be counted in statistics, records or the calendar. Do not allow future dates in the log itself.
+- Sample records get an id starting with `demo-` (`src/data/demo-data.ts`). Removing demo data deletes by that prefix only, so never give a user-created record such an id.
 - Do not rename the `gymlog.v1.*` storage keys. To drop a default exercise, add it to `REMOVED_DEFAULT_EXERCISES` and bump the migration key.
 
 ## Logic
@@ -48,6 +50,7 @@ below are the conventions to keep when changing code.
 - Use the semantic color tokens from `src/styles.css`; no hard-coded colors. Error text and invalid borders use `danger`; `destructive` is only for filled delete buttons.
 - Show a problem with one field under that field with `FieldError` and mark only that input `aria-invalid`. Use `FormAlert` for a problem with the form as a whole, such as a failed save. No browser validation bubbles: forms set `noValidate`.
 - Number fields go through `NumberInput`, which drops letters and extra separators; give each a `maxLength` from `src/lib/limits.ts`.
+- Animate only through `useCountUp` (figures, via the `value` object of `StatTile`) and `SERIES_ANIMATION` (charts); both honour `useReducedMotion`.
 - `NumberInput` steppers: use `stepperLayout="sides"` where the field has the full row on phones; keep the default inside table cells.
 
 ## Before finishing

@@ -17,15 +17,22 @@ Single user, English UI, weights in kilograms. All data stays in the browser
   set. A set that beats your best estimated 1RM for the exercise is marked **PR** as
   you type. Picked the wrong exercise? Swap it for another and keep the sets you
   entered. An unfinished workout is saved as a draft and restored on the next visit.
+  After saving, the saved workout opens.
+- **Upcoming workouts** — plan a workout for a date and time with its exercises. The
+  Workout page counts down to it ("in 2 days", "in 3 hours"); **Start** fills the
+  form with the planned exercises, and the plan disappears once the workout is saved.
 - **History** — past workouts grouped by month, with a details page, editing and
   deletion.
 - **Exercises** — a library of default exercises in six muscle groups, with search,
-  a group filter and your own custom exercises.
+  a group filter and your own custom exercises. Every exercise links to videos that
+  show how to do it.
 - **Progress** — per exercise: personal records, a chart of top weight, estimated
   1RM or volume over time, and a table of every session.
 - **Body weight** — a log with one entry per day, the change since the previous entry
   and over 30 days, and a trend chart.
 - **1RM Calculator** — Epley and Brzycki estimates with a percentage table.
+- **Demo data** — one button fills the app with three months of sample training, body
+  weight and two planned workouts; another removes it and leaves your own records.
 
 Works on desktop (sidebar navigation) and on phones (bottom navigation bar).
 
@@ -130,9 +137,11 @@ Defined in `src/types/domain.ts`:
 - `WorkoutDraft` — the workout form while it is being filled in. Weight and reps are
   kept as the raw text the user typed and parsed only when saving.
 - `BodyWeightEntry` — body weight in kg for one day.
+- `PlannedWorkout` — a date, a time, an optional title and the exercises to do. It has
+  no sets.
 
 Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts`,
-`gymlog.v1.workout-draft` and `gymlog.v1.body-weight`.
+`gymlog.v1.workout-draft`, `gymlog.v1.body-weight` and `gymlog.v1.planned-workouts`.
 
 ### Decisions worth knowing
 
@@ -150,6 +159,16 @@ Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts`,
 - **A personal record is a new best estimated 1RM.** The workout form compares each
   set with every other saved workout of that exercise. The first session of an
   exercise has nothing to beat, so the form does not flag it.
+- **The log has no future dates; plans are separate.** A workout is what was actually
+  lifted, so a planned workout is its own record and never counts in the statistics.
+  Starting a plan copies its exercises into the workout form, and only the saved
+  workout is counted.
+- **Demo records are marked by their id.** Every sample record has an id starting with
+  `demo-` (`src/data/demo-data.ts`), which is how they are removed without touching
+  the records the user made. The sample is generated relative to today, so it always
+  ends in the current week.
+- **Motion respects the system setting.** Charts draw in and headline figures count
+  up from zero, unless the user asked for reduced motion.
 - **The training calendar shades days by number of sets**, relative to the busiest
   day of the year shown.
 - **Default exercises are migrated.** When the default list changes, existing
