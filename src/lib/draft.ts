@@ -31,42 +31,50 @@ export function draftFromWorkout(workout: Workout): WorkoutDraft {
   };
 }
 
-function weightProblem(text: string): string | null {
-  const weight = parseDecimal(text);
-  const valid = Number.isFinite(weight) && weight >= 0 && weight <= SET_WEIGHT_MAX_KG;
-  return valid ? null : `Weight must be 0–${SET_WEIGHT_MAX_KG} kg.`;
-}
-
-function repsProblem(text: string): string | null {
-  const reps = parseInteger(text);
-  const valid = Number.isInteger(reps) && reps >= SET_REPS_MIN && reps <= SET_REPS_MAX;
-  return valid ? null : `Reps must be a whole number ${SET_REPS_MIN}–${SET_REPS_MAX}.`;
-}
-
-/** Validation message for a set, or null when it is valid or still untouched. */
-export function setError(set: DraftSet): string | null {
-  const weightText = set.weight.trim();
-  const repsText = set.reps.trim();
-  if (!weightText && !repsText) return null;
-  return weightProblem(weightText) ?? repsProblem(repsText);
+/** Error message per field of a set; null where the field is fine. */
+export interface SetFieldErrors {
+  weight: string | null;
+  reps: string | null;
 }
 
 /**
- * Message for a value that is typed in but not acceptable, shown while typing.
- * A field that is still empty is not reported here: the user may simply not
- * have reached it yet, so that is left to `setError` when saving.
+ * How strictly a set is checked:
+ * - "typed": only values that are present and wrong, for feedback while typing.
+ *   An empty field is not an error yet: the user may not have reached it.
+ * - "complete": a set that has been started must have both fields filled in,
+ *   which is what saving requires.
  */
-export function setInputError(set: DraftSet): string | null {
+export type SetCheck = "typed" | "complete";
+
+function weightProblem(text: string, check: SetCheck): string | null {
+  if (!text) return check === "complete" ? "Enter the weight" : null;
+  const weight = parseDecimal(text);
+  const valid = Number.isFinite(weight) && weight >= 0 && weight <= SET_WEIGHT_MAX_KG;
+  return valid ? null : `Enter 0–${SET_WEIGHT_MAX_KG} kg`;
+}
+
+function repsProblem(text: string, check: SetCheck): string | null {
+  if (!text) return check === "complete" ? "Enter the reps" : null;
+  const reps = parseInteger(text);
+  const valid = Number.isInteger(reps) && reps >= SET_REPS_MIN && reps <= SET_REPS_MAX;
+  return valid ? null : `Enter ${SET_REPS_MIN}–${SET_REPS_MAX}`;
+}
+
+/** Problems of each field of a set. A set with both fields empty is untouched and has none. */
+export function setFieldErrors(set: DraftSet, check: SetCheck): SetFieldErrors {
   const weightText = set.weight.trim();
   const repsText = set.reps.trim();
-  return (
-    (weightText ? weightProblem(weightText) : null) ?? (repsText ? repsProblem(repsText) : null)
-  );
+  if (!weightText && !repsText) return { weight: null, reps: null };
+  return { weight: weightProblem(weightText, check), reps: repsProblem(repsText, check) };
+}
+
+export function hasFieldErrors(errors: SetFieldErrors): boolean {
+  return errors.weight !== null || errors.reps !== null;
 }
 
 export function setStatus(set: DraftSet): SetStatus {
   if (!set.weight.trim() && !set.reps.trim()) return "empty";
-  return setError(set) ? "invalid" : "valid";
+  return hasFieldErrors(setFieldErrors(set, "complete")) ? "invalid" : "valid";
 }
 
 /** Converts valid sets into domain entries; entries without valid sets are dropped. */

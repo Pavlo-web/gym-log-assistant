@@ -1,21 +1,30 @@
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
-import type { DraftRecord } from "@/lib/draft";
-import { SET_REPS_MAX, SET_REPS_MIN, SET_WEIGHT_MAX_KG } from "@/lib/limits";
+import type { DraftRecord, SetFieldErrors } from "@/lib/draft";
+import {
+  REPS_INPUT_MAX_LENGTH,
+  SET_REPS_MAX,
+  SET_REPS_MIN,
+  SET_WEIGHT_MAX_KG,
+  WEIGHT_INPUT_MAX_LENGTH,
+} from "@/lib/limits";
 import { formatNumber } from "@/lib/number";
-import { cn } from "@/lib/utils";
 import type { DraftSet } from "@/types/domain";
 import { weightInputId } from "./set-input-id";
 
 /** Smallest plate jump, used by the weight stepper. */
 const WEIGHT_STEP_KG = 2.5;
 
+const FIELD_CELL = "py-2 pr-1 md:pr-3";
+const MESSAGE_CELL = "pb-2 pr-1 align-top text-xs md:pr-3";
+
 interface SetRowProps {
   index: number;
   set: DraftSet;
-  error: string | null;
+  /** Problems of this set, per field; null when it has none. */
+  errors: SetFieldErrors | null;
   /** Set when this set beats the previous best estimated 1RM of the exercise. */
   record: DraftRecord | null;
   onChange: (patch: Partial<DraftSet>) => void;
@@ -24,43 +33,47 @@ interface SetRowProps {
   onRepsEnter?: (() => void) | undefined;
 }
 
-/** One editable set: weight, reps and a remove button, with its error or record note underneath. */
+/**
+ * One editable set: weight, reps and a remove button. A problem is shown under
+ * the field it belongs to, and only that field is marked invalid.
+ */
 export function SetRow({
   index,
   set,
-  error,
+  errors,
   record,
   onChange,
   onRemove,
   onRepsEnter,
 }: SetRowProps) {
-  const invalid = !!error;
   const number = index + 1;
   return (
     <>
-      <tr className={cn("border-t border-border", invalid && "bg-destructive/10")}>
+      <tr className="border-t border-border">
         <td className="tabular w-5 py-2 pl-1 text-sm text-muted-foreground md:w-10">{number}</td>
-        <td className="py-2 pr-1 md:pr-3">
+        <td className={FIELD_CELL}>
           <NumberInput
             id={weightInputId(set.id)}
             aria-label={`Set ${number} weight in kg`}
-            aria-invalid={invalid}
+            aria-invalid={!!errors?.weight}
             min={0}
             max={SET_WEIGHT_MAX_KG}
             step={WEIGHT_STEP_KG}
+            maxLength={WEIGHT_INPUT_MAX_LENGTH}
             value={set.weight}
             onValueChange={(weight) => onChange({ weight })}
             className="tabular md:h-9"
             placeholder="0"
           />
         </td>
-        <td className="py-2 pr-1 md:pr-3">
+        <td className={FIELD_CELL}>
           <NumberInput
             aria-label={`Set ${number} reps`}
-            aria-invalid={invalid}
+            aria-invalid={!!errors?.reps}
             min={SET_REPS_MIN}
             max={SET_REPS_MAX}
             step={1}
+            maxLength={REPS_INPUT_MAX_LENGTH}
             value={set.reps}
             onValueChange={(reps) => onChange({ reps })}
             onKeyDown={(event) => {
@@ -80,21 +93,25 @@ export function SetRow({
             variant="ghost"
             aria-label={`Remove set ${number}`}
             onClick={onRemove}
-            className="text-muted-foreground hover:text-destructive"
+            className="text-muted-foreground hover:text-danger"
           >
             <X />
           </Button>
         </td>
       </tr>
-      {error && (
-        <tr>
+      {errors && (
+        <tr className="text-danger">
           <td />
-          <td colSpan={3} role="alert" className="pb-2 text-xs text-destructive">
-            {error}
+          <td className={MESSAGE_CELL} role={errors.weight ? "alert" : undefined}>
+            {errors.weight}
           </td>
+          <td className={MESSAGE_CELL} role={errors.reps ? "alert" : undefined}>
+            {errors.reps}
+          </td>
+          <td />
         </tr>
       )}
-      {record && !error && (
+      {record && !errors && (
         <tr>
           <td />
           <td colSpan={3} role="status" className="pb-2 text-xs text-muted-foreground tabular">

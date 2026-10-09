@@ -34,7 +34,7 @@ export function BodyWeightLog({ rows, onDelete }: BodyWeightLogProps) {
                   aria-label={`Delete entry for ${date}`}
                   title={`Delete entry for ${date}`}
                   onClick={() => onDelete(row)}
-                  className="text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-danger"
                 >
                   <Trash2 />
                 </Button>

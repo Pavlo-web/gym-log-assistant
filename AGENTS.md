@@ -45,7 +45,9 @@ below are the conventions to keep when changing code.
 
 - Keep phone navigation in a dedicated shell component and share safe-area offsets with sticky form actions so navigation and save controls never overlap.
 - Desktop (768px and up) and phone layouts come from the same components: use Tailwind `md:` classes and the `mobile-*` rules in `src/styles.css`, not separate components or user-agent checks.
-- Use the semantic color tokens from `src/styles.css`; no hard-coded colors.
+- Use the semantic color tokens from `src/styles.css`; no hard-coded colors. Error text and invalid borders use `danger`; `destructive` is only for filled delete buttons.
+- Show a problem with one field under that field with `FieldError` and mark only that input `aria-invalid`. Use `FormAlert` for a problem with the form as a whole, such as a failed save. No browser validation bubbles: forms set `noValidate`.
+- Number fields go through `NumberInput`, which drops letters and extra separators; give each a `maxLength` from `src/lib/limits.ts`.
 - `NumberInput` steppers: use `stepperLayout="sides"` where the field has the full row on phones; keep the default inside table cells.
 
 ## Before finishing

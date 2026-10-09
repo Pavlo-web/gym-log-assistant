@@ -57,7 +57,7 @@ export function HistoryDetail({ workoutId }: { workoutId: string }) {
           </Button>
           <Button
             variant="outline"
-            className="text-destructive"
+            className="text-danger"
             onClick={() => setConfirmingDelete(true)}
           >
             <Trash2 /> Delete

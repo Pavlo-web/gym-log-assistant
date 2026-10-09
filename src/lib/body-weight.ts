@@ -65,7 +65,7 @@ export function bodyWeightRows(entries: readonly BodyWeightEntry[]): BodyWeightR
 export function bodyWeightError(input: string): string | null {
   const weight = parseDecimal(input);
   if (!(weight >= BODY_WEIGHT_MIN_KG && weight <= BODY_WEIGHT_MAX_KG)) {
-    return `Enter a weight between ${BODY_WEIGHT_MIN_KG} and ${BODY_WEIGHT_MAX_KG} kg.`;
+    return `Enter ${BODY_WEIGHT_MIN_KG}–${BODY_WEIGHT_MAX_KG} kg`;
   }
   return null;
 }

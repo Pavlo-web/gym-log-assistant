@@ -159,6 +159,9 @@ Stored under versioned keys: `gymlog.v1.exercises`, `gymlog.v1.workouts`,
   zod schemas in `src/data/schemas.ts`. A damaged record is skipped instead of
   breaking the page, and the original text is copied to a `<key>.backup` entry before
   anything overwrites it.
+- **Forms explain what is wrong, next to where it is wrong.** Number fields refuse
+  letters and over-long input as you type. A value out of range is flagged at once
+  under its own field; a field left empty is reported only when you press Save.
 - **A failed save is never silent.** When the browser refuses a write (storage full
   or turned off), the repository throws `StorageWriteError` and the form shows the
   message. Only housekeeping writes, such as seeding the default exercises, are best

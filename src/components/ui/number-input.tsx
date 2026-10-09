@@ -2,7 +2,7 @@ import { forwardRef, type ComponentProps, type KeyboardEvent } from "react";
 import { ChevronDown, ChevronUp, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { parseDecimal } from "@/lib/number";
+import { parseDecimal, sanitizeNumberInput } from "@/lib/number";
 import { cn } from "@/lib/utils";
 
 type NumberInputProps = Omit<
@@ -52,6 +52,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   const maximum = max === undefined ? Infinity : Number(max);
   const current = parseDecimal(value);
   const label = props["aria-label"] ?? "value";
+  const allowDecimal = !Number.isInteger(step);
 
   function stepBy(direction: 1 | -1) {
     // An empty or unreadable field starts from the minimum (or zero when unbounded).
@@ -80,10 +81,11 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         {...props}
         ref={ref}
         type="text"
-        inputMode={Number.isInteger(step) ? "numeric" : "decimal"}
+        inputMode={allowDecimal ? "decimal" : "numeric"}
         value={value}
         disabled={disabled}
-        onChange={(event) => onValueChange(event.target.value)}
+        // Letters, signs and extra separators never make it into the field.
+        onChange={(event) => onValueChange(sanitizeNumberInput(event.target.value, allowDecimal))}
         onKeyDown={handleKeyDown}
         className={cn("tabular pr-9", className)}
       />

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeftRight, Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
-import { setStatus, type DraftRecord } from "@/lib/draft";
+import { setStatus, type DraftRecord, type SetFieldErrors } from "@/lib/draft";
 import { newId } from "@/lib/id";
 import { exerciseLabel } from "@/lib/workout";
 import type { DraftEntry, DraftSet, Exercise } from "@/types/domain";
@@ -13,8 +13,8 @@ interface ExerciseCardProps {
   entry: DraftEntry;
   /** Live library exercise; undefined when it has been deleted. */
   exercise: Exercise | undefined;
-  /** Validation messages keyed by set id. */
-  errors: Record<string, string>;
+  /** Problems of the sets that have any, keyed by set id. */
+  errors: Record<string, SetFieldErrors>;
   /** The set that beats the previous best of this exercise, if any. */
   record: DraftRecord | null;
   onChange: (entry: DraftEntry) => void;
@@ -95,7 +95,7 @@ export function ExerciseCard({
             aria-label={`Remove ${name}`}
             title="Remove exercise"
             onClick={requestRemove}
-            className="text-muted-foreground hover:text-destructive"
+            className="text-muted-foreground hover:text-danger"
           >
             <Trash2 />
           </Button>
@@ -119,7 +119,7 @@ export function ExerciseCard({
               key={set.id}
               index={index}
               set={set}
-              error={errors[set.id] ?? null}
+              errors={errors[set.id] ?? null}
               record={record?.setId === set.id ? record : null}
               onChange={(patch) => updateSet(set.id, patch)}
               onRemove={() => removeSet(set.id)}

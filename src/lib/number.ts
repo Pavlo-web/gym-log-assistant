@@ -22,3 +22,16 @@ export function formatNumber(value: number): string {
 export function formatFixed(value: number, digits = 1): string {
   return value.toFixed(digits).replace(/\.0$/, "");
 }
+
+/**
+ * Drops everything a number field cannot hold as the user types or pastes:
+ * only digits stay, plus a single "." or "," when decimals are allowed.
+ */
+export function sanitizeNumberInput(text: string, allowDecimal: boolean): string {
+  if (!allowDecimal) return text.replace(/\D/g, "");
+  const cleaned = text.replace(/[^\d.,]/g, "");
+  const separator = cleaned.search(/[.,]/);
+  if (separator === -1) return cleaned;
+  const afterSeparator = cleaned.slice(separator + 1).replace(/[.,]/g, "");
+  return cleaned.slice(0, separator + 1) + afterSeparator;
+}

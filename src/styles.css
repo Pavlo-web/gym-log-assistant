@@ -43,6 +43,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-danger: var(--danger);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -90,6 +91,9 @@
 
   --destructive: oklch(0.53 0.21 28);
   --destructive-foreground: oklch(0.97 0.004 285);
+  /* Red that stays readable as text and thin borders on the dark background;
+     --destructive is tuned for filled buttons and is too dark for that. */
+  --danger: oklch(0.74 0.15 25);
 
   --border: oklch(0.28 0.006 285);
   --input: oklch(0.28 0.006 285);

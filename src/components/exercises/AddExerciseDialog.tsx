@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { FieldError, FormAlert } from "@/components/FormMessages";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -39,33 +40,45 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
   const create = useCreateExercise();
   const [name, setName] = useState("");
   const [group, setGroup] = useState<MuscleGroup>(DEFAULT_GROUP);
-  const [error, setError] = useState("");
+  /** Problem with the typed name, shown under the field. */
+  const [nameError, setNameError] = useState("");
+  /** Problem with saving, shown for the form as a whole. */
+  const [saveError, setSaveError] = useState("");
+
+  function clearErrors() {
+    setNameError("");
+    setSaveError("");
+  }
 
   function handleOpenChange(next: boolean) {
     onOpenChange(next);
     // The typed name is kept so reopening after an accidental close does not lose it.
-    setError("");
+    clearErrors();
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed || trimmed.length > EXERCISE_NAME_MAX_LENGTH) {
-      setError(`Enter a name between 1 and ${EXERCISE_NAME_MAX_LENGTH} characters.`);
+    clearErrors();
+    if (!trimmed) {
+      setNameError("Enter a name");
+      return;
+    }
+    if (trimmed.length > EXERCISE_NAME_MAX_LENGTH) {
+      setNameError(`Use at most ${EXERCISE_NAME_MAX_LENGTH} characters`);
       return;
     }
     if (exercises.some((exercise) => isSameExercise(exercise, trimmed, group))) {
-      setError("An exercise with this name already exists in this muscle group.");
+      setNameError(`${group} already has an exercise with this name`);
       return;
     }
-    setError("");
     try {
       await create.mutateAsync({ name: trimmed, muscleGroup: group, isCustom: true });
       onOpenChange(false);
       setName("");
       setGroup(DEFAULT_GROUP);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not add exercise. Try again.");
+      setSaveError(cause instanceof Error ? cause.message : "Could not add exercise. Try again.");
     }
   }
 
@@ -75,21 +88,23 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
         <DialogHeader>
           <DialogTitle>Add exercise</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submit} className="space-y-5 pt-2">
+        {/* noValidate: the form shows its own messages instead of the browser bubbles. */}
+        <form onSubmit={submit} noValidate className="space-y-5 pt-2">
           <div className="space-y-2">
             <Label htmlFor="exercise-name">Name</Label>
             <Input
               id="exercise-name"
               autoFocus
-              required
+              aria-invalid={!!nameError}
               maxLength={EXERCISE_NAME_MAX_LENGTH}
               value={name}
               onChange={(event) => {
                 setName(event.target.value);
-                setError("");
+                clearErrors();
               }}
               placeholder="Exercise name"
             />
+            {nameError && <FieldError>{nameError}</FieldError>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="exercise-group">Muscle group</Label>
@@ -97,7 +112,7 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
               value={group}
               onValueChange={(value) => {
                 if (isMuscleGroup(value)) setGroup(value);
-                setError("");
+                clearErrors();
               }}
             >
               <SelectTrigger id="exercise-group">
@@ -112,12 +127,8 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
               </SelectContent>
             </Select>
           </div>
-          {error && (
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
-          )}
-          <DialogFooter>
+          {saveError && <FormAlert>{saveError}</FormAlert>}
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>

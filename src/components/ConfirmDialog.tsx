@@ -1,4 +1,5 @@
 import type { MouseEvent, ReactNode } from "react";
+import { FormAlert } from "@/components/FormMessages";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,11 +55,7 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        {error && (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        )}
+        {error && <FormAlert>{error}</FormAlert>}
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction

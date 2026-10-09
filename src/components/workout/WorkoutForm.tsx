@@ -4,6 +4,7 @@ import { Dumbbell, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
+import { FieldError, FormAlert } from "@/components/FormMessages";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -18,29 +19,28 @@ import {
   draftRecord,
   emptyDraft,
   isDraftEmpty,
-  setError,
-  setInputError,
+  hasFieldErrors,
+  setFieldErrors,
   setStatus,
   toEntries,
+  type SetCheck,
+  type SetFieldErrors,
 } from "@/lib/draft";
 import { newId } from "@/lib/id";
 import { WORKOUT_NOTES_MAX_LENGTH } from "@/lib/limits";
 import { bestLoggedE1RM } from "@/lib/progress";
-import type { DraftSet, Exercise, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
+import type { Exercise, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
 import { ExerciseCard } from "./ExerciseCard";
 import { ExercisePicker } from "./ExercisePicker";
 import { WorkoutSummary } from "./WorkoutSummary";
 
-/** Validation messages keyed by set id, using `check` to judge each set. */
-function collectSetErrors(
-  draft: WorkoutDraft,
-  check: (set: DraftSet) => string | null,
-): Record<string, string> {
-  const errors: Record<string, string> = {};
+/** Problems of every set that has any, keyed by set id. */
+function collectSetErrors(draft: WorkoutDraft, check: SetCheck): Record<string, SetFieldErrors> {
+  const errors: Record<string, SetFieldErrors> = {};
   for (const entry of draft.entries) {
     for (const set of entry.sets) {
-      const message = check(set);
-      if (message) errors[set.id] = message;
+      const problems = setFieldErrors(set, check);
+      if (hasFieldErrors(problems)) errors[set.id] = problems;
     }
   }
   return errors;
@@ -124,7 +124,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
   const entries = withExerciseSnapshots(toEntries(draft), exercisesById);
   // While typing, only values that are present and wrong are flagged. After a save
   // attempt the full check applies, which also reports fields left empty.
-  const setErrors = collectSetErrors(draft, showErrors ? setError : setInputError);
+  const setErrors = collectSetErrors(draft, showErrors ? "complete" : "typed");
   const hasTypedSets = draft.entries.some((entry) =>
     entry.sets.some((set) => setStatus(set) !== "empty"),
   );
@@ -205,9 +205,9 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
   }
 
   async function save() {
-    if (Object.keys(collectSetErrors(draft, setError)).length > 0) {
+    if (Object.keys(collectSetErrors(draft, "complete")).length > 0) {
       setShowErrors(true);
-      setFormError("Fix the highlighted sets before saving.");
+      setFormError("Some sets need fixing before this workout can be saved.");
       return;
     }
     if (dateError) {
@@ -236,11 +236,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
             value={draft.date}
             onChange={(date) => update({ date })}
           />
-          {dateError && (
-            <p role="alert" className="text-xs text-destructive">
-              {dateError}
-            </p>
-          )}
+          {dateError && <FieldError>{dateError}</FieldError>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="workout-notes">
@@ -301,11 +297,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
         </>
       )}
 
-      {formError && (
-        <p role="alert" className="text-sm text-destructive">
-          {formError}
-        </p>
-      )}
+      {formError && <FormAlert>{formError}</FormAlert>}
       {saveDraft.isError && (
         <p role="status" className="text-xs text-muted-foreground">
           This browser is not saving your draft, so it will be lost if you leave the page. Saving

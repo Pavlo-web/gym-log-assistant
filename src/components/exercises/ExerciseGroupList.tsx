@@ -44,7 +44,7 @@ export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) 
                       aria-label={`Delete ${exercise.name}`}
                       title={`Delete ${exercise.name}`}
                       onClick={() => onDelete(exercise)}
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-muted-foreground hover:text-danger"
                     >
                       <Trash2 />
                     </Button>

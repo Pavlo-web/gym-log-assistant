@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { NumberInput } from "@/components/ui/number-input";
 import { brzycki1RM, epley1RM } from "@/lib/calc";
+import { REPS_INPUT_MAX_LENGTH, WEIGHT_INPUT_MAX_LENGTH } from "@/lib/limits";
 import { formatFixed, parseDecimal, parseInteger } from "@/lib/number";
 import { PercentageTable } from "./PercentageTable";
 
@@ -35,6 +36,7 @@ export function CalculatorPage() {
               aria-label="Weight (kg)"
               step={2.5}
               stepperLayout="sides"
+              maxLength={WEIGHT_INPUT_MAX_LENGTH}
               min={0}
               value={weightInput}
               onValueChange={setWeightInput}
@@ -48,6 +50,7 @@ export function CalculatorPage() {
               inputMode="numeric"
               step={1}
               stepperLayout="sides"
+              maxLength={REPS_INPUT_MAX_LENGTH}
               min={1}
               value={repsInput}
               onValueChange={setRepsInput}
