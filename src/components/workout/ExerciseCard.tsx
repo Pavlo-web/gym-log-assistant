@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeftRight, Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ExerciseVideoLink } from "@/components/ExerciseVideoLink";
 import { Button } from "@/components/ui/button";
 import { setStatus, type DraftRecord, type SetFieldErrors } from "@/lib/draft";
 import { newId } from "@/lib/id";
@@ -77,6 +78,7 @@ export function ExerciseCard({
           <p className="text-xs text-muted-foreground">{group}</p>
         </div>
         <div className="flex shrink-0 items-center">
+          <ExerciseVideoLink name={name} />
           <Button
             type="button"
             size="icon"

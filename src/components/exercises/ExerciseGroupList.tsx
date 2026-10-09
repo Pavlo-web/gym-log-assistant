@@ -1,4 +1,5 @@
 import { Trash2 } from "lucide-react";
+import { ExerciseVideoLink } from "@/components/ExerciseVideoLink";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Exercise, MuscleGroup } from "@/types/domain";
@@ -33,11 +34,14 @@ export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) 
                 className="flex min-h-12 items-center justify-between gap-3 py-2 pl-1"
               >
                 <span className="min-w-0 text-sm">{exercise.name}</span>
-                {exercise.isCustom && (
-                  <span className="flex shrink-0 items-center gap-2">
-                    <Badge variant="secondary" className="font-normal">
+                <span className="flex shrink-0 items-center gap-1">
+                  {exercise.isCustom && (
+                    <Badge variant="secondary" className="mr-1 font-normal">
                       Custom
                     </Badge>
+                  )}
+                  <ExerciseVideoLink name={exercise.name} />
+                  {exercise.isCustom && (
                     <Button
                       size="icon"
                       variant="ghost"
@@ -48,8 +52,8 @@ export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) 
                     >
                       <Trash2 />
                     </Button>
-                  </span>
-                )}
+                  )}
+                </span>
               </li>
             ))}
           </ul>

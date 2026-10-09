@@ -25,6 +25,12 @@ export function exerciseLabel(
   };
 }
 
+/** YouTube search for videos showing how to perform the exercise. */
+export function exerciseVideoUrl(name: string): string {
+  const query = encodeURIComponent(`${name} proper form`);
+  return `https://www.youtube.com/results?search_query=${query}`;
+}
+
 /** True when `exercise` has this name (case-insensitive) in this muscle group. */
 export function isSameExercise(
   exercise: Pick<Exercise, "name" | "muscleGroup">,

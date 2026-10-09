@@ -196,12 +196,15 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
 
   async function saveNew() {
     const notes = draft.notes.trim();
-    await createWorkout.mutateAsync({ date: draft.date, entries, ...(notes ? { notes } : {}) });
+    const saved = await createWorkout.mutateAsync({
+      date: draft.date,
+      entries,
+      ...(notes ? { notes } : {}),
+    });
     await clearDraft.mutateAsync();
-    // The reset below is not a user edit, so it must not be autosaved as a draft.
-    skipNextAutosave.current = true;
-    resetForm();
     toast.success("Workout saved");
+    // Show what was just saved; staying on an emptied form looked like nothing happened.
+    await navigate({ to: "/history/$workoutId", params: { workoutId: saved.id } });
   }
 
   async function save() {
