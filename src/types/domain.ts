@@ -72,6 +72,8 @@ export interface WorkoutDraft {
   date: string;
   notes: string;
   entries: DraftEntry[];
+  /** Planned workout this draft was started from; it is removed once the workout is saved. */
+  planId?: string;
 }
 
 export interface DraftRepository {
@@ -94,4 +96,46 @@ export interface BodyWeightRepository {
   /** Saves the weight for a day, replacing an existing entry for that day. */
   save(date: string, weight: number): Promise<BodyWeightEntry>;
   delete(id: string): Promise<void>;
+}
+
+/** Exercise of a planned workout, with the label stored like on a workout entry. */
+export interface PlannedExercise {
+  exerciseId: string;
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+}
+
+/**
+ * A workout scheduled for later. It holds no sets and never counts in the
+ * statistics; starting it fills the workout form, and saving that form logs
+ * the real workout.
+ */
+export interface PlannedWorkout {
+  id: string;
+  /** ISO date, yyyy-mm-dd */
+  date: string;
+  /** Local time of day, HH:mm (24-hour). */
+  time: string;
+  title?: string;
+  exercises: PlannedExercise[];
+  createdAt: string;
+}
+
+export type NewPlannedWorkout = Omit<PlannedWorkout, "id" | "createdAt">;
+
+export interface PlannedWorkoutRepository {
+  /** Soonest first. */
+  list(): Promise<PlannedWorkout[]>;
+  create(data: NewPlannedWorkout): Promise<PlannedWorkout>;
+  delete(id: string): Promise<void>;
+}
+
+/** Sample records for showing the app with data; kept apart from the user's own. */
+export interface DemoDataRepository {
+  /** True while any sample record is stored. */
+  has(): Promise<boolean>;
+  /** Adds the sample records, replacing earlier ones. The user's records are kept. */
+  load(): Promise<void>;
+  /** Removes only the sample records. */
+  remove(): Promise<void>;
 }

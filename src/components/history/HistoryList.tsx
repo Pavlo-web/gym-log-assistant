@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { History } from "lucide-react";
+import { LoadDemoDataButton } from "@/components/DemoData";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
@@ -57,9 +58,12 @@ export function HistoryList() {
           title="No workouts yet"
           description="Workouts you save will be listed here."
         >
-          <Button asChild className="mt-5">
-            <Link to="/">Log a workout</Link>
-          </Button>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <Link to="/">Log a workout</Link>
+            </Button>
+            <LoadDemoDataButton />
+          </div>
         </EmptyState>
       </>
     );

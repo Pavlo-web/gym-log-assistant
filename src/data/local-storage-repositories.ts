@@ -1,15 +1,19 @@
-import { isIsoDate } from "@/lib/date";
+import { isIsoDate, isTimeOfDay } from "@/lib/date";
 import { newId } from "@/lib/id";
 import { BODY_WEIGHT_MAX_KG, BODY_WEIGHT_MIN_KG, EXERCISE_NAME_MAX_LENGTH } from "@/lib/limits";
 import { isSameExercise } from "@/lib/workout";
 import type {
   BodyWeightEntry,
   BodyWeightRepository,
+  DemoDataRepository,
   DraftRepository,
   Exercise,
   ExerciseRepository,
   NewExercise,
+  NewPlannedWorkout,
   NewWorkout,
+  PlannedWorkout,
+  PlannedWorkoutRepository,
   Workout,
   WorkoutDraft,
   WorkoutRepository,
@@ -19,9 +23,11 @@ import {
   REMOVED_DEFAULT_EXERCISES,
   type ExerciseSeed,
 } from "./default-exercises";
+import { buildDemoData, isDemoId } from "./demo-data";
 import {
   bodyWeightEntrySchema,
   exerciseSchema,
+  plannedWorkoutSchema,
   workoutDraftSchema,
   workoutSchema,
 } from "./schemas";
@@ -41,6 +47,7 @@ const EXERCISES_KEY = "gymlog.v1.exercises";
 const WORKOUTS_KEY = "gymlog.v1.workouts";
 const DRAFT_KEY = "gymlog.v1.workout-draft";
 const BODY_WEIGHT_KEY = "gymlog.v1.body-weight";
+const PLANNED_WORKOUTS_KEY = "gymlog.v1.planned-workouts";
 const EXERCISES_MIGRATION_KEY = "gymlog.v1.exercises-defaults-v2";
 const MIGRATION_DONE = "done";
 
@@ -217,3 +224,72 @@ export const exerciseRepository: ExerciseRepository = new LocalExerciseRepositor
 export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
 export const draftRepository: DraftRepository = new LocalDraftRepository();
 export const bodyWeightRepository: BodyWeightRepository = new LocalBodyWeightRepository();
+
+function loadPlannedWorkouts(): PlannedWorkout[] {
+  return readList<PlannedWorkout>(PLANNED_WORKOUTS_KEY, plannedWorkoutSchema);
+}
+
+class LocalPlannedWorkoutRepository implements PlannedWorkoutRepository {
+  /** Soonest first. */
+  async list(): Promise<PlannedWorkout[]> {
+    return loadPlannedWorkouts().sort(
+      (a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time),
+    );
+  }
+
+  async create(data: NewPlannedWorkout): Promise<PlannedWorkout> {
+    if (!isIsoDate(data.date)) throw new Error("Pick a valid date.");
+    if (!isTimeOfDay(data.time)) throw new Error("Pick a valid time.");
+    if (data.exercises.length === 0) throw new Error("Add at least one exercise.");
+    const plan: PlannedWorkout = { ...data, id: newId(), createdAt: new Date().toISOString() };
+    writeList(PLANNED_WORKOUTS_KEY, [...loadPlannedWorkouts(), plan]);
+    return plan;
+  }
+
+  async delete(id: string): Promise<void> {
+    writeList(
+      PLANNED_WORKOUTS_KEY,
+      loadPlannedWorkouts().filter((plan) => plan.id !== id),
+    );
+  }
+}
+
+/** Keeps the records that are not sample data. */
+function withoutDemo<T extends { id: string }>(records: readonly T[]): T[] {
+  return records.filter((record) => !isDemoId(record.id));
+}
+
+class LocalDemoDataRepository implements DemoDataRepository {
+  async has(): Promise<boolean> {
+    return [...loadWorkouts(), ...loadBodyWeight(), ...loadPlannedWorkouts()].some((record) =>
+      isDemoId(record.id),
+    );
+  }
+
+  async load(): Promise<void> {
+    const demo = buildDemoData(new Date(), loadExercises());
+    const ownWeights = withoutDemo(loadBodyWeight());
+    // Body weight has one entry per day, and a day the user logged stays as it is.
+    const ownDays = new Set(ownWeights.map((entry) => entry.date));
+    writeList(WORKOUTS_KEY, [...withoutDemo(loadWorkouts()), ...demo.workouts]);
+    writeList(BODY_WEIGHT_KEY, [
+      ...ownWeights,
+      ...demo.bodyWeight.filter((entry) => !ownDays.has(entry.date)),
+    ]);
+    writeList(PLANNED_WORKOUTS_KEY, [
+      ...withoutDemo(loadPlannedWorkouts()),
+      ...demo.plannedWorkouts,
+    ]);
+  }
+
+  async remove(): Promise<void> {
+    writeList(WORKOUTS_KEY, withoutDemo(loadWorkouts()));
+    writeList(BODY_WEIGHT_KEY, withoutDemo(loadBodyWeight()));
+    writeList(PLANNED_WORKOUTS_KEY, withoutDemo(loadPlannedWorkouts()));
+  }
+}
+
+/** Local implementations; consumers import them through `@/data`. */
+export const plannedWorkoutRepository: PlannedWorkoutRepository =
+  new LocalPlannedWorkoutRepository();
+export const demoDataRepository: DemoDataRepository = new LocalDemoDataRepository();

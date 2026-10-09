@@ -9,13 +9,15 @@ interface DatePickerProps {
   /** Selected day as yyyy-mm-dd; anything else shows the placeholder. */
   value: string;
   onChange: (value: string) => void;
+  /** Earliest selectable day as yyyy-mm-dd. */
+  min?: string;
   /** Latest selectable day as yyyy-mm-dd. */
-  max: string;
+  max?: string;
   id?: string;
 }
 
 /** Button that opens a calendar popover; works with local yyyy-mm-dd strings. */
-export function DatePicker({ value, onChange, max, id }: DatePickerProps) {
+export function DatePicker({ value, onChange, min, max, id }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const selected = isIsoDate(value) ? parseLocalDate(value) : undefined;
 
@@ -37,7 +39,10 @@ export function DatePicker({ value, onChange, max, id }: DatePickerProps) {
           mode="single"
           selected={selected}
           {...(selected ? { defaultMonth: selected } : {})}
-          disabled={{ after: parseLocalDate(max) }}
+          disabled={[
+            ...(min ? [{ before: parseLocalDate(min) }] : []),
+            ...(max ? [{ after: parseLocalDate(max) }] : []),
+          ]}
           weekStartsOn={1}
           className="mobile-calendar pointer-events-auto p-3"
           onSelect={(day) => {

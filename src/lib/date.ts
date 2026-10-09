@@ -45,3 +45,18 @@ export const formatWeekdayDay = formatter("EEE, d MMM yyyy");
 export const formatLongDay = formatter("EEEE, d MMMM yyyy");
 /** "October 2026" */
 export const formatMonth = formatter("MMMM yyyy");
+
+const TIME_OF_DAY_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** True for a 24-hour `HH:mm` time such as "07:30" or "18:00". */
+export function isTimeOfDay(value: string): boolean {
+  return TIME_OF_DAY_PATTERN.test(value);
+}
+
+/** The moment a local `yyyy-MM-dd` day and `HH:mm` time name. */
+export function parseLocalDateTime(date: string, time: string): Date {
+  const [hours, minutes] = time.split(":").map(Number);
+  const moment = parseLocalDate(date);
+  moment.setHours(hours ?? 0, minutes ?? 0, 0, 0);
+  return moment;
+}
