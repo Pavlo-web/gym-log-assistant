@@ -49,7 +49,8 @@ export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
             tickCount={yTickCount(mobile)}
             tick={AXIS_TICK}
             stroke={AXIS_STROKE}
-            width={mobile ? 56 : 64}
+            // Wide enough for a five-digit weekly volume such as "24,000 kg" on one line.
+            width={78}
             tickFormatter={formatNumber}
             unit=" kg"
             allowDecimals={false}

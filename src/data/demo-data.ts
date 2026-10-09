@@ -51,6 +51,7 @@ const SESSIONS: readonly DemoSession[] = [
       { name: "Incline Dumbbell Press", start: 22, gain: 0.5, step: 2, reps: 10 },
       { name: "Triceps Pushdown", start: 25, gain: 0.6, step: 2.5, reps: 12 },
       { name: "Lateral Raise", start: 8, gain: 0.2, step: 1, reps: 12 },
+      { name: "Cable Crunch", start: 30, gain: 0.5, step: 2.5, reps: 12 },
     ],
   },
   {
