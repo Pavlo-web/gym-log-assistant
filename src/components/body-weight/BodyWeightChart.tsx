@@ -15,11 +15,13 @@ import {
   CHART_MARGIN,
   GRID_PROPS,
   paddedDomain,
+  SERIES_ANIMATION,
   SERIES_COLOR,
   yTickCount,
   type TooltipProps,
 } from "@/components/charts/chart-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { formatDay, formatDayMonth } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 import type { BodyWeightEntry } from "@/types/domain";
@@ -48,6 +50,7 @@ interface BodyWeightChartProps {
 /** Line chart of body weight over time. Default export so the page can lazy-load Recharts. */
 export default function BodyWeightChart({ entries }: BodyWeightChartProps) {
   const mobile = useIsMobile();
+  const reducedMotion = useReducedMotion();
   const domain = paddedDomain(
     entries.map((entry) => entry.weight),
     AXIS_HEADROOM_SHARE,
@@ -81,7 +84,8 @@ export default function BodyWeightChart({ entries }: BodyWeightChartProps) {
             strokeWidth={2}
             dot={{ r: 3, fill: SERIES_COLOR, stroke: SERIES_COLOR }}
             activeDot={{ r: 5 }}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            {...SERIES_ANIMATION}
           />
         </LineChart>
       </ResponsiveContainer>

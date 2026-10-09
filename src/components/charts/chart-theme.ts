@@ -4,6 +4,9 @@ export const AXIS_STROKE = "var(--border)";
 export const SERIES_COLOR = "var(--chart-1)";
 export const CHART_MARGIN = { top: 10, right: 16, left: 0, bottom: 0 };
 
+/** How a series draws itself in: spread onto `<Bar />` or `<Line />`. */
+export const SERIES_ANIMATION = { animationDuration: 700, animationEasing: "ease-out" } as const;
+
 /** Horizontal dashed grid lines: spread onto `<CartesianGrid />`. */
 export const GRID_PROPS = { stroke: AXIS_STROKE, strokeDasharray: "3 3", vertical: false };
 

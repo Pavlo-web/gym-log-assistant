@@ -6,11 +6,13 @@ import {
   AXIS_TICK,
   CHART_MARGIN,
   GRID_PROPS,
+  SERIES_ANIMATION,
   SERIES_COLOR,
   yTickCount,
   type TooltipProps,
 } from "@/components/charts/chart-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { WeekBucket } from "@/lib/dashboard";
 import { formatDay, formatDayMonth } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
@@ -29,6 +31,7 @@ function WeekTooltip(props: TooltipProps<WeekBucket>) {
 /** Bar chart of total volume per week. Default export so the page can lazy-load Recharts. */
 export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
   const mobile = useIsMobile();
+  const reducedMotion = useReducedMotion();
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -56,7 +59,8 @@ export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
             dataKey="volume"
             fill={SERIES_COLOR}
             radius={[3, 3, 0, 0]}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            {...SERIES_ANIMATION}
           />
         </BarChart>
       </ResponsiveContainer>

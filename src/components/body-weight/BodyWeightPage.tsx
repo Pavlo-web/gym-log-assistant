@@ -43,7 +43,7 @@ function Summary({ summary }: { summary: BodyWeightSummary }) {
     <div className="mb-6 grid grid-cols-1 gap-3 min-[350px]:grid-cols-2 md:gap-4 lg:grid-cols-4">
       <StatTile
         label="Current"
-        value={`${formatNumber(latest.weight)} kg`}
+        value={{ amount: latest.weight, format: (kg) => `${formatNumber(kg)} kg` }}
         detail={formatDay(latest.date)}
       />
       <StatTile

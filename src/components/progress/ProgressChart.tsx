@@ -15,11 +15,13 @@ import {
   CHART_MARGIN,
   GRID_PROPS,
   paddedDomain,
+  SERIES_ANIMATION,
   SERIES_COLOR,
   yTickCount,
   type TooltipProps,
 } from "@/components/charts/chart-theme";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { formatDay, formatDayMonth } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 import type { ExercisePoint } from "@/lib/progress";
@@ -51,6 +53,7 @@ interface ProgressChartProps {
 /** Line chart of one metric over time. Default export so the page can lazy-load Recharts. */
 export default function ProgressChart({ points, metric }: ProgressChartProps) {
   const mobile = useIsMobile();
+  const reducedMotion = useReducedMotion();
   const domain = paddedDomain(points.map((point) => point[metric]));
   return (
     <div className="h-72 w-full">
@@ -81,7 +84,8 @@ export default function ProgressChart({ points, metric }: ProgressChartProps) {
             strokeWidth={2}
             dot={{ r: 4, fill: SERIES_COLOR, stroke: SERIES_COLOR }}
             activeDot={{ r: 6 }}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            {...SERIES_ANIMATION}
           />
         </LineChart>
       </ResponsiveContainer>
