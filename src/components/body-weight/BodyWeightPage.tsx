@@ -30,6 +30,13 @@ const HEADER = (
   <PageHeader title="Body weight" description="Track your weight alongside your training" />
 );
 
+/** A range needs two entries; equal weights collapse to a single value. */
+function formatRange(lowest: number, highest: number, singleEntry: boolean): string {
+  if (singleEntry) return "–";
+  if (lowest === highest) return `${formatNumber(lowest)} kg`;
+  return `${formatNumber(lowest)}–${formatNumber(highest)} kg`;
+}
+
 function Summary({ summary }: { summary: BodyWeightSummary }) {
   const { latest, sincePrevious, overTrend, lowest, highest } = summary;
   return (
@@ -47,7 +54,7 @@ function Summary({ summary }: { summary: BodyWeightSummary }) {
         label={`Last ${TREND_DAYS} days`}
         value={overTrend === null ? "–" : formatWeightChange(overTrend)}
       />
-      <StatTile label="Range" value={`${formatNumber(lowest)}–${formatNumber(highest)} kg`} />
+      <StatTile label="Range" value={formatRange(lowest, highest, sincePrevious === null)} />
     </div>
   );
 }
