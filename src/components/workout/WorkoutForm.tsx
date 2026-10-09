@@ -19,22 +19,27 @@ import {
   emptyDraft,
   isDraftEmpty,
   setError,
+  setInputError,
+  setStatus,
   toEntries,
 } from "@/lib/draft";
 import { newId } from "@/lib/id";
 import { WORKOUT_NOTES_MAX_LENGTH } from "@/lib/limits";
 import { bestLoggedE1RM } from "@/lib/progress";
-import type { Exercise, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
+import type { DraftSet, Exercise, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
 import { ExerciseCard } from "./ExerciseCard";
 import { ExercisePicker } from "./ExercisePicker";
 import { WorkoutSummary } from "./WorkoutSummary";
 
-/** Validation messages for every invalid set, keyed by set id. */
-function collectSetErrors(draft: WorkoutDraft): Record<string, string> {
+/** Validation messages keyed by set id, using `check` to judge each set. */
+function collectSetErrors(
+  draft: WorkoutDraft,
+  check: (set: DraftSet) => string | null,
+): Record<string, string> {
   const errors: Record<string, string> = {};
   for (const entry of draft.entries) {
     for (const set of entry.sets) {
-      const message = setError(set);
+      const message = check(set);
       if (message) errors[set.id] = message;
     }
   }
@@ -117,7 +122,12 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     [exercises],
   );
   const entries = withExerciseSnapshots(toEntries(draft), exercisesById);
-  const setErrors = showErrors ? collectSetErrors(draft) : {};
+  // While typing, only values that are present and wrong are flagged. After a save
+  // attempt the full check applies, which also reports fields left empty.
+  const setErrors = collectSetErrors(draft, showErrors ? setError : setInputError);
+  const hasTypedSets = draft.entries.some((entry) =>
+    entry.sets.some((set) => setStatus(set) !== "empty"),
+  );
   const dateError = validateDate(draft.date, today);
   const saving = createWorkout.isPending || updateWorkout.isPending;
 
@@ -195,7 +205,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
   }
 
   async function save() {
-    if (Object.keys(collectSetErrors(draft)).length > 0) {
+    if (Object.keys(collectSetErrors(draft, setError)).length > 0) {
       setShowErrors(true);
       setFormError("Fix the highlighted sets before saving.");
       return;
@@ -323,7 +333,8 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
             Discard
           </Button>
         )}
-        <Button disabled={entries.length === 0 || saving} onClick={() => void save()}>
+        {/* Enabled as soon as anything is typed, so pressing it can explain what is wrong. */}
+        <Button disabled={!hasTypedSets || saving} onClick={() => void save()}>
           {editing ? "Save changes" : "Save workout"}
         </Button>
       </div>

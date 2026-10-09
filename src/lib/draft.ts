@@ -31,21 +31,37 @@ export function draftFromWorkout(workout: Workout): WorkoutDraft {
   };
 }
 
+function weightProblem(text: string): string | null {
+  const weight = parseDecimal(text);
+  const valid = Number.isFinite(weight) && weight >= 0 && weight <= SET_WEIGHT_MAX_KG;
+  return valid ? null : `Weight must be 0–${SET_WEIGHT_MAX_KG} kg.`;
+}
+
+function repsProblem(text: string): string | null {
+  const reps = parseInteger(text);
+  const valid = Number.isInteger(reps) && reps >= SET_REPS_MIN && reps <= SET_REPS_MAX;
+  return valid ? null : `Reps must be a whole number ${SET_REPS_MIN}–${SET_REPS_MAX}.`;
+}
+
 /** Validation message for a set, or null when it is valid or still untouched. */
 export function setError(set: DraftSet): string | null {
   const weightText = set.weight.trim();
   const repsText = set.reps.trim();
   if (!weightText && !repsText) return null;
+  return weightProblem(weightText) ?? repsProblem(repsText);
+}
 
-  const weight = parseDecimal(weightText);
-  if (!Number.isFinite(weight) || weight < 0 || weight > SET_WEIGHT_MAX_KG) {
-    return `Weight must be 0–${SET_WEIGHT_MAX_KG} kg.`;
-  }
-  const reps = parseInteger(repsText);
-  if (!Number.isInteger(reps) || reps < SET_REPS_MIN || reps > SET_REPS_MAX) {
-    return `Reps must be a whole number ${SET_REPS_MIN}–${SET_REPS_MAX}.`;
-  }
-  return null;
+/**
+ * Message for a value that is typed in but not acceptable, shown while typing.
+ * A field that is still empty is not reported here: the user may simply not
+ * have reached it yet, so that is left to `setError` when saving.
+ */
+export function setInputError(set: DraftSet): string | null {
+  const weightText = set.weight.trim();
+  const repsText = set.reps.trim();
+  return (
+    (weightText ? weightProblem(weightText) : null) ?? (repsText ? repsProblem(repsText) : null)
+  );
 }
 
 export function setStatus(set: DraftSet): SetStatus {
