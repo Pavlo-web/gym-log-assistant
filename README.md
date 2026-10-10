@@ -82,10 +82,12 @@ Before pushing, run the type check, lint and build.
 ```
 src/
   routes/       One file per URL. Routes are thin: page metadata plus the page component.
-  components/   UI, one folder per page, plus pieces shared between pages.
+  components/   UI, one folder per page, plus pieces shared between pages. A form keeps its
+                state and saving in a hook next to it (WorkoutForm.tsx + useWorkoutForm.ts).
     ui/         shadcn/ui primitives and the app inputs (number-input, date-picker, time-picker).
     charts/     Styling and tooltip shared by the charts.
-  hooks/        TanStack Query hooks: the only way components read or change data.
+  hooks/        TanStack Query hooks, the only way components read or change data, and a few
+                small UI hooks (count-up, current time, reduced motion).
   data/         Repositories (localStorage), storage access with validation, default exercises.
   lib/          Pure functions with no React: calculations, dates, numbers, validation.
   types/        Domain types and the repository interfaces.
