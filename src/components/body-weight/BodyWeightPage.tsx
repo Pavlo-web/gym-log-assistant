@@ -1,5 +1,3 @@
-import { SectionTitle } from "@/components/SectionTitle";
-import { Surface } from "@/components/Surface";
 import { lazy, Suspense, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { Weight } from "lucide-react";
@@ -7,7 +5,9 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
+import { SectionTitle } from "@/components/SectionTitle";
 import { StatTile } from "@/components/StatTile";
+import { Surface } from "@/components/Surface";
 import { StorageWriteError } from "@/data";
 import { useBodyWeight, useDeleteBodyWeight } from "@/hooks/useBodyWeight";
 import {
@@ -24,7 +24,6 @@ import { formatNumber } from "@/lib/number";
 import { BodyWeightForm } from "./BodyWeightForm";
 import { BodyWeightLog } from "./BodyWeightLog";
 
-// Recharts is heavy and browser-only, so the chart loads on demand on the client.
 const BodyWeightChart = lazy(() => import("./BodyWeightChart"));
 const chartPlaceholder = <div className="h-64" />;
 

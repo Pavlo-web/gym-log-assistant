@@ -1,15 +1,22 @@
-import { Hint } from "@/components/Hint";
-import { SectionTitle } from "@/components/SectionTitle";
-import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { ArrowLeftRight, Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ExerciseVideoLink } from "@/components/ExerciseVideoLink";
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
-import { setStatus, type DraftRecord, type SetFieldErrors } from "@/lib/draft";
-import { newId } from "@/lib/id";
+import {
+  hasTypedSets,
+  newDraftSet,
+  withSetAdded,
+  withSetChanged,
+  withSetRemoved,
+  type DraftRecord,
+  type SetFieldErrors,
+} from "@/lib/draft";
 import { exerciseLabel } from "@/lib/workout";
-import type { DraftEntry, DraftSet, Exercise } from "@/types/domain";
+import type { DraftEntry, Exercise } from "@/types/domain";
 import { SetRow } from "./SetRow";
 import { weightInputId } from "./set-input-id";
 
@@ -39,32 +46,16 @@ export function ExerciseCard({
 
   // Prefilled from the previous set, since sets usually repeat.
   const addSet = ({ focus = false } = {}) => {
-    const set: DraftSet = {
-      id: newId(),
-      weight: lastSet?.weight ?? "",
-      reps: lastSet?.reps ?? "",
-    };
-    onChange({ ...entry, sets: [...entry.sets, set] });
+    const set = newDraftSet(lastSet?.weight, lastSet?.reps);
+    onChange(withSetAdded(entry, set));
     if (focus) {
       // Wait for the new row to render before moving focus into it.
       requestAnimationFrame(() => document.getElementById(weightInputId(set.id))?.focus());
     }
   };
 
-  const updateSet = (id: string, patch: Partial<DraftSet>) => {
-    onChange({
-      ...entry,
-      sets: entry.sets.map((set) => (set.id === id ? { ...set, ...patch } : set)),
-    });
-  };
-
-  const removeSet = (id: string) => {
-    onChange({ ...entry, sets: entry.sets.filter((set) => set.id !== id) });
-  };
-
   const requestRemove = () => {
-    const hasData = entry.sets.some((set) => setStatus(set) !== "empty");
-    if (hasData) setConfirmingRemove(true);
+    if (hasTypedSets([entry])) setConfirmingRemove(true);
     else onRemove();
   };
 
@@ -124,8 +115,8 @@ export function ExerciseCard({
               set={set}
               errors={errors[set.id] ?? null}
               record={record?.setId === set.id ? record : null}
-              onChange={(patch) => updateSet(set.id, patch)}
-              onRemove={() => removeSet(set.id)}
+              onChange={(patch) => onChange(withSetChanged(entry, set.id, patch))}
+              onRemove={() => onChange(withSetRemoved(entry, set.id))}
               onRepsEnter={set === lastSet ? () => addSet({ focus: true }) : undefined}
             />
           ))}

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { Wordmark } from "@/components/Wordmark";
 import { PRIMARY_ACTION, SIDEBAR_ITEMS } from "@/components/navigation";
 import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/Wordmark";
 
 const ITEM =
   "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors [&_svg]:size-4";

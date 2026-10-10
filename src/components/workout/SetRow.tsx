@@ -1,5 +1,5 @@
-import { Hint } from "@/components/Hint";
 import { X } from "lucide-react";
+import { Hint } from "@/components/Hint";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";

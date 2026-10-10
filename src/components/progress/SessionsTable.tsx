@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Surface } from "@/components/Surface";
-import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { formatDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";

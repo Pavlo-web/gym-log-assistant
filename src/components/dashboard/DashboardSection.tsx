@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Surface } from "@/components/Surface";
-import type { ReactNode } from "react";
 
 interface DashboardSectionProps {
   title: string;

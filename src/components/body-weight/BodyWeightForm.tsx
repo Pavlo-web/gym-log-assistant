@@ -1,69 +1,29 @@
-import { Surface } from "@/components/Surface";
-import { useState, type FormEvent } from "react";
 import { FieldError, FormAlert } from "@/components/FormMessages";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
-import { useSaveBodyWeight } from "@/hooks/useBodyWeight";
-import { bodyWeightError } from "@/lib/body-weight";
-import { todayLocal } from "@/lib/date";
 import { BODY_WEIGHT_MAX_KG, BODY_WEIGHT_MIN_KG, WEIGHT_INPUT_MAX_LENGTH } from "@/lib/limits";
-import { parseDecimal } from "@/lib/number";
 import type { BodyWeightEntry } from "@/types/domain";
+import { useBodyWeightForm } from "./useBodyWeightForm";
 
 const WEIGHT_STEP_KG = 0.1;
 
-interface BodyWeightFormProps {
-  entries: BodyWeightEntry[];
-}
-
-export function BodyWeightForm({ entries }: BodyWeightFormProps) {
-  const save = useSaveBodyWeight();
-  const today = todayLocal();
-  const [date, setDate] = useState(today);
-  // Start from the latest weight: the next measurement is usually close to it.
-  const [weight, setWeight] = useState(() => (entries[0] ? String(entries[0].weight) : ""));
-  const [weightError, setWeightError] = useState("");
-  const [saveError, setSaveError] = useState("");
-
-  const existing = entries.find((entry) => entry.date === date);
-
-  const clearErrors = () => {
-    setWeightError("");
-    setSaveError("");
-  };
-
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    clearErrors();
-    const problem = bodyWeightError(weight);
-    if (problem) {
-      setWeightError(problem);
-      return;
-    }
-    try {
-      await save.mutateAsync({ date, weight: parseDecimal(weight) });
-    } catch (cause) {
-      setSaveError(cause instanceof Error ? cause.message : "Could not save. Try again.");
-    }
-  };
+export function BodyWeightForm({ entries }: { entries: BodyWeightEntry[] }) {
+  const form = useBodyWeightForm(entries);
 
   return (
     <Surface asChild className="mb-6">
-      <form onSubmit={submit} noValidate>
-        {/* Aligned to the top so a message under one field does not push the others down. */}
+      <form onSubmit={form.submit} noValidate>
         <div className="grid gap-4 md:grid-cols-[180px_1fr_auto] md:items-start">
           <div className="space-y-2">
             <Label htmlFor="body-weight-date">Date</Label>
             <DatePicker
               id="body-weight-date"
-              max={today}
-              value={date}
-              onChange={(next) => {
-                setDate(next);
-                clearErrors();
-              }}
+              max={form.today}
+              value={form.date}
+              onChange={form.changeDate}
             />
           </div>
           <div className="space-y-2">
@@ -71,32 +31,28 @@ export function BodyWeightForm({ entries }: BodyWeightFormProps) {
             <NumberInput
               id="body-weight-value"
               aria-label="Weight (kg)"
-              aria-invalid={!!weightError}
+              aria-invalid={!!form.weightError}
               min={BODY_WEIGHT_MIN_KG}
               max={BODY_WEIGHT_MAX_KG}
               step={WEIGHT_STEP_KG}
               stepperLayout="sides"
               maxLength={WEIGHT_INPUT_MAX_LENGTH}
-              value={weight}
-              onValueChange={(next) => {
-                setWeight(next);
-                clearErrors();
-              }}
+              value={form.weight}
+              onValueChange={form.changeWeight}
               placeholder="0"
             />
-            {weightError && <FieldError>{weightError}</FieldError>}
+            {form.weightError && <FieldError>{form.weightError}</FieldError>}
           </div>
-          {/* The top padding equals a label plus its gap, so the button lines up with the fields. */}
           <div className="md:pt-6">
-            <Button type="submit" disabled={save.isPending} className="w-full md:w-auto">
-              {existing ? "Update entry" : "Add entry"}
+            <Button type="submit" disabled={form.saving} className="w-full md:w-auto">
+              {form.existing ? "Update entry" : "Add entry"}
             </Button>
           </div>
         </div>
-        {saveError && <FormAlert className="mt-3">{saveError}</FormAlert>}
-        {existing && !weightError && !saveError && (
+        {form.saveError && <FormAlert className="mt-3">{form.saveError}</FormAlert>}
+        {form.existing && !form.weightError && !form.saveError && (
           <p className="mt-3 text-xs text-muted-foreground">
-            This day already has an entry of {existing.weight} kg. Saving replaces it.
+            This day already has an entry of {form.existing.weight} kg. Saving replaces it.
           </p>
         )}
       </form>

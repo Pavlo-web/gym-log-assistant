@@ -1,11 +1,11 @@
-import { ChipGroup } from "@/components/ChipGroup";
-import { Surface } from "@/components/Surface";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { LineChart as ChartIcon } from "lucide-react";
+import { ChipGroup } from "@/components/ChipGroup";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkouts } from "@/hooks/useWorkouts";

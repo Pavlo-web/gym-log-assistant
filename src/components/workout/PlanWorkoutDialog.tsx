@@ -1,8 +1,4 @@
-import { TimePicker } from "@/components/ui/time-picker";
-import { useState, type FormEvent } from "react";
-import { addDays } from "date-fns";
 import { Plus, X } from "lucide-react";
-import { toast } from "sonner";
 import { FieldError, FormAlert } from "@/components/FormMessages";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -16,15 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreatePlannedWorkout } from "@/hooks/usePlannedWorkouts";
-import { isIsoDate, isTimeOfDay, todayLocal, toIsoDate } from "@/lib/date";
+import { TimePicker } from "@/components/ui/time-picker";
+import { todayLocal } from "@/lib/date";
 import { PLAN_TITLE_MAX_LENGTH } from "@/lib/limits";
-import type { Exercise, PlannedExercise } from "@/types/domain";
 import { ExercisePicker } from "./ExercisePicker";
-
-const DEFAULT_TIME = "18:00";
-
-const tomorrow = (): string => toIsoDate(addDays(new Date(), 1));
+import { usePlanWorkoutForm } from "./usePlanWorkoutForm";
 
 interface PlanWorkoutDialogProps {
   open: boolean;
@@ -32,62 +24,7 @@ interface PlanWorkoutDialogProps {
 }
 
 export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps) {
-  const create = useCreatePlannedWorkout();
-  const today = todayLocal();
-  const [date, setDate] = useState(tomorrow);
-  const [time, setTime] = useState(DEFAULT_TIME);
-  const [title, setTitle] = useState("");
-  const [exercises, setExercises] = useState<PlannedExercise[]>([]);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [timeError, setTimeError] = useState("");
-  const [exercisesError, setExercisesError] = useState("");
-  const [saveError, setSaveError] = useState("");
-
-  const clearErrors = () => {
-    setTimeError("");
-    setExercisesError("");
-    setSaveError("");
-  };
-
-  const reset = () => {
-    setDate(tomorrow());
-    setTime(DEFAULT_TIME);
-    setTitle("");
-    setExercises([]);
-    clearErrors();
-  };
-
-  const addExercise = (exercise: Exercise) => {
-    setExercises((current) => [
-      ...current,
-      {
-        exerciseId: exercise.id,
-        exerciseName: exercise.name,
-        muscleGroup: exercise.muscleGroup,
-      },
-    ]);
-    setExercisesError("");
-    setPickerOpen(false);
-  };
-
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    clearErrors();
-    const validTime = isTimeOfDay(time);
-    if (!validTime) setTimeError("Pick a time");
-    if (exercises.length === 0) setExercisesError("Add at least one exercise");
-    if (!validTime || exercises.length === 0 || !isIsoDate(date)) return;
-
-    const name = title.trim();
-    try {
-      await create.mutateAsync({ date, time, exercises, ...(name ? { title: name } : {}) });
-      toast.success("Workout planned");
-      onOpenChange(false);
-      reset();
-    } catch (cause) {
-      setSaveError(cause instanceof Error ? cause.message : "Could not plan workout. Try again.");
-    }
-  };
+  const form = usePlanWorkoutForm(() => onOpenChange(false));
 
   return (
     <>
@@ -99,24 +36,26 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
               It counts in your statistics only after you log its sets.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={submit} noValidate className="space-y-5 pt-2">
+          <form onSubmit={form.submit} noValidate className="space-y-5 pt-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="plan-date">Date</Label>
-                <DatePicker id="plan-date" min={today} value={date} onChange={setDate} />
+                <DatePicker
+                  id="plan-date"
+                  min={todayLocal()}
+                  value={form.date}
+                  onChange={form.setDate}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plan-time">Time</Label>
                 <TimePicker
                   id="plan-time"
-                  aria-invalid={!!timeError}
-                  value={time}
-                  onChange={(next) => {
-                    setTime(next);
-                    setTimeError("");
-                  }}
+                  aria-invalid={!!form.timeError}
+                  value={form.time}
+                  onChange={form.changeTime}
                 />
-                {timeError && <FieldError>{timeError}</FieldError>}
+                {form.timeError && <FieldError>{form.timeError}</FieldError>}
               </div>
             </div>
 
@@ -127,8 +66,8 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
               <Input
                 id="plan-title"
                 maxLength={PLAN_TITLE_MAX_LENGTH}
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                value={form.title}
+                onChange={(event) => form.setTitle(event.target.value)}
                 placeholder="Leg day"
               />
             </div>
@@ -137,9 +76,9 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
               <Label asChild>
                 <p>Exercises</p>
               </Label>
-              {exercises.length > 0 && (
+              {form.exercises.length > 0 && (
                 <ul className="divide-y divide-border rounded-md border border-border">
-                  {exercises.map((exercise) => (
+                  {form.exercises.map((exercise) => (
                     <li
                       key={exercise.exerciseId}
                       className="flex items-center justify-between gap-2 py-1 pl-3 pr-1 text-sm"
@@ -150,11 +89,7 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
                         size="icon"
                         variant="ghost"
                         aria-label={`Remove ${exercise.exerciseName}`}
-                        onClick={() =>
-                          setExercises((current) =>
-                            current.filter((item) => item.exerciseId !== exercise.exerciseId),
-                          )
-                        }
+                        onClick={() => form.removeExercise(exercise.exerciseId)}
                         className="shrink-0 text-muted-foreground hover:text-danger"
                       >
                         <X />
@@ -163,18 +98,23 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
                   ))}
                 </ul>
               )}
-              <Button type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => form.setPickerOpen(true)}
+              >
                 <Plus /> Add exercise
               </Button>
-              {exercisesError && <FieldError>{exercisesError}</FieldError>}
+              {form.exercisesError && <FieldError>{form.exercisesError}</FieldError>}
             </div>
 
-            {saveError && <FormAlert>{saveError}</FormAlert>}
+            {form.saveError && <FormAlert>{form.saveError}</FormAlert>}
             <DialogFooter className="gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={create.isPending}>
+              <Button type="submit" disabled={form.saving}>
                 Plan workout
               </Button>
             </DialogFooter>
@@ -184,10 +124,10 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
 
       <ExercisePicker
         title="Add exercise"
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-        addedIds={new Set(exercises.map((exercise) => exercise.exerciseId))}
-        onSelect={addExercise}
+        open={form.pickerOpen}
+        onOpenChange={form.setPickerOpen}
+        addedIds={form.addedIds}
+        onSelect={form.addExercise}
       />
     </>
   );

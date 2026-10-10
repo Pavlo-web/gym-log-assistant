@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentProps, type KeyboardEvent } from "react";
+import type { ComponentProps, KeyboardEvent } from "react";
 import { ChevronDown, ChevronUp, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,21 +24,18 @@ const stepPrecision = (step: number): number => (String(step).split(".")[1] ?? "
 
 // A text input, not type="number": a comma works as the decimal separator and there is no
 // browser spinner or scroll-to-change.
-export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(function NumberInput(
-  {
-    value,
-    onValueChange,
-    min,
-    max,
-    step = 1,
-    stepperLayout = "stacked",
-    className,
-    onKeyDown,
-    disabled,
-    ...props
-  },
-  ref,
-) {
+export function NumberInput({
+  value,
+  onValueChange,
+  min,
+  max,
+  step = 1,
+  stepperLayout = "stacked",
+  className,
+  onKeyDown,
+  disabled,
+  ...props
+}: NumberInputProps) {
   const minimum = min === undefined ? -Infinity : Number(min);
   const maximum = max === undefined ? Infinity : Number(max);
   const current = parseDecimal(value);
@@ -70,7 +67,6 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     >
       <Input
         {...props}
-        ref={ref}
         type="text"
         inputMode={allowDecimal ? "decimal" : "numeric"}
         value={value}
@@ -109,4 +105,4 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
       </div>
     </div>
   );
-});
+}

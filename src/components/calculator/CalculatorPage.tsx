@@ -1,8 +1,8 @@
-import { Label } from "@/components/ui/label";
-import { SectionTitle } from "@/components/SectionTitle";
-import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
+import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import { brzycki1RM, epley1RM } from "@/lib/calc";
 import { REPS_INPUT_MAX_LENGTH, WEIGHT_INPUT_MAX_LENGTH } from "@/lib/limits";

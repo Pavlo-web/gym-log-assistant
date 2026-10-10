@@ -1,6 +1,6 @@
-import { Surface } from "@/components/Surface";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
+import { Surface } from "@/components/Surface";
 import { formatWeekdayDay } from "@/lib/date";
 import { exerciseLabel, workoutStats } from "@/lib/workout";
 import type { Exercise, Workout } from "@/types/domain";

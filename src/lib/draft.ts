@@ -1,8 +1,16 @@
 import { epley1RM } from "@/lib/calc";
 import { todayLocal } from "@/lib/date";
+import { newId } from "@/lib/id";
 import { SET_REPS_MAX, SET_REPS_MIN, SET_WEIGHT_MAX_KG } from "@/lib/limits";
 import { parseDecimal, parseInteger } from "@/lib/number";
-import type { DraftEntry, DraftSet, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
+import type {
+  DraftEntry,
+  DraftSet,
+  Exercise,
+  Workout,
+  WorkoutDraft,
+  WorkoutEntry,
+} from "@/types/domain";
 
 export type SetStatus = "empty" | "valid" | "invalid";
 
@@ -99,3 +107,78 @@ export const draftRecord = (entry: DraftEntry, previousBest: number): DraftRecor
   }
   return record;
 };
+
+export const newDraftSet = (weight = "", reps = ""): DraftSet => ({ id: newId(), weight, reps });
+
+export const newDraftEntry = (exercise: Exercise): DraftEntry => ({
+  id: newId(),
+  exerciseId: exercise.id,
+  exerciseName: exercise.name,
+  muscleGroup: exercise.muscleGroup,
+  sets: [newDraftSet()],
+});
+
+export const withExercise = (entry: DraftEntry, exercise: Exercise): DraftEntry => ({
+  ...entry,
+  exerciseId: exercise.id,
+  exerciseName: exercise.name,
+  muscleGroup: exercise.muscleGroup,
+});
+
+export const withSetAdded = (entry: DraftEntry, set: DraftSet): DraftEntry => ({
+  ...entry,
+  sets: [...entry.sets, set],
+});
+
+export const withSetChanged = (
+  entry: DraftEntry,
+  setId: string,
+  patch: Partial<DraftSet>,
+): DraftEntry => ({
+  ...entry,
+  sets: entry.sets.map((set) => (set.id === setId ? { ...set, ...patch } : set)),
+});
+
+export const withSetRemoved = (entry: DraftEntry, setId: string): DraftEntry => ({
+  ...entry,
+  sets: entry.sets.filter((set) => set.id !== setId),
+});
+
+export const hasTypedSets = (entries: readonly DraftEntry[]): boolean =>
+  entries.some((entry) => entry.sets.some((set) => setStatus(set) !== "empty"));
+
+export const collectSetErrors = (
+  draft: WorkoutDraft,
+  check: SetCheck,
+): Record<string, SetFieldErrors> => {
+  const errors: Record<string, SetFieldErrors> = {};
+  for (const entry of draft.entries) {
+    for (const set of entry.sets) {
+      const problems = setFieldErrors(set, check);
+      if (hasFieldErrors(problems)) errors[set.id] = problems;
+    }
+  }
+  return errors;
+};
+
+export const workoutDateError = (date: string, today: string): string => {
+  if (!date) return "Pick a date.";
+  if (date > today) return "Future dates are not allowed.";
+  return "";
+};
+
+// Snapshots the exercise name and group so the workout stays readable if the exercise is deleted.
+export const withExerciseSnapshots = (
+  entries: WorkoutEntry[],
+  exercisesById: ReadonlyMap<string, Exercise>,
+): WorkoutEntry[] =>
+  entries.map((entry) => {
+    const exercise = exercisesById.get(entry.exerciseId);
+    const name = exercise?.name ?? entry.exerciseName;
+    const group = exercise?.muscleGroup ?? entry.muscleGroup;
+    return {
+      ...entry,
+      ...(name ? { exerciseName: name } : {}),
+      ...(group ? { muscleGroup: group } : {}),
+    };
+  });

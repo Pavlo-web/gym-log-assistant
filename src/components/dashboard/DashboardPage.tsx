@@ -1,4 +1,3 @@
-import { Surface } from "@/components/Surface";
 import { lazy, Suspense } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
@@ -6,6 +5,7 @@ import { DemoDataNotice, DemoDataOffer, LoadDemoDataButton } from "@/components/
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";

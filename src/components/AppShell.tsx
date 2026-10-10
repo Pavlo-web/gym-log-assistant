@@ -1,5 +1,5 @@
-import { useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { Sidebar } from "@/components/Sidebar";
 import { Wordmark } from "@/components/Wordmark";

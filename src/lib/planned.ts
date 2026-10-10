@@ -1,5 +1,6 @@
 import { differenceInCalendarDays } from "date-fns";
 import { parseLocalDate, parseLocalDateTime, toIsoDate } from "@/lib/date";
+import { newDraftSet } from "@/lib/draft";
 import { newId } from "@/lib/id";
 import type { PlannedWorkout, WorkoutDraft } from "@/types/domain";
 
@@ -38,6 +39,6 @@ export const draftFromPlan = (plan: PlannedWorkout, now: Date): WorkoutDraft => 
     exerciseId: exercise.exerciseId,
     exerciseName: exercise.exerciseName,
     muscleGroup: exercise.muscleGroup,
-    sets: [{ id: newId(), weight: "", reps: "" }],
+    sets: [newDraftSet()],
   })),
 });

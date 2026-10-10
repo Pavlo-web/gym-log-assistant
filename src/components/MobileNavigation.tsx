@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { MoreHorizontal } from "lucide-react";
+import {
+  MOBILE_ACTION,
+  MOBILE_MORE_ITEMS,
+  MOBILE_TABS,
+  type NavItem,
+} from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -10,12 +16,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  MOBILE_ACTION,
-  MOBILE_MORE_ITEMS,
-  MOBILE_TABS,
-  type NavItem,
-} from "@/components/navigation";
 import { cn } from "@/lib/utils";
 
 const TABS_BEFORE_ACTION = 2;

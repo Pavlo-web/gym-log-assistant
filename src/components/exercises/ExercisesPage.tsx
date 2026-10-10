@@ -5,30 +5,11 @@ import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
 import { useDeleteExercise, useExercises } from "@/hooks/useExercises";
-import { MUSCLE_GROUPS, type Exercise } from "@/types/domain";
+import { groupExercises, type GroupFilter } from "@/lib/workout";
+import type { Exercise } from "@/types/domain";
 import { AddExerciseDialog } from "./AddExerciseDialog";
-import { ExerciseFilters, type GroupFilter } from "./ExerciseFilters";
-import { ExerciseGroupList, type ExerciseGroup } from "./ExerciseGroupList";
-
-const filterExercises = (
-  exercises: readonly Exercise[],
-  search: string,
-  group: GroupFilter,
-): ExerciseGroup[] => {
-  const query = search.trim().toLocaleLowerCase();
-  return MUSCLE_GROUPS.filter((muscleGroup) => group === "All" || group === muscleGroup)
-    .map((muscleGroup) => ({
-      muscleGroup,
-      items: exercises
-        .filter(
-          (exercise) =>
-            exercise.muscleGroup === muscleGroup &&
-            exercise.name.toLocaleLowerCase().includes(query),
-        )
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    }))
-    .filter(({ items }) => items.length > 0);
-};
+import { ExerciseFilters } from "./ExerciseFilters";
+import { ExerciseGroupList } from "./ExerciseGroupList";
 
 export function ExercisesPage() {
   const { data: exercises = [], isPending, isError, refetch } = useExercises();
@@ -39,7 +20,7 @@ export function ExercisesPage() {
   const [deleting, setDeleting] = useState<Exercise | null>(null);
   const [deleteError, setDeleteError] = useState("");
 
-  const groups = filterExercises(exercises, search, group);
+  const groups = groupExercises(exercises, search, group);
 
   const requestDelete = (exercise: Exercise) => {
     setDeleteError("");

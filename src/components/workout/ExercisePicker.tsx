@@ -6,25 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useExercises } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
-import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@/types/domain";
-
-interface ExerciseGroup {
-  group: MuscleGroup;
-  items: Exercise[];
-}
-
-const groupExercises = (exercises: readonly Exercise[], search: string): ExerciseGroup[] => {
-  const query = search.trim().toLocaleLowerCase();
-  return MUSCLE_GROUPS.map((group) => ({
-    group,
-    items: exercises
-      .filter(
-        (exercise) =>
-          exercise.muscleGroup === group && exercise.name.toLocaleLowerCase().includes(query),
-      )
-      .sort((a, b) => a.name.localeCompare(b.name)),
-  })).filter(({ items }) => items.length > 0);
-};
+import { groupExercises, type ExerciseGroup } from "@/lib/workout";
+import type { Exercise } from "@/types/domain";
 
 interface SearchFieldProps {
   value: string;
@@ -72,10 +55,10 @@ function ExerciseList({ groups, addedIds, onSelect, rowClassName }: ExerciseList
   if (isError) return <ListMessage role="alert">Could not load exercises.</ListMessage>;
   if (groups.length === 0) return <ListMessage>No exercises found.</ListMessage>;
 
-  return groups.map(({ group, items }) => (
-    <div key={group}>
+  return groups.map(({ muscleGroup, items }) => (
+    <div key={muscleGroup}>
       <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {group}
+        {muscleGroup}
       </h3>
       <ul>
         {items.map((exercise) => {

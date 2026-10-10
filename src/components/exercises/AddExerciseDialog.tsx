@@ -1,4 +1,3 @@
-import { useState, type FormEvent } from "react";
 import { FieldError, FormAlert } from "@/components/FormMessages";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateExercise } from "@/hooks/useExercises";
 import { EXERCISE_NAME_MAX_LENGTH } from "@/lib/limits";
-import { isSameExercise } from "@/lib/workout";
-import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@/types/domain";
-
-const DEFAULT_GROUP: MuscleGroup = "Chest";
-
-const isMuscleGroup = (value: string): value is MuscleGroup =>
-  (MUSCLE_GROUPS as readonly string[]).includes(value);
+import { MUSCLE_GROUPS, type Exercise } from "@/types/domain";
+import { useAddExerciseForm } from "./useAddExerciseForm";
 
 interface AddExerciseDialogProps {
   open: boolean;
@@ -34,47 +27,11 @@ interface AddExerciseDialogProps {
 }
 
 export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExerciseDialogProps) {
-  const create = useCreateExercise();
-  const [name, setName] = useState("");
-  const [group, setGroup] = useState<MuscleGroup>(DEFAULT_GROUP);
-  const [nameError, setNameError] = useState("");
-  const [saveError, setSaveError] = useState("");
-
-  const clearErrors = () => {
-    setNameError("");
-    setSaveError("");
-  };
+  const form = useAddExerciseForm(exercises, () => onOpenChange(false));
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next);
-    // The typed name is kept so reopening after an accidental close does not lose it.
-    clearErrors();
-  };
-
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = name.trim();
-    clearErrors();
-    if (!trimmed) {
-      setNameError("Enter a name");
-      return;
-    }
-    if (trimmed.length > EXERCISE_NAME_MAX_LENGTH) {
-      setNameError(`Use at most ${EXERCISE_NAME_MAX_LENGTH} characters`);
-      return;
-    }
-    if (exercises.some((exercise) => isSameExercise(exercise, trimmed, group))) {
-      setNameError(`${group} already has an exercise with this name`);
-      return;
-    }
-    try {
-      await create.mutateAsync({ name: trimmed, muscleGroup: group, isCustom: true });
-      onOpenChange(false);
-      setName("");
-      setGroup(DEFAULT_GROUP);
-    } catch (cause) {
-      setSaveError(cause instanceof Error ? cause.message : "Could not add exercise. Try again.");
-    }
+    form.clearErrors();
   };
 
   return (
@@ -83,32 +40,23 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
         <DialogHeader>
           <DialogTitle>Add exercise</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submit} noValidate className="space-y-5 pt-2">
+        <form onSubmit={form.submit} noValidate className="space-y-5 pt-2">
           <div className="space-y-2">
             <Label htmlFor="exercise-name">Name</Label>
             <Input
               id="exercise-name"
               autoFocus
-              aria-invalid={!!nameError}
+              aria-invalid={!!form.nameError}
               maxLength={EXERCISE_NAME_MAX_LENGTH}
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-                clearErrors();
-              }}
+              value={form.name}
+              onChange={(event) => form.changeName(event.target.value)}
               placeholder="Exercise name"
             />
-            {nameError && <FieldError>{nameError}</FieldError>}
+            {form.nameError && <FieldError>{form.nameError}</FieldError>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="exercise-group">Muscle group</Label>
-            <Select
-              value={group}
-              onValueChange={(value) => {
-                if (isMuscleGroup(value)) setGroup(value);
-                clearErrors();
-              }}
-            >
+            <Select value={form.group} onValueChange={form.changeGroup}>
               <SelectTrigger id="exercise-group">
                 <SelectValue />
               </SelectTrigger>
@@ -121,12 +69,12 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
               </SelectContent>
             </Select>
           </div>
-          {saveError && <FormAlert>{saveError}</FormAlert>}
+          {form.saveError && <FormAlert>{form.saveError}</FormAlert>}
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={create.isPending}>
+            <Button type="submit" disabled={form.saving}>
               Add exercise
             </Button>
           </DialogFooter>

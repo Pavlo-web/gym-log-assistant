@@ -1,4 +1,4 @@
-import { format, isValid } from "date-fns";
+import { addDays, format, isValid } from "date-fns";
 
 // Workout dates are local calendar days (`yyyy-MM-dd`). Never pass them through `new Date(string)`
 // or `toISOString()`: those read them as UTC and can shift the day.
@@ -8,6 +8,8 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 export const toIsoDate = (date: Date): string => format(date, ISO_DATE_FORMAT);
 
 export const todayLocal = (): string => toIsoDate(new Date());
+
+export const tomorrowLocal = (): string => toIsoDate(addDays(new Date(), 1));
 
 export const parseLocalDate = (value: string): Date => {
   const [year, month, day] = value.split("-").map(Number);

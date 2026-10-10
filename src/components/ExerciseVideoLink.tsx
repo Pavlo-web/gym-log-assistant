@@ -1,5 +1,5 @@
-import { Hint } from "@/components/Hint";
 import { CirclePlay } from "lucide-react";
+import { Hint } from "@/components/Hint";
 import { Button } from "@/components/ui/button";
 import { exerciseVideoUrl } from "@/lib/workout";
 
