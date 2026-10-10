@@ -313,8 +313,12 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
         </p>
       )}
 
-      {/* Sticks above the bottom navigation on phones; see `.mobile-save-bar` in styles.css. */}
-      <div className="mobile-save-bar sticky z-30 flex items-center justify-end gap-2 border-t border-border bg-background py-3 md:static md:bg-transparent md:pb-0 md:pt-6">
+      {/*
+        On phones the bar is docked to the bottom navigation, edge to edge, so the two read
+        as one block; the buttons sit at the sides to leave the centre to the round nav
+        button. See `.mobile-save-bar` in styles.css.
+      */}
+      <div className="mobile-save-bar fixed inset-x-0 z-30 flex items-center justify-between gap-2 border-t border-sidebar-border bg-sidebar px-3 py-3 md:static md:justify-end md:border-border md:bg-transparent md:px-0 md:pb-0 md:pt-6">
         {workout ? (
           <Button
             variant="ghost"

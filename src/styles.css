@@ -192,17 +192,20 @@
 @media (width < 768px) {
   :root {
     --mobile-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
-    --mobile-action-offset: calc(var(--mobile-nav-height) + 24px);
+    /* Height of the docked save bar: 44px buttons plus 12px padding above and below. */
+    --mobile-save-bar-height: 69px;
   }
 
   .mobile-navigation {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  /* Room for the navigation, a docked save bar and some air above them. */
   .mobile-page {
-    padding-bottom: calc(var(--mobile-action-offset) + 96px);
+    padding-bottom: calc(var(--mobile-nav-height) + var(--mobile-save-bar-height) + 32px);
   }
+  /* Docked flush on top of the navigation: nothing shows between the two. */
   .mobile-save-bar {
-    bottom: var(--mobile-action-offset);
+    bottom: var(--mobile-nav-height);
   }
   .mobile-sheet {
     max-height: 85dvh;
