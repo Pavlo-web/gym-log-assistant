@@ -3,12 +3,7 @@ import { bestEpley1RM, epley1RM } from "@/lib/calc";
 import { cn } from "@/lib/utils";
 import type { WorkoutSet } from "@/types/domain";
 
-/**
- * Sets of one exercise with the estimated 1RM of each; the best set carries a
- * "Best" badge when there is more than one set to compare. On phones the
- * `mobile-detail-table` styles turn each row into a small grid and use
- * `data-label` as the cell caption.
- */
+// On phones `mobile-detail-table` turns each row into a grid captioned by `data-label`.
 export function ExerciseSetsTable({ sets }: { sets: WorkoutSet[] }) {
   const best = bestEpley1RM(sets);
   // Only the first of equal sets is marked, so identical sets do not all light up.

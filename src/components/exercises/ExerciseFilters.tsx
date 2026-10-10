@@ -1,9 +1,8 @@
-import { ChipGroup } from "@/components/ChipGroup";
 import { Search } from "lucide-react";
+import { ChipGroup } from "@/components/ChipGroup";
 import { Input } from "@/components/ui/input";
-import { MUSCLE_GROUPS, type MuscleGroup } from "@/types/domain";
-
-export type GroupFilter = MuscleGroup | "All";
+import type { GroupFilter } from "@/lib/workout";
+import { MUSCLE_GROUPS } from "@/types/domain";
 
 const FILTERS = (["All", ...MUSCLE_GROUPS] satisfies GroupFilter[]).map((value) => ({
   value,
@@ -17,7 +16,6 @@ interface ExerciseFiltersProps {
   onGroupChange: (group: GroupFilter) => void;
 }
 
-/** Search field and muscle-group chips above the exercise library. */
 export function ExerciseFilters({
   search,
   onSearchChange,
@@ -39,7 +37,6 @@ export function ExerciseFilters({
           className="pl-10"
         />
       </div>
-      {/* On phones the chips scroll sideways inside their own row instead of wrapping. */}
       <ChipGroup
         options={FILTERS}
         value={group}

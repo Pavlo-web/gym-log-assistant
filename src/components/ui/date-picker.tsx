@@ -6,17 +6,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { formatDay, isIsoDate, parseLocalDate, toIsoDate } from "@/lib/date";
 
 interface DatePickerProps {
-  /** Selected day as yyyy-mm-dd; anything else shows the placeholder. */
+  // yyyy-mm-dd; anything else shows the placeholder.
   value: string;
   onChange: (value: string) => void;
-  /** Earliest selectable day as yyyy-mm-dd. */
   min?: string;
-  /** Latest selectable day as yyyy-mm-dd. */
   max?: string;
   id?: string;
 }
 
-/** Button that opens a calendar popover; works with local yyyy-mm-dd strings. */
 export function DatePicker({ value, onChange, min, max, id }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const selected = isIsoDate(value) ? parseLocalDate(value) : undefined;

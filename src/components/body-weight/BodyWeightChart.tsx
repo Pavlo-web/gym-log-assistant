@@ -26,7 +26,6 @@ import { formatDay, formatDayMonth } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 import type { BodyWeightEntry } from "@/types/domain";
 
-/** Minimum pixel gap between x-axis labels. */
 const TICK_GAP = { mobile: 50, desktop: 20 };
 
 /** Body weight moves by a kilo or two, so the axis stays tight around the data. */
@@ -43,11 +42,10 @@ function EntryTooltip(props: TooltipProps<BodyWeightEntry>) {
 }
 
 interface BodyWeightChartProps {
-  /** Oldest first. */
   entries: BodyWeightEntry[];
 }
 
-/** Line chart of body weight over time. Default export so the page can lazy-load Recharts. */
+// Default export so the page can lazy-load Recharts.
 export default function BodyWeightChart({ entries }: BodyWeightChartProps) {
   const mobile = useIsMobile();
   const reducedMotion = useReducedMotion();

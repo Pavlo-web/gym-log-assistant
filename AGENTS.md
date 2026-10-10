@@ -21,6 +21,16 @@ below are the conventions to keep when changing code.
 - One component per file. Split a component when it grows past one clear responsibility.
 - Define navigation items once in `src/components/navigation.ts`; the sidebar and the phone bottom bar are both derived from it.
 - Use the shared `ConfirmDialog` for destructive confirmations, `EmptyState` for empty pages, `PageHeader` for page titles, and `LoadingState` / `ErrorState` (with a retry) while a page loads or fails.
+- A component renders; it does not hold a form's logic. State, validation and saving of a form live in a hook next to the component (`WorkoutForm.tsx` + `useWorkoutForm.ts`), and anything that needs no state is a pure function in `src/lib`. One or two simple handlers may stay in the component.
+
+## Code style
+
+- Functions are `const name = (...) => ...`: helpers, hooks, handlers and callbacks. Only React components are `function` declarations. ESLint enforces this in `src/lib`, `src/data` and `src/hooks`.
+- An arrow function is not hoisted: define it above its first use (ESLint `no-use-before-define`).
+- Comment only what the code cannot say: why something is done, a consequence to beware of, an outside constraint, or an example of a format. One line where possible. No comment that repeats a name, a signature or a prop type; if a comment is needed to explain a name, rename it instead.
+- No `forwardRef`: in React 19 `ref` is a regular prop.
+- Imports go in this order: `react`, packages, `@/…` sorted by path, then relative.
+- `src/components/ui` holds generated shadcn components; leave their style as generated. The app's own files there (`number-input`, `date-picker`, `time-picker`, `picker-trigger`) follow these rules.
 
 ## Data
 

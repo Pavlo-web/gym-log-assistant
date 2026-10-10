@@ -1,9 +1,9 @@
-import { SectionTitle } from "@/components/SectionTitle";
-import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { WorkoutSummary } from "@/components/workout/WorkoutSummary";
 import { useExercises } from "@/hooks/useExercises";

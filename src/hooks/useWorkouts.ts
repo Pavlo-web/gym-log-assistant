@@ -4,42 +4,40 @@ import type { NewWorkout } from "@/types/domain";
 
 export const workoutsKey = ["workouts"] as const;
 
-export function useWorkouts() {
-  return useQuery({
+export const useWorkouts = () =>
+  useQuery({
     queryKey: workoutsKey,
     queryFn: () => workoutRepository.list(),
   });
-}
 
-export function useWorkout(id: string | undefined) {
-  return useQuery({
+export const useWorkout = (id: string | undefined) =>
+  useQuery({
     queryKey: [...workoutsKey, id],
     queryFn: () => (id ? workoutRepository.getById(id) : Promise.resolve(null)),
     enabled: !!id,
   });
-}
 
-export function useCreateWorkout() {
+export const useCreateWorkout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: NewWorkout) => workoutRepository.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: workoutsKey }),
   });
-}
+};
 
-export function useUpdateWorkout() {
+export const useUpdateWorkout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<NewWorkout> }) =>
       workoutRepository.update(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: workoutsKey }),
   });
-}
+};
 
-export function useDeleteWorkout() {
+export const useDeleteWorkout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => workoutRepository.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: workoutsKey }),
   });
-}
+};

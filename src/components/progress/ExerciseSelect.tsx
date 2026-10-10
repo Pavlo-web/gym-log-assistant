@@ -14,17 +14,14 @@ import type { LoggedExercise } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 import { MUSCLE_GROUPS } from "@/types/domain";
 
-/** Heading for exercises whose muscle group is unknown (deleted, with no stored group). */
 const UNGROUPED = "Other";
 
 interface ExerciseSelectProps {
   options: LoggedExercise[];
-  /** Id of the selected exercise. */
   value: string;
   onChange: (id: string) => void;
 }
 
-/** Searchable dropdown of exercises, grouped by muscle group. */
 export function ExerciseSelect({ options, value, onChange }: ExerciseSelectProps) {
   const [open, setOpen] = useState(false);
   const current = options.find((option) => option.id === value);

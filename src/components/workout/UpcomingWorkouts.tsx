@@ -1,10 +1,10 @@
-import { Hint } from "@/components/Hint";
-import { SectionTitle } from "@/components/SectionTitle";
-import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { CalendarPlus, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StorageWriteError } from "@/data";
@@ -19,7 +19,6 @@ import { PlanWorkoutDialog } from "./PlanWorkoutDialog";
 interface PlanRowProps {
   plan: PlannedWorkout;
   now: Date;
-  /** True while the workout form is filled from this plan. */
   inProgress: boolean;
   onStart: () => void;
   onDelete: () => void;
@@ -70,12 +69,10 @@ function PlanRow({ plan, now, inProgress, onStart, onDelete }: PlanRowProps) {
 }
 
 interface UpcomingWorkoutsProps {
-  /** Plan the workout form is currently filled from, if any. */
   activePlanId: string | undefined;
   onStart: (plan: PlannedWorkout) => void;
 }
 
-/** Planned workouts with a countdown to each, and the way to plan another. */
 export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProps) {
   const { data: plans = [] } = usePlannedWorkouts();
   const deletePlan = useDeletePlannedWorkout();
@@ -83,7 +80,7 @@ export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProp
   const [planning, setPlanning] = useState(false);
   const [deleting, setDeleting] = useState<PlannedWorkout | null>(null);
 
-  async function confirmDelete() {
+  const confirmDelete = async () => {
     if (!deleting) return;
     try {
       await deletePlan.mutateAsync(deleting.id);
@@ -91,7 +88,7 @@ export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProp
     } catch (cause) {
       toast.error(cause instanceof StorageWriteError ? cause.message : "Could not delete plan");
     }
-  }
+  };
 
   return (
     <Surface as="section" aria-label="Upcoming workouts" className="mb-6">

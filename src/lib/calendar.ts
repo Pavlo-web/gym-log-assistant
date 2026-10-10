@@ -6,15 +6,14 @@ import { toIsoDate } from "./date";
 /** A year of weeks; one extra so the same week of last year is still visible. */
 export const CALENDAR_WEEKS = 53;
 
-/** Shade of a calendar day: 0 is a rest day, 4 the busiest kind of day. */
+// 0 is a rest day, 4 the busiest kind of day.
 export type HeatLevel = 0 | 1 | 2 | 3 | 4;
 const MAX_LEVEL = 4;
 
-/** Columns a month label needs: closer than this to an edge or to another label, it would collide or be cut off. */
+// A month label closer than this to an edge or to another label would collide or be cut off.
 export const LABEL_COLUMNS = 3;
 
 export interface CalendarDay {
-  /** yyyy-mm-dd */
   date: string;
   workouts: number;
   sets: number;
@@ -22,14 +21,11 @@ export interface CalendarDay {
   level: HeatLevel;
   /** After today: shown as an empty slot to keep the last week aligned. */
   future: boolean;
-  /** First workout of the day, for linking to its details. */
   workoutId?: string;
 }
 
 export interface CalendarMonth {
-  /** Index of the week column where the month starts. */
   column: number;
-  /** "Oct" */
   label: string;
 }
 
@@ -37,7 +33,6 @@ export interface TrainingCalendar {
   /** Oldest week first; each week runs Monday to Sunday. */
   weeks: CalendarDay[][];
   months: CalendarMonth[];
-  /** Days with at least one workout in the period. */
   activeDays: number;
 }
 
@@ -48,7 +43,7 @@ interface DayTotals {
   workoutId: string;
 }
 
-function totalsByDate(workouts: readonly Workout[]): Map<string, DayTotals> {
+const totalsByDate = (workouts: readonly Workout[]): Map<string, DayTotals> => {
   const totals = new Map<string, DayTotals>();
   for (const workout of workouts) {
     const day = totals.get(workout.date) ?? {
@@ -63,18 +58,16 @@ function totalsByDate(workouts: readonly Workout[]): Map<string, DayTotals> {
     totals.set(workout.date, day);
   }
   return totals;
-}
+};
 
-/** Shade for a day, scaled against the busiest day of the period by number of sets. */
-function heatLevel(sets: number, workouts: number, busiestSets: number): HeatLevel {
+const heatLevel = (sets: number, workouts: number, busiestSets: number): HeatLevel => {
   if (workouts === 0) return 0;
   if (busiestSets === 0) return 1;
   const level = Math.ceil((sets / busiestSets) * MAX_LEVEL);
   return Math.min(MAX_LEVEL, Math.max(1, level)) as HeatLevel;
-}
+};
 
-/** A label wherever a new month begins, leaving out the ones that would not fit. */
-function monthLabels(mondays: readonly Date[]): CalendarMonth[] {
+const monthLabels = (mondays: readonly Date[]): CalendarMonth[] => {
   const labels: CalendarMonth[] = [];
   mondays.forEach((monday, column) => {
     const previous = mondays[column - 1];
@@ -87,17 +80,13 @@ function monthLabels(mondays: readonly Date[]): CalendarMonth[] {
   const [first, second] = labels;
   const firstIsCrowded = first && second && second.column - first.column < LABEL_COLUMNS;
   return firstIsCrowded ? labels.slice(1) : labels;
-}
+};
 
-/**
- * GitHub-style activity grid: the last `weekCount` weeks ending with the
- * current one, a column per week and a row per weekday starting on Monday.
- */
-export function trainingCalendar(
+export const trainingCalendar = (
   workouts: readonly Workout[],
   today: Date,
   weekCount = CALENDAR_WEEKS,
-): TrainingCalendar {
+): TrainingCalendar => {
   const totals = totalsByDate(workouts);
   const todayIso = toIsoDate(today);
   const currentMonday = startOfWeek(today, { weekStartsOn: 1 });
@@ -130,4 +119,4 @@ export function trainingCalendar(
   );
 
   return { weeks, months: monthLabels(mondays), activeDays: inPeriod.length };
-}
+};

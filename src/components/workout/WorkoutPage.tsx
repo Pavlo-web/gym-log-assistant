@@ -13,16 +13,14 @@ import { WorkoutForm } from "./WorkoutForm";
 
 const FORM_ID = "workout-form";
 
-/** The page for logging a workout, with the planned ones listed above the form. */
 export function WorkoutPage() {
   const draft = useWorkoutDraft();
   const saveDraft = useSaveWorkoutDraft();
   // The form reads its draft on mount, so starting a plan remounts it under a new key.
   const [formVersion, setFormVersion] = useState(0);
-  // Plan waiting for the user to confirm that it may replace the current draft.
   const [replacingWith, setReplacingWith] = useState<PlannedWorkout | null>(null);
 
-  async function start(plan: PlannedWorkout) {
+  const start = async (plan: PlannedWorkout) => {
     try {
       await saveDraft.mutateAsync(draftFromPlan(plan, new Date()));
     } catch (cause) {
@@ -34,12 +32,12 @@ export function WorkoutPage() {
     requestAnimationFrame(() =>
       document.getElementById(FORM_ID)?.scrollIntoView({ block: "start" }),
     );
-  }
+  };
 
-  function requestStart(plan: PlannedWorkout) {
+  const requestStart = (plan: PlannedWorkout) => {
     if (draft.data && !isDraftEmpty(draft.data)) setReplacingWith(plan);
     else void start(plan);
-  }
+  };
 
   return (
     <>

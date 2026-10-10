@@ -1,23 +1,17 @@
-import { Hint } from "@/components/Hint";
-import { SectionTitle } from "@/components/SectionTitle";
 import { Trash2 } from "lucide-react";
 import { ExerciseVideoLink } from "@/components/ExerciseVideoLink";
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Exercise, MuscleGroup } from "@/types/domain";
-
-export interface ExerciseGroup {
-  muscleGroup: MuscleGroup;
-  items: Exercise[];
-}
+import type { ExerciseGroup } from "@/lib/workout";
+import type { Exercise } from "@/types/domain";
 
 interface ExerciseGroupListProps {
   groups: ExerciseGroup[];
-  /** Called for custom exercises only; default exercises cannot be deleted. */
   onDelete: (exercise: Exercise) => void;
 }
 
-/** The exercise library, one section per muscle group. */
 export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) {
   return (
     <div className="space-y-9">

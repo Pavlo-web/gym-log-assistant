@@ -4,25 +4,24 @@ import type { NewPlannedWorkout } from "@/types/domain";
 
 export const plannedWorkoutsKey = ["planned-workouts"] as const;
 
-export function usePlannedWorkouts() {
-  return useQuery({
+export const usePlannedWorkouts = () =>
+  useQuery({
     queryKey: plannedWorkoutsKey,
     queryFn: () => plannedWorkoutRepository.list(),
   });
-}
 
-export function useCreatePlannedWorkout() {
+export const useCreatePlannedWorkout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: NewPlannedWorkout) => plannedWorkoutRepository.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: plannedWorkoutsKey }),
   });
-}
+};
 
-export function useDeletePlannedWorkout() {
+export const useDeletePlannedWorkout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => plannedWorkoutRepository.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: plannedWorkoutsKey }),
   });
-}
+};

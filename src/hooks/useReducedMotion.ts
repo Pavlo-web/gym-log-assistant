@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined" && window.matchMedia(QUERY).matches;
-}
+const prefersReducedMotion = (): boolean =>
+  typeof window !== "undefined" && window.matchMedia(QUERY).matches;
 
-/** True when the user asked the system to minimise animation. */
-export function useReducedMotion(): boolean {
+export const useReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(prefersReducedMotion);
 
   useEffect(() => {
@@ -18,4 +16,4 @@ export function useReducedMotion(): boolean {
   }, []);
 
   return reduced;
-}
+};

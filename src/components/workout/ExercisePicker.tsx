@@ -6,26 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useExercises } from "@/hooks/useExercises";
 import { cn } from "@/lib/utils";
-import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@/types/domain";
-
-interface ExerciseGroup {
-  group: MuscleGroup;
-  items: Exercise[];
-}
-
-/** Exercises matching the search, grouped by muscle group and sorted by name. */
-function groupExercises(exercises: readonly Exercise[], search: string): ExerciseGroup[] {
-  const query = search.trim().toLocaleLowerCase();
-  return MUSCLE_GROUPS.map((group) => ({
-    group,
-    items: exercises
-      .filter(
-        (exercise) =>
-          exercise.muscleGroup === group && exercise.name.toLocaleLowerCase().includes(query),
-      )
-      .sort((a, b) => a.name.localeCompare(b.name)),
-  })).filter(({ items }) => items.length > 0);
-}
+import { groupExercises, type ExerciseGroup } from "@/lib/workout";
+import type { Exercise } from "@/types/domain";
 
 interface SearchFieldProps {
   value: string;
@@ -62,10 +44,8 @@ function ListMessage({ role, children }: { role?: "status" | "alert"; children: 
 
 interface ExerciseListProps {
   groups: ExerciseGroup[];
-  /** Exercises already in the workout; shown as "Added" and not selectable. */
   addedIds: Set<string>;
   onSelect: (exercise: Exercise) => void;
-  /** Extra classes for each row, e.g. a taller tap target on phones. */
   rowClassName?: string;
 }
 
@@ -75,10 +55,10 @@ function ExerciseList({ groups, addedIds, onSelect, rowClassName }: ExerciseList
   if (isError) return <ListMessage role="alert">Could not load exercises.</ListMessage>;
   if (groups.length === 0) return <ListMessage>No exercises found.</ListMessage>;
 
-  return groups.map(({ group, items }) => (
-    <div key={group}>
+  return groups.map(({ muscleGroup, items }) => (
+    <div key={muscleGroup}>
       <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {group}
+        {muscleGroup}
       </h3>
       <ul>
         {items.map((exercise) => {
@@ -106,7 +86,6 @@ function ExerciseList({ groups, addedIds, onSelect, rowClassName }: ExerciseList
 }
 
 interface ExercisePickerProps {
-  /** Heading of the picker, e.g. "Add exercise" or "Change exercise". */
   title: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -114,7 +93,6 @@ interface ExercisePickerProps {
   onSelect: (exercise: Exercise) => void;
 }
 
-/** Searchable exercise list: a bottom sheet on phones, a dialog on larger screens. */
 export function ExercisePicker({
   title,
   open,
@@ -127,15 +105,15 @@ export function ExercisePicker({
   const mobile = useIsMobile();
   const groups = groupExercises(exercises, search);
 
-  function handleOpenChange(next: boolean) {
+  const handleOpenChange = (next: boolean) => {
     onOpenChange(next);
     if (!next) setSearch("");
-  }
+  };
 
-  function handleSelect(exercise: Exercise) {
+  const handleSelect = (exercise: Exercise) => {
     onSelect(exercise);
     setSearch("");
-  }
+  };
 
   if (mobile) {
     return (

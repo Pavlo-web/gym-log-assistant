@@ -1,26 +1,24 @@
-import { Surface } from "@/components/Surface";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { StorageWriteError } from "@/data";
 import { useHasDemoData, useLoadDemoData, useRemoveDemoData } from "@/hooks/useDemoData";
 
-function failureMessage(cause: unknown, fallback: string): string {
-  return cause instanceof StorageWriteError ? cause.message : fallback;
-}
+const failureMessage = (cause: unknown, fallback: string): string =>
+  cause instanceof StorageWriteError ? cause.message : fallback;
 
-/** Fills the app with sample workouts, for looking around before logging anything. */
 export function LoadDemoDataButton({ className }: { className?: string }) {
   const load = useLoadDemoData();
 
-  async function loadDemo() {
+  const loadDemo = async () => {
     try {
       await load.mutateAsync();
       toast.success("Demo data loaded");
     } catch (cause) {
       toast.error(failureMessage(cause, "Could not load demo data"));
     }
-  }
+  };
 
   return (
     <Button
@@ -34,20 +32,19 @@ export function LoadDemoDataButton({ className }: { className?: string }) {
   );
 }
 
-/** Says that sample records are mixed in and offers to remove them; hidden when there are none. */
 export function DemoDataNotice() {
   const { data: hasDemoData } = useHasDemoData();
   const remove = useRemoveDemoData();
   if (!hasDemoData) return null;
 
-  async function removeDemo() {
+  const removeDemo = async () => {
     try {
       await remove.mutateAsync();
       toast.success("Demo data removed");
     } catch (cause) {
       toast.error(failureMessage(cause, "Could not remove demo data"));
     }
-  }
+  };
 
   return (
     <Surface
@@ -69,7 +66,6 @@ export function DemoDataNotice() {
   );
 }
 
-/** Quiet offer under a page that already has records; hidden once sample data is loaded. */
 export function DemoDataOffer() {
   const { data: hasDemoData, isPending } = useHasDemoData();
   if (isPending || hasDemoData) return null;

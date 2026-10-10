@@ -3,9 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 const PADDING = {
-  /** Regular card. */
   default: "p-3 md:p-5",
-  /** One-line notice or banner. */
   compact: "px-4 py-3",
   /** The content brings its own padding, e.g. a full-width table. */
   flush: "",
@@ -16,14 +14,9 @@ interface SurfaceProps extends HTMLAttributes<HTMLElement> {
   /** Style the single child instead of adding an element, e.g. a `form` or a `Link`. */
   asChild?: boolean;
   padding?: keyof typeof PADDING;
-  /** For cards that are clickable as a whole. */
   interactive?: boolean;
 }
 
-/**
- * The card of the app: every bordered block on a page is a Surface, so radius,
- * border, background and padding are defined once.
- */
 export function Surface({
   as = "div",
   asChild = false,

@@ -1,7 +1,6 @@
 import { Surface } from "@/components/Surface";
 import { useCountUp } from "@/hooks/useCountUp";
 
-/** A figure that counts up from zero; `format` turns each step into the shown text. */
 export interface CountedValue {
   amount: number;
   format: (amount: number) => string;
@@ -9,11 +8,8 @@ export interface CountedValue {
 
 interface StatTileProps {
   label: string;
-  /** Fixed text, or a number that counts up when the tile appears. */
   value: string | CountedValue;
-  /** Secondary line under the value, e.g. the change versus an earlier period. */
   detail?: string;
-  /** Small print at the bottom, e.g. the date a record was set. */
   footnote?: string;
 }
 
@@ -21,7 +17,6 @@ function CountUp({ amount, format }: CountedValue) {
   return <>{format(useCountUp(amount))}</>;
 }
 
-/** Bordered tile showing one headline figure with its label. */
 export function StatTile({ label, value, detail, footnote }: StatTileProps) {
   return (
     <Surface>

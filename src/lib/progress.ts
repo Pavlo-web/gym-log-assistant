@@ -2,11 +2,9 @@ import type { Exercise, MuscleGroup, Workout, WorkoutSet } from "@/types/domain"
 import { bestEpley1RM, epley1RM, setsVolume } from "./calc";
 import { exerciseLabel } from "./workout";
 
-/** One training day of a single exercise. */
 export interface ExercisePoint {
   date: string;
   topWeight: number;
-  /** reps of the heaviest set (most reps on ties) */
   topReps: number;
   bestE1RM: number;
   volume: number;
@@ -20,7 +18,6 @@ export interface PersonalRecords {
   maxVolume: { value: number; date: string };
 }
 
-/** An exercise that appears in at least one saved workout. */
 export interface LoggedExercise {
   id: string;
   name: string;
@@ -32,8 +29,7 @@ interface DayBucket {
   workoutIds: string[];
 }
 
-/** Sets of one exercise grouped by date, ascending by date. */
-function setsByDate(workouts: readonly Workout[], exerciseId: string): [string, DayBucket][] {
+const setsByDate = (workouts: readonly Workout[], exerciseId: string): [string, DayBucket][] => {
   const byDate = new Map<string, DayBucket>();
   for (const workout of workouts) {
     const sets = workout.entries
@@ -46,21 +42,22 @@ function setsByDate(workouts: readonly Workout[], exerciseId: string): [string, 
     byDate.set(workout.date, bucket);
   }
   return [...byDate].sort(([a], [b]) => a.localeCompare(b));
-}
+};
 
 /** The heaviest set; more reps wins a tie on weight. */
-function heaviestSet(sets: readonly WorkoutSet[]): WorkoutSet | undefined {
-  return sets.reduce<WorkoutSet | undefined>((top, set) => {
+const heaviestSet = (sets: readonly WorkoutSet[]): WorkoutSet | undefined =>
+  sets.reduce<WorkoutSet | undefined>((top, set) => {
     if (!top) return set;
     const heavier = set.weight > top.weight;
     const sameWeightMoreReps = set.weight === top.weight && set.reps > top.reps;
     return heavier || sameWeightMoreReps ? set : top;
   }, undefined);
-}
 
-/** One point per date containing the exercise, ascending by date. */
-export function exerciseHistory(workouts: readonly Workout[], exerciseId: string): ExercisePoint[] {
-  return setsByDate(workouts, exerciseId).map(([date, { sets, workoutIds }]) => {
+export const exerciseHistory = (
+  workouts: readonly Workout[],
+  exerciseId: string,
+): ExercisePoint[] =>
+  setsByDate(workouts, exerciseId).map(([date, { sets, workoutIds }]) => {
     const top = heaviestSet(sets);
     return {
       date,
@@ -72,13 +69,12 @@ export function exerciseHistory(workouts: readonly Workout[], exerciseId: string
       workoutIds,
     };
   });
-}
 
-/** Personal records; earliest date wins ties. Null when the exercise was never logged. */
-export function personalRecords(
+// Earliest date wins ties.
+export const personalRecords = (
   workouts: readonly Workout[],
   exerciseId: string,
-): PersonalRecords | null {
+): PersonalRecords | null => {
   let maxWeight: PersonalRecords["maxWeight"] | null = null;
   let bestE1RM: PersonalRecords["bestE1RM"] | null = null;
   let maxVolume: PersonalRecords["maxVolume"] | null = null;
@@ -107,13 +103,12 @@ export function personalRecords(
 
   if (!maxWeight || !bestE1RM || !maxVolume) return null;
   return { maxWeight, bestE1RM, maxVolume };
-}
+};
 
-/** Exercises with at least one logged set, most recently trained first. */
-export function loggedExercises(
+export const loggedExercises = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
-): LoggedExercise[] {
+): LoggedExercise[] => {
   const logged = new Map<string, LoggedExercise>();
   for (const workout of workouts) {
     for (const entry of workout.entries) {
@@ -123,22 +118,18 @@ export function loggedExercises(
     }
   }
   return [...logged.values()];
-}
+};
 
-/**
- * Best estimated 1RM ever logged for an exercise; 0 when it was never logged.
- * `excludeWorkoutId` leaves one workout out, so a workout being edited is not
- * compared with its own saved version.
- */
-export function bestLoggedE1RM(
+// `excludeWorkoutId` keeps a workout being edited from competing with its own saved version.
+export const bestLoggedE1RM = (
   workouts: readonly Workout[],
   exerciseId: string,
   excludeWorkoutId?: string,
-): number {
+): number => {
   const sets = workouts
     .filter((workout) => workout.id !== excludeWorkoutId)
     .flatMap((workout) => workout.entries)
     .filter((entry) => entry.exerciseId === exerciseId)
     .flatMap((entry) => entry.sets);
   return bestEpley1RM(sets);
-}
+};

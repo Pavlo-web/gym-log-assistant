@@ -1,27 +1,23 @@
 import { differenceInCalendarDays } from "date-fns";
 import { parseLocalDate, parseLocalDateTime, toIsoDate } from "@/lib/date";
+import { newDraftSet } from "@/lib/draft";
 import { newId } from "@/lib/id";
 import type { PlannedWorkout, WorkoutDraft } from "@/types/domain";
 
-/** Shown for a plan saved without a title. */
 export const UNTITLED_PLAN = "Workout";
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 
-function plural(count: number, unit: string): string {
-  return `${count} ${unit}${count === 1 ? "" : "s"}`;
-}
+const plural = (count: number, unit: string): string => `${count} ${unit}${count === 1 ? "" : "s"}`;
 
 export interface Countdown {
-  /** True once the planned time has come, so the workout can be logged. */
   due: boolean;
   /** "in 2 days", "Tomorrow", "in 3 hours", "in 20 minutes", "Ready to start" or "Overdue". */
   label: string;
 }
 
-/** How long is left until a planned workout, relative to `now`. */
-export function countdown(plan: Pick<PlannedWorkout, "date" | "time">, now: Date): Countdown {
+export const countdown = (plan: Pick<PlannedWorkout, "date" | "time">, now: Date): Countdown => {
   const left = parseLocalDateTime(plan.date, plan.time).getTime() - now.getTime();
   const days = differenceInCalendarDays(parseLocalDate(plan.date), now);
 
@@ -31,24 +27,18 @@ export function countdown(plan: Pick<PlannedWorkout, "date" | "time">, now: Date
   if (left >= HOUR_MS)
     return { due: false, label: `in ${plural(Math.floor(left / HOUR_MS), "hour")}` };
   return { due: false, label: `in ${plural(Math.max(1, Math.ceil(left / MINUTE_MS)), "minute")}` };
-}
+};
 
-/**
- * Form state for logging a planned workout: its exercises with one empty set
- * each. The date is the day it is actually done, because the log has no future
- * dates.
- */
-export function draftFromPlan(plan: PlannedWorkout, now: Date): WorkoutDraft {
-  return {
-    date: toIsoDate(now),
-    notes: plan.title ?? "",
-    planId: plan.id,
-    entries: plan.exercises.map((exercise) => ({
-      id: newId(),
-      exerciseId: exercise.exerciseId,
-      exerciseName: exercise.exerciseName,
-      muscleGroup: exercise.muscleGroup,
-      sets: [{ id: newId(), weight: "", reps: "" }],
-    })),
-  };
-}
+// Dated the day it is actually done: the log has no future dates.
+export const draftFromPlan = (plan: PlannedWorkout, now: Date): WorkoutDraft => ({
+  date: toIsoDate(now),
+  notes: plan.title ?? "",
+  planId: plan.id,
+  entries: plan.exercises.map((exercise) => ({
+    id: newId(),
+    exerciseId: exercise.exerciseId,
+    exerciseName: exercise.exerciseName,
+    muscleGroup: exercise.muscleGroup,
+    sets: [newDraftSet()],
+  })),
+});

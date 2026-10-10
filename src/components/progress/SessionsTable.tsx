@@ -1,18 +1,17 @@
+import { Link } from "@tanstack/react-router";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Surface } from "@/components/Surface";
-import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { formatDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 import type { ExercisePoint, PersonalRecords } from "@/lib/progress";
 
-/** True when any of the exercise's personal records was set on this date. */
-function isRecordDate(records: PersonalRecords | null, date: string): boolean {
+const isRecordDate = (records: PersonalRecords | null, date: string): boolean => {
   if (!records) return false;
   return [records.maxWeight, records.bestE1RM, records.maxVolume].some(
     (record) => record.date === date,
   );
-}
+};
 
 function SessionDate({ point }: { point: ExercisePoint }) {
   const [workoutId] = point.workoutIds;
@@ -35,10 +34,7 @@ interface SessionsTableProps {
   records: PersonalRecords | null;
 }
 
-/**
- * Every session of one exercise. On phones the `mobile-sessions` styles turn
- * each row into a small grid and use `data-label` as the cell caption.
- */
+// On phones `mobile-sessions` turns each row into a grid captioned by `data-label`.
 export function SessionsTable({ points, records }: SessionsTableProps) {
   return (
     <Surface as="section">

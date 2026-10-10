@@ -4,26 +4,25 @@ import type { WorkoutDraft } from "@/types/domain";
 
 export const draftKey = ["workout-draft"] as const;
 
-export function useWorkoutDraft() {
-  return useQuery({
+export const useWorkoutDraft = () =>
+  useQuery({
     queryKey: draftKey,
     queryFn: () => draftRepository.get(),
     staleTime: Infinity,
   });
-}
 
-export function useSaveWorkoutDraft() {
+export const useSaveWorkoutDraft = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (draft: WorkoutDraft) => draftRepository.set(draft),
     onSuccess: (_r, draft) => queryClient.setQueryData(draftKey, draft),
   });
-}
+};
 
-export function useClearWorkoutDraft() {
+export const useClearWorkoutDraft = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => draftRepository.clear(),
     onSuccess: () => queryClient.setQueryData(draftKey, null),
   });
-}
+};

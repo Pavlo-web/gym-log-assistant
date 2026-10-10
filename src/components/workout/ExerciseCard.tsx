@@ -1,33 +1,36 @@
-import { Hint } from "@/components/Hint";
-import { SectionTitle } from "@/components/SectionTitle";
-import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { ArrowLeftRight, Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ExerciseVideoLink } from "@/components/ExerciseVideoLink";
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
-import { setStatus, type DraftRecord, type SetFieldErrors } from "@/lib/draft";
-import { newId } from "@/lib/id";
+import {
+  hasTypedSets,
+  newDraftSet,
+  withSetAdded,
+  withSetChanged,
+  withSetRemoved,
+  type DraftRecord,
+  type SetFieldErrors,
+} from "@/lib/draft";
 import { exerciseLabel } from "@/lib/workout";
-import type { DraftEntry, DraftSet, Exercise } from "@/types/domain";
+import type { DraftEntry, Exercise } from "@/types/domain";
 import { SetRow } from "./SetRow";
 import { weightInputId } from "./set-input-id";
 
 interface ExerciseCardProps {
   entry: DraftEntry;
-  /** Live library exercise; undefined when it has been deleted. */
+  // Undefined when the exercise has been deleted from the library.
   exercise: Exercise | undefined;
-  /** Problems of the sets that have any, keyed by set id. */
   errors: Record<string, SetFieldErrors>;
-  /** The set that beats the previous best of this exercise, if any. */
   record: DraftRecord | null;
   onChange: (entry: DraftEntry) => void;
-  /** Asks the form to open the picker and replace this exercise, keeping the sets. */
   onChangeExercise: () => void;
   onRemove: () => void;
 }
 
-/** One exercise of the workout form with its editable list of sets. */
 export function ExerciseCard({
   entry,
   exercise,
@@ -41,37 +44,20 @@ export function ExerciseCard({
   const { name, group } = exerciseLabel(entry, exercise ? [exercise] : []);
   const lastSet = entry.sets.at(-1);
 
-  /** Adds a set prefilled from the previous one, since sets usually repeat. */
-  function addSet({ focus = false } = {}) {
-    const set: DraftSet = {
-      id: newId(),
-      weight: lastSet?.weight ?? "",
-      reps: lastSet?.reps ?? "",
-    };
-    onChange({ ...entry, sets: [...entry.sets, set] });
+  // Prefilled from the previous set, since sets usually repeat.
+  const addSet = ({ focus = false } = {}) => {
+    const set = newDraftSet(lastSet?.weight, lastSet?.reps);
+    onChange(withSetAdded(entry, set));
     if (focus) {
       // Wait for the new row to render before moving focus into it.
       requestAnimationFrame(() => document.getElementById(weightInputId(set.id))?.focus());
     }
-  }
+  };
 
-  function updateSet(id: string, patch: Partial<DraftSet>) {
-    onChange({
-      ...entry,
-      sets: entry.sets.map((set) => (set.id === id ? { ...set, ...patch } : set)),
-    });
-  }
-
-  function removeSet(id: string) {
-    onChange({ ...entry, sets: entry.sets.filter((set) => set.id !== id) });
-  }
-
-  /** Asks first only when there is entered data to lose. */
-  function requestRemove() {
-    const hasData = entry.sets.some((set) => setStatus(set) !== "empty");
-    if (hasData) setConfirmingRemove(true);
+  const requestRemove = () => {
+    if (hasTypedSets([entry])) setConfirmingRemove(true);
     else onRemove();
-  }
+  };
 
   return (
     <Surface as="section" aria-label={name}>
@@ -129,9 +115,8 @@ export function ExerciseCard({
               set={set}
               errors={errors[set.id] ?? null}
               record={record?.setId === set.id ? record : null}
-              onChange={(patch) => updateSet(set.id, patch)}
-              onRemove={() => removeSet(set.id)}
-              // Enter in the last set adds the next one and moves focus to it.
+              onChange={(patch) => onChange(withSetChanged(entry, set.id, patch))}
+              onRemove={() => onChange(withSetRemoved(entry, set.id))}
               onRepsEnter={set === lastSet ? () => addSet({ focus: true }) : undefined}
             />
           ))}

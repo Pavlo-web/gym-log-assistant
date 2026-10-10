@@ -1,11 +1,10 @@
-import { Surface } from "@/components/Surface";
 import { Link } from "@tanstack/react-router";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { useNow } from "@/hooks/useNow";
 import { usePlannedWorkouts } from "@/hooks/usePlannedWorkouts";
 import { countdown, UNTITLED_PLAN } from "@/lib/planned";
 
-/** The soonest planned workout with its countdown; hidden when nothing is planned. */
 export function NextWorkoutNotice() {
   const { data: plans = [] } = usePlannedWorkouts();
   const now = useNow();

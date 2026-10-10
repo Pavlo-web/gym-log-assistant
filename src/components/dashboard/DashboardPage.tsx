@@ -1,4 +1,3 @@
-import { Surface } from "@/components/Surface";
 import { lazy, Suspense } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
@@ -6,6 +5,7 @@ import { DemoDataNotice, DemoDataOffer, LoadDemoDataButton } from "@/components/
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
+import { Surface } from "@/components/Surface";
 import { Button } from "@/components/ui/button";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
@@ -32,7 +32,6 @@ import { TrainingCalendar } from "./TrainingCalendar";
 const WeeklyVolumeChart = lazy(() => import("./WeeklyVolumeChart"));
 const chartPlaceholder = <div className="h-64" />;
 
-/** Pairs of sections sit side by side once the screen is wide enough for two readable columns. */
 const TWO_COLUMNS = "grid grid-cols-1 gap-x-6 xl:grid-cols-2";
 
 function DashboardHeader() {
@@ -49,9 +48,8 @@ function DashboardHeader() {
   );
 }
 
-function hasUnfinishedDraft(draft: WorkoutDraft | null | undefined): boolean {
-  return !!draft && (draft.entries.length > 0 || draft.notes.trim() !== "");
-}
+const hasUnfinishedDraft = (draft: WorkoutDraft | null | undefined): boolean =>
+  !!draft && (draft.entries.length > 0 || draft.notes.trim() !== "");
 
 function DraftNotice() {
   return (
@@ -68,7 +66,6 @@ function DraftNotice() {
 }
 
 interface OverviewProps {
-  /** Newest first. */
   workouts: Workout[];
   exercises: Exercise[];
 }

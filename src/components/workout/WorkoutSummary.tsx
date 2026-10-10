@@ -3,7 +3,6 @@ import { formatNumber } from "@/lib/number";
 import type { WorkoutEntry } from "@/types/domain";
 
 interface WorkoutSummaryProps {
-  /** Entries that count towards the totals. */
   entries: WorkoutEntry[];
   /**
    * Passed separately because the form counts every exercise on screen, while
@@ -12,7 +11,6 @@ interface WorkoutSummaryProps {
   exerciseCount: number;
 }
 
-/** Exercises / sets / volume totals of a workout. */
 export function WorkoutSummary({ entries, exerciseCount }: WorkoutSummaryProps) {
   const items = [
     { label: "Exercises", value: String(exerciseCount) },

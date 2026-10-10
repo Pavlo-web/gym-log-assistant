@@ -1,85 +1,78 @@
 import { epley1RM } from "@/lib/calc";
 import { todayLocal } from "@/lib/date";
+import { newId } from "@/lib/id";
 import { SET_REPS_MAX, SET_REPS_MIN, SET_WEIGHT_MAX_KG } from "@/lib/limits";
 import { parseDecimal, parseInteger } from "@/lib/number";
-import type { DraftEntry, DraftSet, Workout, WorkoutDraft, WorkoutEntry } from "@/types/domain";
+import type {
+  DraftEntry,
+  DraftSet,
+  Exercise,
+  Workout,
+  WorkoutDraft,
+  WorkoutEntry,
+} from "@/types/domain";
 
 export type SetStatus = "empty" | "valid" | "invalid";
 
-export function emptyDraft(): WorkoutDraft {
-  return { date: todayLocal(), notes: "", entries: [] };
-}
+export const emptyDraft = (): WorkoutDraft => ({ date: todayLocal(), notes: "", entries: [] });
 
-/** A draft the user has not touched: no exercises, no notes and today's date. */
-export function isDraftEmpty(draft: WorkoutDraft): boolean {
-  return draft.entries.length === 0 && draft.notes.trim() === "" && draft.date === todayLocal();
-}
+export const isDraftEmpty = (draft: WorkoutDraft): boolean =>
+  draft.entries.length === 0 && draft.notes.trim() === "" && draft.date === todayLocal();
 
-/** Turns a saved workout back into editable form state. */
-export function draftFromWorkout(workout: Workout): WorkoutDraft {
-  return {
-    date: workout.date,
-    notes: workout.notes ?? "",
-    entries: workout.entries.map((entry) => ({
-      ...entry,
-      sets: entry.sets.map((set) => ({
-        id: set.id,
-        weight: String(set.weight),
-        reps: String(set.reps),
-      })),
+export const draftFromWorkout = (workout: Workout): WorkoutDraft => ({
+  date: workout.date,
+  notes: workout.notes ?? "",
+  entries: workout.entries.map((entry) => ({
+    ...entry,
+    sets: entry.sets.map((set) => ({
+      id: set.id,
+      weight: String(set.weight),
+      reps: String(set.reps),
     })),
-  };
-}
+  })),
+});
 
-/** Error message per field of a set; null where the field is fine. */
 export interface SetFieldErrors {
   weight: string | null;
   reps: string | null;
 }
 
-/**
- * How strictly a set is checked:
- * - "typed": only values that are present and wrong, for feedback while typing.
- *   An empty field is not an error yet: the user may not have reached it.
- * - "complete": a set that has been started must have both fields filled in,
- *   which is what saving requires.
- */
+// "typed": only values that are present and wrong, for feedback while typing.
+// "complete": a started set needs both fields, which is what saving requires.
 export type SetCheck = "typed" | "complete";
 
-function weightProblem(text: string, check: SetCheck): string | null {
+const weightProblem = (text: string, check: SetCheck): string | null => {
   if (!text) return check === "complete" ? "Enter the weight" : null;
   const weight = parseDecimal(text);
   const valid = Number.isFinite(weight) && weight >= 0 && weight <= SET_WEIGHT_MAX_KG;
   return valid ? null : `Enter 0–${SET_WEIGHT_MAX_KG} kg`;
-}
+};
 
-function repsProblem(text: string, check: SetCheck): string | null {
+const repsProblem = (text: string, check: SetCheck): string | null => {
   if (!text) return check === "complete" ? "Enter the reps" : null;
   const reps = parseInteger(text);
   const valid = Number.isInteger(reps) && reps >= SET_REPS_MIN && reps <= SET_REPS_MAX;
   return valid ? null : `Enter ${SET_REPS_MIN}–${SET_REPS_MAX}`;
-}
+};
 
-/** Problems of each field of a set. A set with both fields empty is untouched and has none. */
-export function setFieldErrors(set: DraftSet, check: SetCheck): SetFieldErrors {
+export const setFieldErrors = (set: DraftSet, check: SetCheck): SetFieldErrors => {
   const weightText = set.weight.trim();
   const repsText = set.reps.trim();
   if (!weightText && !repsText) return { weight: null, reps: null };
   return { weight: weightProblem(weightText, check), reps: repsProblem(repsText, check) };
-}
+};
 
-export function hasFieldErrors(errors: SetFieldErrors): boolean {
-  return errors.weight !== null || errors.reps !== null;
-}
+export const hasFieldErrors = (errors: SetFieldErrors): boolean =>
+  errors.weight !== null || errors.reps !== null;
 
-export function setStatus(set: DraftSet): SetStatus {
+export const setStatus = (set: DraftSet): SetStatus => {
   if (!set.weight.trim() && !set.reps.trim()) return "empty";
   return hasFieldErrors(setFieldErrors(set, "complete")) ? "invalid" : "valid";
-}
+};
 
-/** Converts valid sets into domain entries; entries without valid sets are dropped. */
-export function toEntries(draft: WorkoutDraft): WorkoutEntry[] {
-  return draft.entries
+// Entries without a valid set are dropped.
+export const toEntries = (draft: WorkoutDraft): WorkoutEntry[] =>
+  draft.entries
     .map((entry) => ({
       id: entry.id,
       exerciseId: entry.exerciseId,
@@ -94,23 +87,15 @@ export function toEntries(draft: WorkoutDraft): WorkoutEntry[] {
         })),
     }))
     .filter((entry) => entry.sets.length > 0);
-}
 
-/** A set in the form that beats the previous best estimated 1RM of its exercise. */
 export interface DraftRecord {
   setId: string;
-  /** Estimated 1RM of the record set, in kg. */
   estimate: number;
-  /** The best estimate it beats, in kg. */
   previous: number;
 }
 
-/**
- * The record set of a draft entry, if any: its best valid set, when that beats
- * `previousBest`. An exercise with no history has nothing to beat, so its
- * first session is not flagged.
- */
-export function draftRecord(entry: DraftEntry, previousBest: number): DraftRecord | null {
+// An exercise with no history has nothing to beat, so its first session is not flagged.
+export const draftRecord = (entry: DraftEntry, previousBest: number): DraftRecord | null => {
   if (previousBest <= 0) return null;
   let record: DraftRecord | null = null;
   for (const set of entry.sets) {
@@ -121,4 +106,79 @@ export function draftRecord(entry: DraftEntry, previousBest: number): DraftRecor
     }
   }
   return record;
-}
+};
+
+export const newDraftSet = (weight = "", reps = ""): DraftSet => ({ id: newId(), weight, reps });
+
+export const newDraftEntry = (exercise: Exercise): DraftEntry => ({
+  id: newId(),
+  exerciseId: exercise.id,
+  exerciseName: exercise.name,
+  muscleGroup: exercise.muscleGroup,
+  sets: [newDraftSet()],
+});
+
+export const withExercise = (entry: DraftEntry, exercise: Exercise): DraftEntry => ({
+  ...entry,
+  exerciseId: exercise.id,
+  exerciseName: exercise.name,
+  muscleGroup: exercise.muscleGroup,
+});
+
+export const withSetAdded = (entry: DraftEntry, set: DraftSet): DraftEntry => ({
+  ...entry,
+  sets: [...entry.sets, set],
+});
+
+export const withSetChanged = (
+  entry: DraftEntry,
+  setId: string,
+  patch: Partial<DraftSet>,
+): DraftEntry => ({
+  ...entry,
+  sets: entry.sets.map((set) => (set.id === setId ? { ...set, ...patch } : set)),
+});
+
+export const withSetRemoved = (entry: DraftEntry, setId: string): DraftEntry => ({
+  ...entry,
+  sets: entry.sets.filter((set) => set.id !== setId),
+});
+
+export const hasTypedSets = (entries: readonly DraftEntry[]): boolean =>
+  entries.some((entry) => entry.sets.some((set) => setStatus(set) !== "empty"));
+
+export const collectSetErrors = (
+  draft: WorkoutDraft,
+  check: SetCheck,
+): Record<string, SetFieldErrors> => {
+  const errors: Record<string, SetFieldErrors> = {};
+  for (const entry of draft.entries) {
+    for (const set of entry.sets) {
+      const problems = setFieldErrors(set, check);
+      if (hasFieldErrors(problems)) errors[set.id] = problems;
+    }
+  }
+  return errors;
+};
+
+export const workoutDateError = (date: string, today: string): string => {
+  if (!date) return "Pick a date.";
+  if (date > today) return "Future dates are not allowed.";
+  return "";
+};
+
+// Snapshots the exercise name and group so the workout stays readable if the exercise is deleted.
+export const withExerciseSnapshots = (
+  entries: WorkoutEntry[],
+  exercisesById: ReadonlyMap<string, Exercise>,
+): WorkoutEntry[] =>
+  entries.map((entry) => {
+    const exercise = exercisesById.get(entry.exerciseId);
+    const name = exercise?.name ?? entry.exerciseName;
+    const group = exercise?.muscleGroup ?? entry.muscleGroup;
+    return {
+      ...entry,
+      ...(name ? { exerciseName: name } : {}),
+      ...(group ? { muscleGroup: group } : {}),
+    };
+  });

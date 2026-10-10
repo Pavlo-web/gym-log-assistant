@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { MoreHorizontal } from "lucide-react";
+import {
+  MOBILE_ACTION,
+  MOBILE_MORE_ITEMS,
+  MOBILE_TABS,
+  type NavItem,
+} from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -10,23 +16,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  MOBILE_ACTION,
-  MOBILE_MORE_ITEMS,
-  MOBILE_TABS,
-  type NavItem,
-} from "@/components/navigation";
 import { cn } from "@/lib/utils";
 
-/** Tabs shown to the left of the centre button; the rest go to its right. */
 const TABS_BEFORE_ACTION = 2;
 
 const TAB_BUTTON =
   "h-16 min-w-0 flex-col gap-1 rounded-none px-0 text-[10px] font-normal hover:bg-transparent [&_svg]:size-5";
 
-function tabColor(active: boolean): string {
-  return active ? "text-primary" : "text-muted-foreground";
-}
+const tabColor = (active: boolean): string => (active ? "text-primary" : "text-muted-foreground");
 
 function NavTab({ item, pathname }: { item: NavItem; pathname: string }) {
   const Icon = item.icon;
@@ -41,7 +38,6 @@ function NavTab({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-/** Raised round button in the middle of the bar for the primary action. */
 function ActionButton({ item, pathname }: { item: NavItem; pathname: string }) {
   const Icon = item.icon;
   const active = pathname === item.to;
@@ -64,7 +60,6 @@ function ActionButton({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-/** "More" tab: opens a bottom sheet with the sections that do not fit in the bar. */
 function MoreMenu({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false);
   const active = MOBILE_MORE_ITEMS.some((item) => item.to === pathname);
@@ -101,7 +96,6 @@ function MoreMenu({ pathname }: { pathname: string }) {
   );
 }
 
-/** Fixed bottom bar shown on phones instead of the sidebar. */
 export function MobileNavigation() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   return (

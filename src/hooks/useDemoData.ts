@@ -3,27 +3,25 @@ import { demoDataRepository } from "@/data";
 
 export const demoDataKey = ["demo-data"] as const;
 
-/** Whether sample records are currently stored. */
-export function useHasDemoData() {
-  return useQuery({
+export const useHasDemoData = () =>
+  useQuery({
     queryKey: demoDataKey,
     queryFn: () => demoDataRepository.has(),
   });
-}
 
 /** Sample data touches workouts, body weight and plans, so every list is reloaded. */
-export function useLoadDemoData() {
+export const useLoadDemoData = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => demoDataRepository.load(),
     onSuccess: () => queryClient.invalidateQueries(),
   });
-}
+};
 
-export function useRemoveDemoData() {
+export const useRemoveDemoData = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => demoDataRepository.remove(),
     onSuccess: () => queryClient.invalidateQueries(),
   });
-}
+};

@@ -3,7 +3,6 @@ import { ProgressPage } from "@/components/progress/ProgressPage";
 import { pageMeta } from "@/lib/page-meta";
 
 interface ProgressSearch {
-  /** Id of the exercise to show; kept in the URL so the view can be linked and reloaded. */
   exercise?: string;
 }
 

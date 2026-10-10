@@ -1,18 +1,16 @@
+import { Trash2 } from "lucide-react";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Surface } from "@/components/Surface";
-import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatWeightChange, type BodyWeightRow } from "@/lib/body-weight";
 import { formatWeekdayDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 
 interface BodyWeightLogProps {
-  /** Newest first. */
   rows: BodyWeightRow[];
   onDelete: (row: BodyWeightRow) => void;
 }
 
-/** Every entry of the log with its change from the previous one. */
 export function BodyWeightLog({ rows, onDelete }: BodyWeightLogProps) {
   return (
     <Surface as="section">

@@ -10,7 +10,6 @@ function Stat({ value, label }: { value: string | number; label: string }) {
   );
 }
 
-/** Exercises / sets / volume of a workout as three labelled figures. */
 export function WorkoutStats({ stats }: { stats: Stats }) {
   return (
     <>

@@ -1,14 +1,12 @@
 import { Link } from "@tanstack/react-router";
+import { Wordmark } from "@/components/Wordmark";
 import { PRIMARY_ACTION, SIDEBAR_ITEMS } from "@/components/navigation";
 import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/Wordmark";
 
 const ITEM =
   "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors [&_svg]:size-4";
-/** The current page: a lighter row with a coral bar at its left edge. */
 const ACTIVE_ITEM = `${ITEM} bg-sidebar-accent font-medium text-sidebar-accent-foreground before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-primary [&_svg]:text-primary`;
 
-/** Desktop navigation: the main action as a button, then the sections of the app. */
 export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-sidebar-border bg-sidebar px-3 py-7 md:flex">
