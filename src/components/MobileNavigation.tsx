@@ -24,9 +24,7 @@ const TABS_BEFORE_ACTION = 2;
 const TAB_BUTTON =
   "h-16 min-w-0 flex-col gap-1 rounded-none px-0 text-[10px] font-normal hover:bg-transparent [&_svg]:size-5";
 
-function tabColor(active: boolean): string {
-  return active ? "text-primary" : "text-muted-foreground";
-}
+const tabColor = (active: boolean): string => (active ? "text-primary" : "text-muted-foreground");
 
 function NavTab({ item, pathname }: { item: NavItem; pathname: string }) {
   const Icon = item.icon;

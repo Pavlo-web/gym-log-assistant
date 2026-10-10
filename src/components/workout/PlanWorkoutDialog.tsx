@@ -24,9 +24,7 @@ import { ExercisePicker } from "./ExercisePicker";
 
 const DEFAULT_TIME = "18:00";
 
-function tomorrow(): string {
-  return toIsoDate(addDays(new Date(), 1));
-}
+const tomorrow = (): string => toIsoDate(addDays(new Date(), 1));
 
 interface PlanWorkoutDialogProps {
   open: boolean;
@@ -46,21 +44,21 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
   const [exercisesError, setExercisesError] = useState("");
   const [saveError, setSaveError] = useState("");
 
-  function clearErrors() {
+  const clearErrors = () => {
     setTimeError("");
     setExercisesError("");
     setSaveError("");
-  }
+  };
 
-  function reset() {
+  const reset = () => {
     setDate(tomorrow());
     setTime(DEFAULT_TIME);
     setTitle("");
     setExercises([]);
     clearErrors();
-  }
+  };
 
-  function addExercise(exercise: Exercise) {
+  const addExercise = (exercise: Exercise) => {
     setExercises((current) => [
       ...current,
       {
@@ -71,9 +69,9 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
     ]);
     setExercisesError("");
     setPickerOpen(false);
-  }
+  };
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearErrors();
     const validTime = isTimeOfDay(time);
@@ -90,7 +88,7 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
     } catch (cause) {
       setSaveError(cause instanceof Error ? cause.message : "Could not plan workout. Try again.");
     }
-  }
+  };
 
   return (
     <>

@@ -83,7 +83,7 @@ export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProp
   const [planning, setPlanning] = useState(false);
   const [deleting, setDeleting] = useState<PlannedWorkout | null>(null);
 
-  async function confirmDelete() {
+  const confirmDelete = async () => {
     if (!deleting) return;
     try {
       await deletePlan.mutateAsync(deleting.id);
@@ -91,7 +91,7 @@ export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProp
     } catch (cause) {
       toast.error(cause instanceof StorageWriteError ? cause.message : "Could not delete plan");
     }
-  }
+  };
 
   return (
     <Surface as="section" aria-label="Upcoming workouts" className="mb-6">

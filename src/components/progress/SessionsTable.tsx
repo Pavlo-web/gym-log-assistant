@@ -7,12 +7,12 @@ import { formatNumber } from "@/lib/number";
 import type { ExercisePoint, PersonalRecords } from "@/lib/progress";
 
 /** True when any of the exercise's personal records was set on this date. */
-function isRecordDate(records: PersonalRecords | null, date: string): boolean {
+const isRecordDate = (records: PersonalRecords | null, date: string): boolean => {
   if (!records) return false;
   return [records.maxWeight, records.bestE1RM, records.maxVolume].some(
     (record) => record.date === date,
   );
-}
+};
 
 function SessionDate({ point }: { point: ExercisePoint }) {
   const [workoutId] = point.workoutIds;

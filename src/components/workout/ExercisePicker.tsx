@@ -14,7 +14,7 @@ interface ExerciseGroup {
 }
 
 /** Exercises matching the search, grouped by muscle group and sorted by name. */
-function groupExercises(exercises: readonly Exercise[], search: string): ExerciseGroup[] {
+const groupExercises = (exercises: readonly Exercise[], search: string): ExerciseGroup[] => {
   const query = search.trim().toLocaleLowerCase();
   return MUSCLE_GROUPS.map((group) => ({
     group,
@@ -25,7 +25,7 @@ function groupExercises(exercises: readonly Exercise[], search: string): Exercis
       )
       .sort((a, b) => a.name.localeCompare(b.name)),
   })).filter(({ items }) => items.length > 0);
-}
+};
 
 interface SearchFieldProps {
   value: string;
@@ -127,15 +127,15 @@ export function ExercisePicker({
   const mobile = useIsMobile();
   const groups = groupExercises(exercises, search);
 
-  function handleOpenChange(next: boolean) {
+  const handleOpenChange = (next: boolean) => {
     onOpenChange(next);
     if (!next) setSearch("");
-  }
+  };
 
-  function handleSelect(exercise: Exercise) {
+  const handleSelect = (exercise: Exercise) => {
     onSelect(exercise);
     setSearch("");
-  }
+  };
 
   if (mobile) {
     return (

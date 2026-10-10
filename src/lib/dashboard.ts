@@ -35,17 +35,17 @@ export interface RecentPR {
 }
 
 /** Monday (yyyy-mm-dd) of the week containing the given date. */
-export function weekStart(date: string | Date): string {
+export const weekStart = (date: string | Date): string => {
   const day = typeof date === "string" ? parseLocalDate(date) : date;
   return toIsoDate(startOfWeek(day, WEEK_OPTIONS));
-}
+};
 
 /** Last `count` weeks ending with the current week, oldest first; empty weeks are zero. */
-export function weeklyBuckets(
+export const weeklyBuckets = (
   workouts: readonly Workout[],
   today: Date,
   count = DASHBOARD_WEEKS,
-): WeekBucket[] {
+): WeekBucket[] => {
   const currentWeek = startOfWeek(today, WEEK_OPTIONS);
   const buckets: WeekBucket[] = Array.from({ length: count }, (_, index) => ({
     week: toIsoDate(addWeeks(currentWeek, index - count + 1)),
@@ -61,14 +61,14 @@ export function weeklyBuckets(
     bucket.workouts += 1;
   }
   return buckets;
-}
+};
 
 /**
  * Consecutive weeks with a workout, counting back from this week. A week that
  * has not been trained yet does not break the streak: counting then starts
  * from last week.
  */
-export function weeklyStreak(workouts: readonly Workout[], today: Date): number {
+export const weeklyStreak = (workouts: readonly Workout[], today: Date): number => {
   const trainedWeeks = new Set(workouts.map((workout) => weekStart(workout.date)));
   let cursor = startOfWeek(today, WEEK_OPTIONS);
   if (!trainedWeeks.has(toIsoDate(cursor))) cursor = addWeeks(cursor, -1);
@@ -79,21 +79,21 @@ export function weeklyStreak(workouts: readonly Workout[], today: Date): number 
     cursor = addWeeks(cursor, -1);
   }
   return streak;
-}
+};
 
-export function workoutsThisMonth(workouts: readonly Workout[], today: Date): number {
+export const workoutsThisMonth = (workouts: readonly Workout[], today: Date): number => {
   const from = toIsoDate(startOfMonth(today));
   const to = toIsoDate(today);
   return workouts.filter((workout) => workout.date >= from && workout.date <= to).length;
-}
+};
 
 /** Sets per muscle group over the last `days` days (including today); all groups, zeros included. */
-export function muscleGroupSplit(
+export const muscleGroupSplit = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
   today: Date,
   days = MUSCLE_SPLIT_DAYS,
-): MuscleGroupSets[] {
+): MuscleGroupSets[] => {
   const from = toIsoDate(subDays(today, days - 1));
   const to = toIsoDate(today);
   const liveGroups = new Map(exercises.map((exercise) => [exercise.id, exercise.muscleGroup]));
@@ -107,13 +107,13 @@ export function muscleGroupSplit(
     }
   }
   return MUSCLE_GROUPS.map((group) => ({ group, sets: counts.get(group) ?? 0 }));
-}
+};
 
 /** Display name per exercise id: the live library name wins over names stored on entries. */
-function exerciseNames(
+const exerciseNames = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
-): Map<string, string> {
+): Map<string, string> => {
   const names = new Map<string, string>();
   for (const workout of workouts) {
     for (const entry of workout.entries) {
@@ -124,17 +124,17 @@ function exerciseNames(
   }
   for (const exercise of exercises) names.set(exercise.id, exercise.name);
   return names;
-}
+};
 
 /**
  * Sessions that set a new best estimated 1RM for their exercise, newest first.
  * The first session of an exercise counts as a record.
  */
-export function recentPRs(
+export const recentPRs = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
   limit = RECENT_ITEMS,
-): RecentPR[] {
+): RecentPR[] => {
   const names = exerciseNames(workouts, exercises);
   const dates = [...new Set(workouts.map((workout) => workout.date))].sort();
   const records: RecentPR[] = [];
@@ -155,4 +155,4 @@ export function recentPRs(
     }
   }
   return records.sort((a, b) => b.date.localeCompare(a.date) || b.value - a.value).slice(0, limit);
-}
+};

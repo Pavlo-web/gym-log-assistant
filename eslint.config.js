@@ -36,5 +36,35 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // Own code only: the shadcn files in components/ui and the Lovable runtime files keep their style.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/components/ui/**",
+      "src/routeTree.gen.ts",
+      "src/hooks/use-mobile.tsx",
+      "src/lib/utils.ts",
+      "src/lib/error-capture.ts",
+      "src/lib/error-page.ts",
+      "src/lib/lovable-error-reporting.ts",
+      "src/{router,server,start}.{ts,tsx}",
+    ],
+    rules: {
+      // An arrow function is not hoisted, so it must be defined above its first use.
+      "@typescript-eslint/no-use-before-define": ["error", { functions: false }],
+    },
+  },
+  {
+    // No components here, so every function is an arrow function.
+    files: ["src/{lib,data,hooks}/**/*.{ts,tsx}"],
+    ignores: [
+      "src/hooks/use-mobile.tsx",
+      "src/lib/utils.ts",
+      "src/lib/error-capture.ts",
+      "src/lib/error-page.ts",
+      "src/lib/lovable-error-reporting.ts",
+    ],
+    rules: { "func-style": ["error", "expression"] },
+  },
   eslintPluginPrettier,
 );

@@ -24,9 +24,7 @@ type NumberInputProps = Omit<
 const STEPPER_BUTTON = "h-4 w-7 rounded-sm p-0 text-muted-foreground hover:text-foreground";
 
 /** Decimal places of the step, so stepping by 2.5 never yields 7.500000001. */
-function stepPrecision(step: number): number {
-  return (String(step).split(".")[1] ?? "").length;
-}
+const stepPrecision = (step: number): number => (String(step).split(".")[1] ?? "").length;
 
 /**
  * Text field for numbers with up/down steppers (buttons and arrow keys).
@@ -54,21 +52,21 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   const label = props["aria-label"] ?? "value";
   const allowDecimal = !Number.isInteger(step);
 
-  function stepBy(direction: 1 | -1) {
+  const stepBy = (direction: 1 | -1) => {
     // An empty or unreadable field starts from the minimum (or zero when unbounded).
     const fallback = Number.isFinite(minimum) ? minimum : 0;
     const base = Number.isFinite(current) ? current : fallback;
     const next = Number((base + direction * step).toFixed(stepPrecision(step)));
     onValueChange(String(Math.min(maximum, Math.max(minimum, next))));
-  }
+  };
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "ArrowUp" || event.key === "ArrowDown") {
       event.preventDefault();
       stepBy(event.key === "ArrowUp" ? 1 : -1);
     }
     onKeyDown?.(event);
-  }
+  };
 
   return (
     <div

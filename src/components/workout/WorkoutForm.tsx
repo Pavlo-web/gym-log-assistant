@@ -36,7 +36,7 @@ import { ExercisePicker } from "./ExercisePicker";
 import { WorkoutSummary } from "./WorkoutSummary";
 
 /** Problems of every set that has any, keyed by set id. */
-function collectSetErrors(draft: WorkoutDraft, check: SetCheck): Record<string, SetFieldErrors> {
+const collectSetErrors = (draft: WorkoutDraft, check: SetCheck): Record<string, SetFieldErrors> => {
   const errors: Record<string, SetFieldErrors> = {};
   for (const entry of draft.entries) {
     for (const set of entry.sets) {
@@ -45,23 +45,23 @@ function collectSetErrors(draft: WorkoutDraft, check: SetCheck): Record<string, 
     }
   }
   return errors;
-}
+};
 
-function validateDate(date: string, today: string): string {
+const validateDate = (date: string, today: string): string => {
   if (!date) return "Pick a date.";
   if (date > today) return "Future dates are not allowed.";
   return "";
-}
+};
 
 /**
  * Stores the exercise name and muscle group on each entry, preferring the live
  * library values, so the workout stays readable if the exercise is deleted.
  */
-function withExerciseSnapshots(
+const withExerciseSnapshots = (
   entries: WorkoutEntry[],
   exercisesById: ReadonlyMap<string, Exercise>,
-): WorkoutEntry[] {
-  return entries.map((entry) => {
+): WorkoutEntry[] =>
+  entries.map((entry) => {
     const exercise = exercisesById.get(entry.exerciseId);
     const name = exercise?.name ?? entry.exerciseName;
     const group = exercise?.muscleGroup ?? entry.muscleGroup;
@@ -71,7 +71,6 @@ function withExerciseSnapshots(
       ...(group ? { muscleGroup: group } : {}),
     };
   });
-}
 
 interface WorkoutFormProps {
   /** Unsaved draft to resume when logging a new workout. */
@@ -133,24 +132,24 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
   const dateError = validateDate(draft.date, today);
   const saving = createWorkout.isPending || updateWorkout.isPending;
 
-  function update(patch: Partial<WorkoutDraft>) {
+  const update = (patch: Partial<WorkoutDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
     setFormError("");
-  }
+  };
 
-  function resetForm() {
+  const resetForm = () => {
     setDraft(emptyDraft());
     setShowErrors(false);
     setFormError("");
-  }
+  };
 
   /** Opens the picker to add an exercise, or to replace the exercise of `entryId`. */
-  function openPicker(entryId: string | null = null) {
+  const openPicker = (entryId: string | null = null) => {
     setChangingEntryId(entryId);
     setPickerOpen(true);
-  }
+  };
 
-  function addExercise(exercise: Exercise) {
+  const addExercise = (exercise: Exercise) => {
     update({
       entries: [
         ...draft.entries,
@@ -163,10 +162,10 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
         },
       ],
     });
-  }
+  };
 
   /** Swaps the exercise of an entry and keeps the sets already typed in. */
-  function changeExercise(entryId: string, exercise: Exercise) {
+  const changeExercise = (entryId: string, exercise: Exercise) => {
     update({
       entries: draft.entries.map((entry) =>
         entry.id === entryId
@@ -179,24 +178,24 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
           : entry,
       ),
     });
-  }
+  };
 
-  function selectExercise(exercise: Exercise) {
+  const selectExercise = (exercise: Exercise) => {
     if (changingEntryId) changeExercise(changingEntryId, exercise);
     else addExercise(exercise);
     setPickerOpen(false);
-  }
+  };
 
-  async function saveEdited(saved: Workout) {
+  const saveEdited = async (saved: Workout) => {
     await updateWorkout.mutateAsync({
       id: saved.id,
       data: { date: draft.date, entries, notes: draft.notes.trim() },
     });
     toast.success("Workout updated");
     await navigate({ to: "/history/$workoutId", params: { workoutId: saved.id } });
-  }
+  };
 
-  async function saveNew() {
+  const saveNew = async () => {
     const notes = draft.notes.trim();
     const saved = await createWorkout.mutateAsync({
       date: draft.date,
@@ -210,9 +209,9 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     toast.success("Workout saved");
     // Show what was just saved; staying on an emptied form looked like nothing happened.
     await navigate({ to: "/history/$workoutId", params: { workoutId: saved.id } });
-  }
+  };
 
-  async function save() {
+  const save = async () => {
     if (Object.keys(collectSetErrors(draft, "complete")).length > 0) {
       setShowErrors(true);
       setFormError("Some sets need fixing before this workout can be saved.");
@@ -231,7 +230,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
         cause instanceof StorageWriteError ? cause.message : "Could not save workout. Try again.",
       );
     }
-  }
+  };
 
   return (
     <div className="space-y-6">

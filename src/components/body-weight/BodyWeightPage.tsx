@@ -33,11 +33,11 @@ const HEADER = (
 );
 
 /** A range needs two entries; equal weights collapse to a single value. */
-function formatRange(lowest: number, highest: number, singleEntry: boolean): string {
+const formatRange = (lowest: number, highest: number, singleEntry: boolean): string => {
   if (singleEntry) return "–";
   if (lowest === highest) return `${formatNumber(lowest)} kg`;
   return `${formatNumber(lowest)}–${formatNumber(highest)} kg`;
-}
+};
 
 function Summary({ summary }: { summary: BodyWeightSummary }) {
   const { latest, sincePrevious, overTrend, lowest, highest } = summary;
@@ -67,7 +67,7 @@ export function BodyWeightPage() {
   const [deleting, setDeleting] = useState<BodyWeightRow | null>(null);
   const [deleteError, setDeleteError] = useState("");
 
-  async function confirmDelete() {
+  const confirmDelete = async () => {
     if (!deleting) return;
     try {
       setDeleteError("");
@@ -80,7 +80,7 @@ export function BodyWeightPage() {
           : "Could not delete the entry. Try again.",
       );
     }
-  }
+  };
 
   if (isPending) {
     return (

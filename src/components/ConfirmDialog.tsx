@@ -43,10 +43,10 @@ export function ConfirmDialog({
   error,
   size = "sm",
 }: ConfirmDialogProps) {
-  function handleConfirm(event: MouseEvent<HTMLButtonElement>) {
+  const handleConfirm = (event: MouseEvent<HTMLButtonElement>) => {
     if (keepOpenOnConfirm) event.preventDefault();
     onConfirm();
-  }
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>

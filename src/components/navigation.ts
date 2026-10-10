@@ -37,9 +37,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { to: "/calculator", label: "1RM Calculator", icon: Calculator, mobile: "more" },
 ];
 
-function byPlacement(placement: MobilePlacement): NavItem[] {
-  return NAV_ITEMS.filter((item) => item.mobile === placement);
-}
+const byPlacement = (placement: MobilePlacement): NavItem[] =>
+  NAV_ITEMS.filter((item) => item.mobile === placement);
 
 export const MOBILE_TABS = byPlacement("tab");
 export const MOBILE_MORE_ITEMS = byPlacement("more");

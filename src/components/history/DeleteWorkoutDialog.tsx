@@ -15,7 +15,7 @@ export function DeleteWorkoutDialog({ workoutId, open, onOpenChange }: DeleteWor
   const navigate = useNavigate();
   const remove = useDeleteWorkout();
 
-  async function deleteWorkout() {
+  const deleteWorkout = async () => {
     try {
       await remove.mutateAsync(workoutId);
     } catch (cause) {
@@ -24,7 +24,7 @@ export function DeleteWorkoutDialog({ workoutId, open, onOpenChange }: DeleteWor
     }
     toast.success("Workout deleted");
     await navigate({ to: "/history" });
-  }
+  };
 
   return (
     <ConfirmDialog

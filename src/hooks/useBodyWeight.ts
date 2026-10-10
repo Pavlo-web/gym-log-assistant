@@ -3,26 +3,25 @@ import { bodyWeightRepository } from "@/data";
 
 export const bodyWeightKey = ["body-weight"] as const;
 
-export function useBodyWeight() {
-  return useQuery({
+export const useBodyWeight = () =>
+  useQuery({
     queryKey: bodyWeightKey,
     queryFn: () => bodyWeightRepository.list(),
   });
-}
 
-export function useSaveBodyWeight() {
+export const useSaveBodyWeight = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ date, weight }: { date: string; weight: number }) =>
       bodyWeightRepository.save(date, weight),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: bodyWeightKey }),
   });
-}
+};
 
-export function useDeleteBodyWeight() {
+export const useDeleteBodyWeight = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => bodyWeightRepository.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: bodyWeightKey }),
   });
-}
+};

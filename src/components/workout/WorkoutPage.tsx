@@ -22,7 +22,7 @@ export function WorkoutPage() {
   // Plan waiting for the user to confirm that it may replace the current draft.
   const [replacingWith, setReplacingWith] = useState<PlannedWorkout | null>(null);
 
-  async function start(plan: PlannedWorkout) {
+  const start = async (plan: PlannedWorkout) => {
     try {
       await saveDraft.mutateAsync(draftFromPlan(plan, new Date()));
     } catch (cause) {
@@ -34,12 +34,12 @@ export function WorkoutPage() {
     requestAnimationFrame(() =>
       document.getElementById(FORM_ID)?.scrollIntoView({ block: "start" }),
     );
-  }
+  };
 
-  function requestStart(plan: PlannedWorkout) {
+  const requestStart = (plan: PlannedWorkout) => {
     if (draft.data && !isDraftEmpty(draft.data)) setReplacingWith(plan);
     else void start(plan);
-  }
+  };
 
   return (
     <>

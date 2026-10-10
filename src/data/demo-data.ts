@@ -15,9 +15,7 @@ import type {
  */
 const DEMO_ID_PREFIX = "demo-";
 
-export function isDemoId(id: string): boolean {
-  return id.startsWith(DEMO_ID_PREFIX);
-}
+export const isDemoId = (id: string): boolean => id.startsWith(DEMO_ID_PREFIX);
 
 /** How many weeks of training the sample covers, the current week included. */
 const WEEKS = 12;
@@ -101,16 +99,14 @@ const BODY_WEIGHT_WEEKLY_LOSS_KG = 0.2;
 /** Days after Monday on which the sample weighs in. */
 const WEIGH_IN_OFFSETS = [0, 3] as const;
 
-function roundTo(value: number, step: number): number {
-  return Math.round(value / step) * step;
-}
+const roundTo = (value: number, step: number): number => Math.round(value / step) * step;
 
-function buildEntry(
+const buildEntry = (
   lift: DemoLift,
   exercise: Exercise,
   week: number,
   idBase: string,
-): WorkoutEntry {
+): WorkoutEntry => {
   const weight = roundTo(lift.start + lift.gain * week, lift.step);
   const pattern = REP_PATTERNS[week % REP_PATTERNS.length] ?? [0, 0, 0];
   return {
@@ -124,13 +120,13 @@ function buildEntry(
       reps: lift.reps + change,
     })),
   };
-}
+};
 
-function toPlannedExercises(
+const toPlannedExercises = (
   session: DemoSession,
   exercisesByName: ReadonlyMap<string, Exercise>,
-): PlannedExercise[] {
-  return session.lifts.flatMap((lift) => {
+): PlannedExercise[] =>
+  session.lifts.flatMap((lift) => {
     const exercise = exercisesByName.get(lift.name);
     return exercise
       ? [
@@ -142,7 +138,6 @@ function toPlannedExercises(
         ]
       : [];
   });
-}
 
 export interface DemoData {
   workouts: Workout[];
@@ -155,7 +150,7 @@ export interface DemoData {
  * weight trend and two planned workouts. The result depends only on `today`
  * and the exercise library, so loading it twice gives the same records.
  */
-export function buildDemoData(today: Date, exercises: readonly Exercise[]): DemoData {
+export const buildDemoData = (today: Date, exercises: readonly Exercise[]): DemoData => {
   const exercisesByName = new Map(exercises.map((exercise) => [exercise.name, exercise]));
   const todayIso = toIsoDate(today);
   const firstMonday = addDays(startOfWeek(today, { weekStartsOn: 1 }), -(WEEKS - 1) * 7);
@@ -225,4 +220,4 @@ export function buildDemoData(today: Date, exercises: readonly Exercise[]): Demo
   }
 
   return { workouts, bodyWeight, plannedWorkouts };
-}
+};

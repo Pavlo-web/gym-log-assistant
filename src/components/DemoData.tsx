@@ -5,22 +5,21 @@ import { Button } from "@/components/ui/button";
 import { StorageWriteError } from "@/data";
 import { useHasDemoData, useLoadDemoData, useRemoveDemoData } from "@/hooks/useDemoData";
 
-function failureMessage(cause: unknown, fallback: string): string {
-  return cause instanceof StorageWriteError ? cause.message : fallback;
-}
+const failureMessage = (cause: unknown, fallback: string): string =>
+  cause instanceof StorageWriteError ? cause.message : fallback;
 
 /** Fills the app with sample workouts, for looking around before logging anything. */
 export function LoadDemoDataButton({ className }: { className?: string }) {
   const load = useLoadDemoData();
 
-  async function loadDemo() {
+  const loadDemo = async () => {
     try {
       await load.mutateAsync();
       toast.success("Demo data loaded");
     } catch (cause) {
       toast.error(failureMessage(cause, "Could not load demo data"));
     }
-  }
+  };
 
   return (
     <Button
@@ -40,14 +39,14 @@ export function DemoDataNotice() {
   const remove = useRemoveDemoData();
   if (!hasDemoData) return null;
 
-  async function removeDemo() {
+  const removeDemo = async () => {
     try {
       await remove.mutateAsync();
       toast.success("Demo data removed");
     } catch (cause) {
       toast.error(failureMessage(cause, "Could not remove demo data"));
     }
-  }
+  };
 
   return (
     <Surface

@@ -26,12 +26,13 @@ export interface BodyWeightRow extends BodyWeightEntry {
 }
 
 /** Entries oldest first: the order a chart needs. */
-export function chronological(entries: readonly BodyWeightEntry[]): BodyWeightEntry[] {
-  return [...entries].sort((a, b) => a.date.localeCompare(b.date));
-}
+export const chronological = (entries: readonly BodyWeightEntry[]): BodyWeightEntry[] =>
+  [...entries].sort((a, b) => a.date.localeCompare(b.date));
 
 /** Headline numbers of the log; null when it is empty. */
-export function bodyWeightSummary(entries: readonly BodyWeightEntry[]): BodyWeightSummary | null {
+export const bodyWeightSummary = (
+  entries: readonly BodyWeightEntry[],
+): BodyWeightSummary | null => {
   const ordered = chronological(entries);
   const latest = ordered.at(-1);
   if (!latest) return null;
@@ -48,10 +49,10 @@ export function bodyWeightSummary(entries: readonly BodyWeightEntry[]): BodyWeig
     lowest: Math.min(...weights),
     highest: Math.max(...weights),
   };
-}
+};
 
 /** Entries newest first, each with its change from the entry before it. */
-export function bodyWeightRows(entries: readonly BodyWeightEntry[]): BodyWeightRow[] {
+export const bodyWeightRows = (entries: readonly BodyWeightEntry[]): BodyWeightRow[] => {
   const ordered = chronological(entries);
   return ordered
     .map((entry, index) => {
@@ -59,20 +60,20 @@ export function bodyWeightRows(entries: readonly BodyWeightEntry[]): BodyWeightR
       return { ...entry, change: previous ? entry.weight - previous.weight : null };
     })
     .reverse();
-}
+};
 
 /** Validation message for a typed weight, or null when it is acceptable. */
-export function bodyWeightError(input: string): string | null {
+export const bodyWeightError = (input: string): string | null => {
   const weight = parseDecimal(input);
   if (!(weight >= BODY_WEIGHT_MIN_KG && weight <= BODY_WEIGHT_MAX_KG)) {
     return `Enter ${BODY_WEIGHT_MIN_KG}–${BODY_WEIGHT_MAX_KG} kg`;
   }
   return null;
-}
+};
 
 /** "+0.6 kg", "−1.2 kg" or "±0 kg". */
-export function formatWeightChange(change: number): string {
+export const formatWeightChange = (change: number): string => {
   const rounded = Math.round(change * 10) / 10;
   const sign = rounded > 0 ? "+" : rounded < 0 ? "−" : "±";
   return `${sign}${formatNumber(Math.abs(rounded))} kg`;
-}
+};

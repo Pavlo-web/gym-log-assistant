@@ -6,30 +6,25 @@ import type { DraftEntry, DraftSet, Workout, WorkoutDraft, WorkoutEntry } from "
 
 export type SetStatus = "empty" | "valid" | "invalid";
 
-export function emptyDraft(): WorkoutDraft {
-  return { date: todayLocal(), notes: "", entries: [] };
-}
+export const emptyDraft = (): WorkoutDraft => ({ date: todayLocal(), notes: "", entries: [] });
 
 /** A draft the user has not touched: no exercises, no notes and today's date. */
-export function isDraftEmpty(draft: WorkoutDraft): boolean {
-  return draft.entries.length === 0 && draft.notes.trim() === "" && draft.date === todayLocal();
-}
+export const isDraftEmpty = (draft: WorkoutDraft): boolean =>
+  draft.entries.length === 0 && draft.notes.trim() === "" && draft.date === todayLocal();
 
 /** Turns a saved workout back into editable form state. */
-export function draftFromWorkout(workout: Workout): WorkoutDraft {
-  return {
-    date: workout.date,
-    notes: workout.notes ?? "",
-    entries: workout.entries.map((entry) => ({
-      ...entry,
-      sets: entry.sets.map((set) => ({
-        id: set.id,
-        weight: String(set.weight),
-        reps: String(set.reps),
-      })),
+export const draftFromWorkout = (workout: Workout): WorkoutDraft => ({
+  date: workout.date,
+  notes: workout.notes ?? "",
+  entries: workout.entries.map((entry) => ({
+    ...entry,
+    sets: entry.sets.map((set) => ({
+      id: set.id,
+      weight: String(set.weight),
+      reps: String(set.reps),
     })),
-  };
-}
+  })),
+});
 
 /** Error message per field of a set; null where the field is fine. */
 export interface SetFieldErrors {
@@ -46,40 +41,39 @@ export interface SetFieldErrors {
  */
 export type SetCheck = "typed" | "complete";
 
-function weightProblem(text: string, check: SetCheck): string | null {
+const weightProblem = (text: string, check: SetCheck): string | null => {
   if (!text) return check === "complete" ? "Enter the weight" : null;
   const weight = parseDecimal(text);
   const valid = Number.isFinite(weight) && weight >= 0 && weight <= SET_WEIGHT_MAX_KG;
   return valid ? null : `Enter 0–${SET_WEIGHT_MAX_KG} kg`;
-}
+};
 
-function repsProblem(text: string, check: SetCheck): string | null {
+const repsProblem = (text: string, check: SetCheck): string | null => {
   if (!text) return check === "complete" ? "Enter the reps" : null;
   const reps = parseInteger(text);
   const valid = Number.isInteger(reps) && reps >= SET_REPS_MIN && reps <= SET_REPS_MAX;
   return valid ? null : `Enter ${SET_REPS_MIN}–${SET_REPS_MAX}`;
-}
+};
 
 /** Problems of each field of a set. A set with both fields empty is untouched and has none. */
-export function setFieldErrors(set: DraftSet, check: SetCheck): SetFieldErrors {
+export const setFieldErrors = (set: DraftSet, check: SetCheck): SetFieldErrors => {
   const weightText = set.weight.trim();
   const repsText = set.reps.trim();
   if (!weightText && !repsText) return { weight: null, reps: null };
   return { weight: weightProblem(weightText, check), reps: repsProblem(repsText, check) };
-}
+};
 
-export function hasFieldErrors(errors: SetFieldErrors): boolean {
-  return errors.weight !== null || errors.reps !== null;
-}
+export const hasFieldErrors = (errors: SetFieldErrors): boolean =>
+  errors.weight !== null || errors.reps !== null;
 
-export function setStatus(set: DraftSet): SetStatus {
+export const setStatus = (set: DraftSet): SetStatus => {
   if (!set.weight.trim() && !set.reps.trim()) return "empty";
   return hasFieldErrors(setFieldErrors(set, "complete")) ? "invalid" : "valid";
-}
+};
 
 /** Converts valid sets into domain entries; entries without valid sets are dropped. */
-export function toEntries(draft: WorkoutDraft): WorkoutEntry[] {
-  return draft.entries
+export const toEntries = (draft: WorkoutDraft): WorkoutEntry[] =>
+  draft.entries
     .map((entry) => ({
       id: entry.id,
       exerciseId: entry.exerciseId,
@@ -94,7 +88,6 @@ export function toEntries(draft: WorkoutDraft): WorkoutEntry[] {
         })),
     }))
     .filter((entry) => entry.sets.length > 0);
-}
 
 /** A set in the form that beats the previous best estimated 1RM of its exercise. */
 export interface DraftRecord {
@@ -110,7 +103,7 @@ export interface DraftRecord {
  * `previousBest`. An exercise with no history has nothing to beat, so its
  * first session is not flagged.
  */
-export function draftRecord(entry: DraftEntry, previousBest: number): DraftRecord | null {
+export const draftRecord = (entry: DraftEntry, previousBest: number): DraftRecord | null => {
   if (previousBest <= 0) return null;
   let record: DraftRecord | null = null;
   for (const set of entry.sets) {
@@ -121,4 +114,4 @@ export function draftRecord(entry: DraftEntry, previousBest: number): DraftRecor
     }
   }
   return record;
-}
+};

@@ -3,10 +3,10 @@ import type { WeekBucket } from "@/lib/dashboard";
 import { formatNumber } from "@/lib/number";
 
 /** "+2 vs last week", "−150 kg vs last week" or "±0 vs last week". */
-function weekDelta(difference: number, unit = ""): string {
+const weekDelta = (difference: number, unit = ""): string => {
   const sign = difference > 0 ? "+" : difference < 0 ? "−" : "±";
   return `${sign}${formatNumber(Math.abs(difference))}${unit} vs last week`;
-}
+};
 
 interface SummaryTilesProps {
   thisWeek: WeekBucket;

@@ -51,23 +51,34 @@ const PLANNED_WORKOUTS_KEY = "gymlog.v1.planned-workouts";
 const EXERCISES_MIGRATION_KEY = "gymlog.v1.exercises-defaults-v2";
 const MIGRATION_DONE = "done";
 
-function toDefaultExercise(seed: ExerciseSeed): Exercise {
-  return { id: newId(), name: seed.name, muscleGroup: seed.muscleGroup, isCustom: false };
-}
+const toDefaultExercise = (seed: ExerciseSeed): Exercise => ({
+  id: newId(),
+  name: seed.name,
+  muscleGroup: seed.muscleGroup,
+  isCustom: false,
+});
 
 /** Seeding and migrating happen while reading, so their writes are best effort. */
-function seedExercises(): Exercise[] {
+const seedExercises = (): Exercise[] => {
   const seeded = DEFAULT_EXERCISES.map(toDefaultExercise);
   tryWriteList(EXERCISES_KEY, seeded);
   return seeded;
-}
+};
+
+/** Stored defaults keep their original spelling, so removed ones are matched exactly. */
+const isRemovedDefault = (exercise: Exercise): boolean => {
+  if (exercise.isCustom) return false;
+  return REMOVED_DEFAULT_EXERCISES.some(
+    (removed) => removed.muscleGroup === exercise.muscleGroup && removed.name === exercise.name,
+  );
+};
 
 /**
  * Brings an existing library in line with the current defaults: drops defaults
  * that were removed and adds the ones that are missing. Custom exercises are
  * never touched.
  */
-function migrateDefaultExercises(exercises: readonly Exercise[]): Exercise[] {
+const migrateDefaultExercises = (exercises: readonly Exercise[]): Exercise[] => {
   const migrated = exercises.filter((exercise) => !isRemovedDefault(exercise));
 
   for (const seed of DEFAULT_EXERCISES) {
@@ -77,17 +88,9 @@ function migrateDefaultExercises(exercises: readonly Exercise[]): Exercise[] {
     if (!exists) migrated.push(toDefaultExercise(seed));
   }
   return migrated;
-}
+};
 
-/** Stored defaults keep their original spelling, so removed ones are matched exactly. */
-function isRemovedDefault(exercise: Exercise): boolean {
-  if (exercise.isCustom) return false;
-  return REMOVED_DEFAULT_EXERCISES.some(
-    (removed) => removed.muscleGroup === exercise.muscleGroup && removed.name === exercise.name,
-  );
-}
-
-function loadExercises(): Exercise[] {
+const loadExercises = (): Exercise[] => {
   if (!hasStorage()) return [];
   const stored = readList<Exercise>(EXERCISES_KEY, exerciseSchema);
   if (stored.length === 0) return seedExercises();
@@ -98,11 +101,9 @@ function loadExercises(): Exercise[] {
     tryWriteItem(EXERCISES_MIGRATION_KEY, MIGRATION_DONE);
   }
   return migrated;
-}
+};
 
-function loadWorkouts(): Workout[] {
-  return readList<Workout>(WORKOUTS_KEY, workoutSchema);
-}
+const loadWorkouts = (): Workout[] => readList<Workout>(WORKOUTS_KEY, workoutSchema);
 
 class LocalExerciseRepository implements ExerciseRepository {
   async list(): Promise<Exercise[]> {
@@ -189,9 +190,8 @@ class LocalDraftRepository implements DraftRepository {
   }
 }
 
-function loadBodyWeight(): BodyWeightEntry[] {
-  return readList<BodyWeightEntry>(BODY_WEIGHT_KEY, bodyWeightEntrySchema);
-}
+const loadBodyWeight = (): BodyWeightEntry[] =>
+  readList<BodyWeightEntry>(BODY_WEIGHT_KEY, bodyWeightEntrySchema);
 
 class LocalBodyWeightRepository implements BodyWeightRepository {
   /** Newest first. */
@@ -225,9 +225,8 @@ export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository()
 export const draftRepository: DraftRepository = new LocalDraftRepository();
 export const bodyWeightRepository: BodyWeightRepository = new LocalBodyWeightRepository();
 
-function loadPlannedWorkouts(): PlannedWorkout[] {
-  return readList<PlannedWorkout>(PLANNED_WORKOUTS_KEY, plannedWorkoutSchema);
-}
+const loadPlannedWorkouts = (): PlannedWorkout[] =>
+  readList<PlannedWorkout>(PLANNED_WORKOUTS_KEY, plannedWorkoutSchema);
 
 class LocalPlannedWorkoutRepository implements PlannedWorkoutRepository {
   /** Soonest first. */
@@ -255,9 +254,8 @@ class LocalPlannedWorkoutRepository implements PlannedWorkoutRepository {
 }
 
 /** Keeps the records that are not sample data. */
-function withoutDemo<T extends { id: string }>(records: readonly T[]): T[] {
-  return records.filter((record) => !isDemoId(record.id));
-}
+const withoutDemo = <T extends { id: string }>(records: readonly T[]): T[] =>
+  records.filter((record) => !isDemoId(record.id));
 
 class LocalDemoDataRepository implements DemoDataRepository {
   async has(): Promise<boolean> {

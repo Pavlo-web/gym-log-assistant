@@ -14,34 +14,31 @@ export interface ExerciseLabel {
  * name stored on the entry when it was saved, so old workouts stay readable
  * after an exercise is deleted.
  */
-export function exerciseLabel(
+export const exerciseLabel = (
   entry: Pick<WorkoutEntry, "exerciseId" | "exerciseName" | "muscleGroup">,
   exercises: readonly Exercise[],
-): ExerciseLabel {
+): ExerciseLabel => {
   const live = exercises.find((exercise) => exercise.id === entry.exerciseId);
   return {
     name: live?.name ?? entry.exerciseName ?? DELETED_EXERCISE_NAME,
     group: live?.muscleGroup ?? entry.muscleGroup,
   };
-}
+};
 
 /** YouTube search for videos showing how to perform the exercise. */
-export function exerciseVideoUrl(name: string): string {
+export const exerciseVideoUrl = (name: string): string => {
   const query = encodeURIComponent(`${name} proper form`);
   return `https://www.youtube.com/results?search_query=${query}`;
-}
+};
 
 /** True when `exercise` has this name (case-insensitive) in this muscle group. */
-export function isSameExercise(
+export const isSameExercise = (
   exercise: Pick<Exercise, "name" | "muscleGroup">,
   name: string,
   muscleGroup: MuscleGroup,
-): boolean {
-  return (
-    exercise.muscleGroup === muscleGroup &&
-    exercise.name.toLocaleLowerCase() === name.toLocaleLowerCase()
-  );
-}
+): boolean =>
+  exercise.muscleGroup === muscleGroup &&
+  exercise.name.toLocaleLowerCase() === name.toLocaleLowerCase();
 
 export interface WorkoutStats {
   exercises: number;
@@ -50,10 +47,8 @@ export interface WorkoutStats {
 }
 
 /** Headline numbers of a workout: exercise count, set count and total volume in kg. */
-export function workoutStats(workout: Workout): WorkoutStats {
-  return {
-    exercises: workout.entries.length,
-    sets: countSets(workout.entries),
-    volume: workoutVolume(workout),
-  };
-}
+export const workoutStats = (workout: Workout): WorkoutStats => ({
+  exercises: workout.entries.length,
+  sets: countSets(workout.entries),
+  volume: workoutVolume(workout),
+});

@@ -42,7 +42,7 @@ export function ExerciseCard({
   const lastSet = entry.sets.at(-1);
 
   /** Adds a set prefilled from the previous one, since sets usually repeat. */
-  function addSet({ focus = false } = {}) {
+  const addSet = ({ focus = false } = {}) => {
     const set: DraftSet = {
       id: newId(),
       weight: lastSet?.weight ?? "",
@@ -53,25 +53,25 @@ export function ExerciseCard({
       // Wait for the new row to render before moving focus into it.
       requestAnimationFrame(() => document.getElementById(weightInputId(set.id))?.focus());
     }
-  }
+  };
 
-  function updateSet(id: string, patch: Partial<DraftSet>) {
+  const updateSet = (id: string, patch: Partial<DraftSet>) => {
     onChange({
       ...entry,
       sets: entry.sets.map((set) => (set.id === id ? { ...set, ...patch } : set)),
     });
-  }
+  };
 
-  function removeSet(id: string) {
+  const removeSet = (id: string) => {
     onChange({ ...entry, sets: entry.sets.filter((set) => set.id !== id) });
-  }
+  };
 
   /** Asks first only when there is entered data to lose. */
-  function requestRemove() {
+  const requestRemove = () => {
     const hasData = entry.sets.some((set) => setStatus(set) !== "empty");
     if (hasData) setConfirmingRemove(true);
     else onRemove();
-  }
+  };
 
   return (
     <Surface as="section" aria-label={name}>

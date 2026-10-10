@@ -4,16 +4,14 @@ import { useReducedMotion } from "./useReducedMotion";
 const DURATION_MS = 700;
 
 /** Starts fast and settles, so the final figure is readable early. */
-function easeOutCubic(progress: number): number {
-  return 1 - (1 - progress) ** 3;
-}
+const easeOutCubic = (progress: number): number => 1 - (1 - progress) ** 3;
 
 /**
  * Counts from zero to `target` when the value first appears or changes. Whole
  * targets stay whole on the way and others keep one decimal, so the figure does
  * not flicker through long fractions.
  */
-export function useCountUp(target: number): number {
+export const useCountUp = (target: number): number => {
   const reducedMotion = useReducedMotion();
   const [value, setValue] = useState(reducedMotion ? target : 0);
 
@@ -42,4 +40,4 @@ export function useCountUp(target: number): number {
   }, [target, reducedMotion]);
 
   return value;
-}
+};

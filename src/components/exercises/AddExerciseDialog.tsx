@@ -24,9 +24,8 @@ import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from "@/types/domain";
 
 const DEFAULT_GROUP: MuscleGroup = "Chest";
 
-function isMuscleGroup(value: string): value is MuscleGroup {
-  return (MUSCLE_GROUPS as readonly string[]).includes(value);
-}
+const isMuscleGroup = (value: string): value is MuscleGroup =>
+  (MUSCLE_GROUPS as readonly string[]).includes(value);
 
 interface AddExerciseDialogProps {
   open: boolean;
@@ -45,18 +44,18 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
   /** Problem with saving, shown for the form as a whole. */
   const [saveError, setSaveError] = useState("");
 
-  function clearErrors() {
+  const clearErrors = () => {
     setNameError("");
     setSaveError("");
-  }
+  };
 
-  function handleOpenChange(next: boolean) {
+  const handleOpenChange = (next: boolean) => {
     onOpenChange(next);
     // The typed name is kept so reopening after an accidental close does not lose it.
     clearErrors();
-  }
+  };
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = name.trim();
     clearErrors();
@@ -80,7 +79,7 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
     } catch (cause) {
       setSaveError(cause instanceof Error ? cause.message : "Could not add exercise. Try again.");
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

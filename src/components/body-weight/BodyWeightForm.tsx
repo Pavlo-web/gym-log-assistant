@@ -34,12 +34,12 @@ export function BodyWeightForm({ entries }: BodyWeightFormProps) {
 
   const existing = entries.find((entry) => entry.date === date);
 
-  function clearErrors() {
+  const clearErrors = () => {
     setWeightError("");
     setSaveError("");
-  }
+  };
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     clearErrors();
     const problem = bodyWeightError(weight);
@@ -52,7 +52,7 @@ export function BodyWeightForm({ entries }: BodyWeightFormProps) {
     } catch (cause) {
       setSaveError(cause instanceof Error ? cause.message : "Could not save. Try again.");
     }
-  }
+  };
 
   return (
     <Surface asChild className="mb-6">

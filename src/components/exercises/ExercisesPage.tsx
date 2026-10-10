@@ -11,11 +11,11 @@ import { ExerciseFilters, type GroupFilter } from "./ExerciseFilters";
 import { ExerciseGroupList, type ExerciseGroup } from "./ExerciseGroupList";
 
 /** Exercises matching the search and group filter, grouped and sorted by name. */
-function filterExercises(
+const filterExercises = (
   exercises: readonly Exercise[],
   search: string,
   group: GroupFilter,
-): ExerciseGroup[] {
+): ExerciseGroup[] => {
   const query = search.trim().toLocaleLowerCase();
   return MUSCLE_GROUPS.filter((muscleGroup) => group === "All" || group === muscleGroup)
     .map((muscleGroup) => ({
@@ -29,7 +29,7 @@ function filterExercises(
         .sort((a, b) => a.name.localeCompare(b.name)),
     }))
     .filter(({ items }) => items.length > 0);
-}
+};
 
 export function ExercisesPage() {
   const { data: exercises = [], isPending, isError, refetch } = useExercises();
@@ -42,12 +42,12 @@ export function ExercisesPage() {
 
   const groups = filterExercises(exercises, search, group);
 
-  function requestDelete(exercise: Exercise) {
+  const requestDelete = (exercise: Exercise) => {
     setDeleteError("");
     setDeleting(exercise);
-  }
+  };
 
-  async function confirmDelete() {
+  const confirmDelete = async () => {
     if (!deleting) return;
     try {
       setDeleteError("");
@@ -58,7 +58,7 @@ export function ExercisesPage() {
         cause instanceof Error ? cause.message : "Could not delete exercise. Try again.",
       );
     }
-  }
+  };
 
   return (
     <>

@@ -49,9 +49,8 @@ function DashboardHeader() {
   );
 }
 
-function hasUnfinishedDraft(draft: WorkoutDraft | null | undefined): boolean {
-  return !!draft && (draft.entries.length > 0 || draft.notes.trim() !== "");
-}
+const hasUnfinishedDraft = (draft: WorkoutDraft | null | undefined): boolean =>
+  !!draft && (draft.entries.length > 0 || draft.notes.trim() !== "");
 
 function DraftNotice() {
   return (

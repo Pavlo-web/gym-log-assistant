@@ -28,12 +28,12 @@ const LABEL_OFFSET = 2;
 
 const CELL = "aspect-square rounded-[2px]";
 
-function dayLabel(day: CalendarDay): string {
+const dayLabel = (day: CalendarDay): string => {
   const date = formatDay(day.date);
   if (day.workouts === 0) return `${date}: rest day`;
   const sets = `${day.sets} ${day.sets === 1 ? "set" : "sets"}`;
   return `${date}: ${sets}, ${formatNumber(day.volume)} kg`;
-}
+};
 
 function DayCell({ day, column, row }: { day: CalendarDay; column: number; row: number }) {
   const style = { gridColumn: column, gridRow: row };
