@@ -1,3 +1,4 @@
+import { Surface } from "@/components/Surface";
 import { lazy, Suspense } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
@@ -54,12 +55,15 @@ function hasUnfinishedDraft(draft: WorkoutDraft | null | undefined): boolean {
 
 function DraftNotice() {
   return (
-    <div className="mb-6 grid grid-cols-1 items-center gap-2 md:flex md:justify-between md:gap-4 rounded-md border border-border bg-card px-4 py-3 text-sm">
+    <Surface
+      padding="compact"
+      className="mb-6 grid grid-cols-1 items-center gap-2 text-sm md:flex md:justify-between md:gap-4"
+    >
       <span className="text-muted-foreground">You have an unfinished workout.</span>
       <Button asChild variant="link" className="h-auto p-0">
         <Link to="/">Continue draft</Link>
       </Button>
-    </div>
+    </Surface>
   );
 }
 

@@ -1,3 +1,5 @@
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { lazy, Suspense, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { Weight } from "lucide-react";
@@ -108,8 +110,8 @@ export function BodyWeightPage() {
       {summary ? (
         <>
           <Summary summary={summary} />
-          <section className="mb-6 rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
-            <h2 className="mb-4 font-semibold">Trend</h2>
+          <Surface as="section" className="mb-6">
+            <SectionTitle title="Trend" className="mb-4" />
             <ClientOnly fallback={chartPlaceholder}>
               <Suspense fallback={chartPlaceholder}>
                 <BodyWeightChart entries={chronological(entries)} />
@@ -118,7 +120,7 @@ export function BodyWeightPage() {
             {entries.length === 1 && (
               <p className="mt-2 text-sm text-muted-foreground">Add more entries to see a trend.</p>
             )}
-          </section>
+          </Surface>
           <BodyWeightLog
             rows={bodyWeightRows(entries)}
             onDelete={(row) => {

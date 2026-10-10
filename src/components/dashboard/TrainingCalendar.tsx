@@ -47,10 +47,7 @@ function DayCell({ day, column, row }: { day: CalendarDay; column: number; row: 
       to="/history/$workoutId"
       params={{ workoutId: day.workoutId }}
       style={style}
-      className={cn(
-        className,
-        "hover:ring-1 hover:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-      )}
+      className={cn(className, "hover:ring-1 hover:ring-ring")}
       title={label}
       aria-label={label}
     />

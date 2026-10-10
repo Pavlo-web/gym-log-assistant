@@ -1,3 +1,5 @@
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
 import { Trash2 } from "lucide-react";
 import { ExerciseVideoLink } from "@/components/ExerciseVideoLink";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +23,15 @@ export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) 
     <div className="space-y-9">
       {groups.map(({ muscleGroup, items }) => (
         <section key={muscleGroup} aria-label={muscleGroup}>
-          <div className="mb-3 flex items-baseline justify-between border-b border-border pb-3">
-            <h2 className="text-lg font-semibold">{muscleGroup}</h2>
-            <span className="tabular text-xs text-muted-foreground">
-              {items.length} {items.length === 1 ? "exercise" : "exercises"}
-            </span>
-          </div>
+          <SectionTitle
+            title={muscleGroup}
+            className="mb-3 items-baseline border-b border-border pb-3"
+            action={
+              <span className="tabular text-xs text-muted-foreground">
+                {items.length} {items.length === 1 ? "exercise" : "exercises"}
+              </span>
+            }
+          />
           <ul className="divide-y divide-border">
             {items.map((exercise) => (
               <li
@@ -42,16 +47,17 @@ export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) 
                   )}
                   <ExerciseVideoLink name={exercise.name} />
                   {exercise.isCustom && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      aria-label={`Delete ${exercise.name}`}
-                      title={`Delete ${exercise.name}`}
-                      onClick={() => onDelete(exercise)}
-                      className="text-muted-foreground hover:text-danger"
-                    >
-                      <Trash2 />
-                    </Button>
+                    <Hint label="Delete exercise">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={`Delete ${exercise.name}`}
+                        onClick={() => onDelete(exercise)}
+                        className="text-muted-foreground hover:text-danger"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </Hint>
                   )}
                 </span>
               </li>

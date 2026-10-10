@@ -1,3 +1,5 @@
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
@@ -71,11 +73,10 @@ export function HistoryDetail({ workoutId }: { workoutId: string }) {
         {entries.map((entry) => {
           const label = exerciseLabel(entry, exercises.data);
           return (
-            <section key={entry.id} className="rounded-md border border-border bg-card p-3 md:p-5">
-              <h2 className="font-semibold">{label.name}</h2>
-              <p className="mb-4 text-xs text-muted-foreground">{label.group}</p>
+            <Surface as="section" key={entry.id}>
+              <SectionTitle title={label.name} subtitle={label.group} className="mb-4" />
               <ExerciseSetsTable sets={entry.sets} />
-            </section>
+            </Surface>
           );
         })}
       </div>

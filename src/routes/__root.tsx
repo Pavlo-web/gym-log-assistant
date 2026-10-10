@@ -1,3 +1,4 @@
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -125,9 +126,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <AppShell>
-        <Outlet />
-      </AppShell>
+      <TooltipProvider delayDuration={300}>
+        <AppShell>
+          <Outlet />
+        </AppShell>
+      </TooltipProvider>
       <Toaster theme="dark" />
     </QueryClientProvider>
   );

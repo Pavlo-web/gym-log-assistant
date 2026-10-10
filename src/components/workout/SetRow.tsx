@@ -1,3 +1,4 @@
+import { Hint } from "@/components/Hint";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,16 +88,18 @@ export function SetRow({
           />
         </td>
         <td className="w-11 py-2 text-right md:w-10">
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={`Remove set ${number}`}
-            onClick={onRemove}
-            className="text-muted-foreground hover:text-danger"
-          >
-            <X />
-          </Button>
+          <Hint label="Remove set">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label={`Remove set ${number}`}
+              onClick={onRemove}
+              className="text-muted-foreground hover:text-danger"
+            >
+              <X />
+            </Button>
+          </Hint>
         </td>
       </tr>
       {errors && (

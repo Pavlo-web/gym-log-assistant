@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CalendarDays } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { PickerTrigger } from "@/components/ui/picker-trigger";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatDay, isIsoDate, parseLocalDate, toIsoDate } from "@/lib/date";
 
@@ -24,15 +24,12 @@ export function DatePicker({ value, onChange, min, max, id }: DatePickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <PickerTrigger
           id={id}
-          type="button"
-          variant="outline"
-          className="tabular h-9 w-full justify-between border-input bg-transparent px-3 text-base font-normal shadow-sm focus-visible:ring-ring md:text-sm"
-        >
-          <span>{selected ? formatDay(value) : "Pick a date"}</span>
-          <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
-        </Button>
+          icon={CalendarDays}
+          value={selected ? formatDay(value) : undefined}
+          placeholder="Pick a date"
+        />
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar

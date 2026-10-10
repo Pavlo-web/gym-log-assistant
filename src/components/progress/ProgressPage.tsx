@@ -1,3 +1,5 @@
+import { ChipGroup } from "@/components/ChipGroup";
+import { Surface } from "@/components/Surface";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { LineChart as ChartIcon } from "lucide-react";
@@ -5,7 +7,6 @@ import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { ErrorState, LoadingState } from "@/components/PageStatus";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useExercises } from "@/hooks/useExercises";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { exerciseHistory, loggedExercises, personalRecords } from "@/lib/progress";
@@ -23,10 +24,6 @@ const METRICS: { value: Metric; label: string }[] = [
   { value: "bestE1RM", label: "Est. 1RM" },
   { value: "volume", label: "Volume" },
 ];
-
-function isMetric(value: string): value is Metric {
-  return METRICS.some((metric) => metric.value === value);
-}
 
 interface ProgressPageProps {
   /** Exercise id from the URL; ignored when it has no logged sets. */
@@ -99,25 +96,14 @@ export function ProgressPage({ selectedId, onSelect }: ProgressPageProps) {
 
       {records && <RecordStats records={records} />}
 
-      <section className="mb-6 rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          size="sm"
+      <Surface as="section" className="mb-6">
+        <ChipGroup
+          options={METRICS}
           value={metric}
-          onValueChange={(value) => {
-            // Radix sends an empty string when the active item is clicked again.
-            if (isMetric(value)) setMetric(value);
-          }}
-          className="mobile-metric mb-4 justify-start"
+          onChange={setMetric}
           aria-label="Chart metric"
-        >
-          {METRICS.map(({ value, label }) => (
-            <ToggleGroupItem key={value} value={value}>
-              {label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+          className="mb-4"
+        />
         <ClientOnly fallback={chartPlaceholder}>
           <Suspense fallback={chartPlaceholder}>
             <ProgressChart points={points} metric={metric} />
@@ -128,7 +114,7 @@ export function ProgressPage({ selectedId, onSelect }: ProgressPageProps) {
             Log more sessions with this exercise to see a trend.
           </p>
         )}
-      </section>
+      </Surface>
 
       <SessionsTable points={points} records={records} />
     </>

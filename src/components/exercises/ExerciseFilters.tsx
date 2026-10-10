@@ -1,11 +1,14 @@
+import { ChipGroup } from "@/components/ChipGroup";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MUSCLE_GROUPS, type MuscleGroup } from "@/types/domain";
 
 export type GroupFilter = MuscleGroup | "All";
 
-const FILTERS: readonly GroupFilter[] = ["All", ...MUSCLE_GROUPS];
+const FILTERS = (["All", ...MUSCLE_GROUPS] satisfies GroupFilter[]).map((value) => ({
+  value,
+  label: value,
+}));
 
 interface ExerciseFiltersProps {
   search: string;
@@ -33,27 +36,17 @@ export function ExerciseFilters({
           placeholder="Search exercises"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          className="h-10 pl-10"
+          className="pl-10"
         />
       </div>
       {/* On phones the chips scroll sideways inside their own row instead of wrapping. */}
-      <div
-        className="flex max-w-full flex-nowrap gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0"
+      <ChipGroup
+        options={FILTERS}
+        value={group}
+        onChange={onGroupChange}
         aria-label="Filter by muscle group"
-      >
-        {FILTERS.map((filter) => (
-          <Button
-            key={filter}
-            size="sm"
-            className="shrink-0"
-            variant={group === filter ? "default" : "outline"}
-            aria-pressed={group === filter}
-            onClick={() => onGroupChange(filter)}
-          >
-            {filter}
-          </Button>
-        ))}
-      </div>
+        className="max-w-full flex-nowrap overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0"
+      />
     </div>
   );
 }

@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div
           className={cn(
             "mobile-page mx-auto w-full min-w-0 px-3 pt-6 md:px-6 md:py-12",
-            wide ? "max-w-6xl" : "max-w-3xl",
+            wide ? "max-w-6xl" : "max-w-4xl",
           )}
         >
           {children}

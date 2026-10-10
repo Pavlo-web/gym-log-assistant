@@ -1,3 +1,5 @@
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import type { ReactNode } from "react";
 
 interface DashboardSectionProps {
@@ -11,15 +13,9 @@ interface DashboardSectionProps {
 /** Bordered card with a heading that wraps each block of the dashboard. */
 export function DashboardSection({ title, subtitle, action, children }: DashboardSectionProps) {
   return (
-    <section className="mb-6 rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
-      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-2 md:flex md:justify-between md:gap-4">
-        <div>
-          <h2 className="font-semibold">{title}</h2>
-          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-        </div>
-        {action}
-      </div>
+    <Surface as="section" className="mb-6">
+      <SectionTitle title={title} subtitle={subtitle} action={action} className="mb-4" />
       {children}
-    </section>
+    </Surface>
   );
 }

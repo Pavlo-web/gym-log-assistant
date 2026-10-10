@@ -1,3 +1,5 @@
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { formatDay } from "@/lib/date";
@@ -39,8 +41,8 @@ interface SessionsTableProps {
  */
 export function SessionsTable({ points, records }: SessionsTableProps) {
   return (
-    <section className="rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
-      <h2 className="mb-3 font-semibold">Sessions</h2>
+    <Surface as="section">
+      <SectionTitle title="Sessions" className="mb-3" />
       <div className="overflow-x-auto">
         <table className="mobile-sessions w-full text-sm tabular" aria-label="Sessions">
           <thead>
@@ -76,6 +78,6 @@ export function SessionsTable({ points, records }: SessionsTableProps) {
           </tbody>
         </table>
       </div>
-    </section>
+    </Surface>
   );
 }

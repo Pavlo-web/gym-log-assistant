@@ -1,3 +1,6 @@
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { CalendarPlus, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -50,16 +53,17 @@ function PlanRow({ plan, now, inProgress, onStart, onDelete }: PlanRowProps) {
             <Play /> Start
           </Button>
         )}
-        <Button
-          size="icon"
-          variant="ghost"
-          aria-label={`Delete planned workout ${title}`}
-          title="Delete plan"
-          onClick={onDelete}
-          className="text-muted-foreground hover:text-danger"
-        >
-          <Trash2 />
-        </Button>
+        <Hint label="Delete plan">
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label={`Delete planned workout ${title}`}
+            onClick={onDelete}
+            className="text-muted-foreground hover:text-danger"
+          >
+            <Trash2 />
+          </Button>
+        </Hint>
       </div>
     </li>
   );
@@ -90,16 +94,15 @@ export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProp
   }
 
   return (
-    <section
-      aria-label="Upcoming workouts"
-      className="mb-6 rounded-md border border-border bg-card min-w-0 p-3 md:p-5"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="font-semibold">Upcoming</h2>
-        <Button variant="outline" size="sm" onClick={() => setPlanning(true)}>
-          <CalendarPlus /> Plan workout
-        </Button>
-      </div>
+    <Surface as="section" aria-label="Upcoming workouts" className="mb-6">
+      <SectionTitle
+        title="Upcoming"
+        action={
+          <Button variant="outline" size="sm" onClick={() => setPlanning(true)}>
+            <CalendarPlus /> Plan workout
+          </Button>
+        }
+      />
 
       {plans.length === 0 ? (
         <p className="mt-2 text-sm text-muted-foreground">
@@ -131,6 +134,6 @@ export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProp
         confirmLabel="Delete"
         onConfirm={() => void confirmDelete()}
       />
-    </section>
+    </Surface>
   );
 }

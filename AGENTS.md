@@ -53,6 +53,21 @@ below are the conventions to keep when changing code.
 - Animate only through `useCountUp` (figures, via the `value` object of `StatTile`) and `SERIES_ANIMATION` (charts); both honour `useReducedMotion`.
 - `NumberInput` steppers: use `stepperLayout="sides"` where the field has the full row on phones; keep the default inside table cells.
 
+## Design system
+
+Tokens live in `src/styles.css`; the components below are the only way to use them.
+
+- **Surfaces.** Four steps, each lighter than the one it sits on: `background` (page) → `card` → `popover` (popovers, dialogs, toasts, tooltips) → `hover`. A dialog must never be darker than the page behind it. Shadows are for floating layers only; buttons, inputs and cards have none.
+- **Cards.** Never hand-write a card: use `Surface` (`padding="compact"` for one-line notices, `"flush"` when the content pads itself, `interactive` for cards that are a link). Stacked cards are 24px apart (`mb-6` / `mt-6`); tiles in a grid use `gap-4`.
+- **Headings.** `PageHeader` for the page title, `SectionTitle` for every card or section heading (it takes a subtitle and an action). Type scale: page title `text-xl md:text-2xl`, section title `text-base font-semibold`, body `text-sm`, captions `text-xs text-muted-foreground`, headline figures through `StatTile`.
+- **Fields.** Inputs, selects and picker triggers are 36px tall on desktop (44px on phones) with the `field` background. Use `fieldSize="lg"` for a page's headline field instead of overriding height or background. Label every field with `Label`.
+- **Pickers.** Dates use `DatePicker`, times use `TimePicker`; both open from `PickerTrigger`, so do not style one without the other. No native `date`, `time` or `number` inputs.
+- **Focus.** One style for everything, defined once in `src/styles.css` (2px `ring` outline, 2px offset). Do not add `ring-*` focus classes or remove the outline in a component.
+- **Hover and selection.** Hover is always the neutral `hover` token. The coral `accent` tint means selected or active, never hover.
+- **Buttons.** One filled primary button per page for its main action; `outline` for secondary actions, `ghost` for icon buttons and quiet actions, `destructive` only inside delete confirmations.
+- **Choosing one of a few options** (filters, chart metric): `ChipGroup`, whose selected chip is tinted rather than filled so it does not compete with the primary button.
+- **Icon-only buttons** get an `aria-label` and a `Hint` tooltip, not a `title` attribute.
+
 ## Before finishing
 
 Run type check (`bunx tsc --noEmit`), `bun run lint` and `bun run build`; all must pass. The project has no automated tests, so check changed pages in the browser at desktop and phone widths.

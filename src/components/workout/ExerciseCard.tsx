@@ -1,3 +1,6 @@
+import { Hint } from "@/components/Hint";
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { useState } from "react";
 import { ArrowLeftRight, Plus, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -71,38 +74,41 @@ export function ExerciseCard({
   }
 
   return (
-    <section aria-label={name} className="rounded-lg border border-border bg-card p-3 md:p-5">
-      <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 md:flex md:justify-between">
-        <div className="min-w-0 break-words">
-          <h2 className="text-base font-semibold">{name}</h2>
-          <p className="text-xs text-muted-foreground">{group}</p>
-        </div>
-        <div className="flex shrink-0 items-center">
-          <ExerciseVideoLink name={name} />
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={`Change ${name} to another exercise`}
-            title="Change exercise"
-            onClick={onChangeExercise}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeftRight />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={`Remove ${name}`}
-            title="Remove exercise"
-            onClick={requestRemove}
-            className="text-muted-foreground hover:text-danger"
-          >
-            <Trash2 />
-          </Button>
-        </div>
-      </div>
+    <Surface as="section" aria-label={name}>
+      <SectionTitle
+        title={name}
+        subtitle={group}
+        className="mb-3"
+        action={
+          <>
+            <ExerciseVideoLink name={name} />
+            <Hint label="Change exercise">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={`Change ${name} to another exercise`}
+                onClick={onChangeExercise}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeftRight />
+              </Button>
+            </Hint>
+            <Hint label="Remove exercise">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={`Remove ${name}`}
+                onClick={requestRemove}
+                className="text-muted-foreground hover:text-danger"
+              >
+                <Trash2 />
+              </Button>
+            </Hint>
+          </>
+        }
+      />
 
       <table className="w-full table-fixed md:table-auto">
         <thead>
@@ -143,6 +149,6 @@ export function ExerciseCard({
         confirmLabel="Remove"
         onConfirm={onRemove}
       />
-    </section>
+    </Surface>
   );
 }

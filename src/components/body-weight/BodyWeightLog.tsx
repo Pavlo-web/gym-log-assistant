@@ -1,3 +1,5 @@
+import { SectionTitle } from "@/components/SectionTitle";
+import { Surface } from "@/components/Surface";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatWeightChange, type BodyWeightRow } from "@/lib/body-weight";
@@ -13,8 +15,8 @@ interface BodyWeightLogProps {
 /** Every entry of the log with its change from the previous one. */
 export function BodyWeightLog({ rows, onDelete }: BodyWeightLogProps) {
   return (
-    <section className="rounded-md border border-border bg-card min-w-0 p-3 md:p-5">
-      <h2 className="mb-3 font-semibold">Entries</h2>
+    <Surface as="section">
+      <SectionTitle title="Entries" className="mb-3" />
       <ul className="divide-y divide-border text-sm">
         {rows.map((row) => {
           const date = formatWeekdayDay(row.date);
@@ -43,6 +45,6 @@ export function BodyWeightLog({ rows, onDelete }: BodyWeightLogProps) {
           );
         })}
       </ul>
-    </section>
+    </Surface>
   );
 }

@@ -1,3 +1,4 @@
+import { Surface } from "@/components/Surface";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,10 @@ export function DemoDataNotice() {
   }
 
   return (
-    <div className="mb-6 grid grid-cols-1 items-center gap-2 rounded-md border border-border bg-card px-4 py-3 text-sm md:flex md:justify-between md:gap-4">
+    <Surface
+      padding="compact"
+      className="mb-6 grid grid-cols-1 items-center gap-2 text-sm md:flex md:justify-between md:gap-4"
+    >
       <span className="text-muted-foreground">
         You are looking at demo data. Your own records are kept when you remove it.
       </span>
@@ -61,7 +65,7 @@ export function DemoDataNotice() {
       >
         Remove demo data
       </Button>
-    </div>
+    </Surface>
   );
 }
 
