@@ -1,49 +1,12 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { MobileNavigation } from "@/components/MobileNavigation";
-import { NAV_ITEMS } from "@/components/navigation";
+import { Sidebar } from "@/components/Sidebar";
+import { Wordmark } from "@/components/Wordmark";
 import { cn } from "@/lib/utils";
-
-const SIDEBAR_LINK = "flex items-center gap-3 rounded-md px-3 py-2 text-sm [&_svg]:size-4";
 
 /** Pages whose content is a grid of cards and can use a wide screen; the rest stay readable-width. */
 const WIDE_PAGES: readonly string[] = ["/dashboard"];
-
-function Wordmark() {
-  return (
-    <>
-      Gym<span className="text-primary"> Log</span>
-    </>
-  );
-}
-
-function Sidebar() {
-  return (
-    <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-sidebar-border bg-sidebar px-5 py-7 md:flex">
-      <Link to="/" className="mb-10 block">
-        <span className="text-lg font-semibold tracking-tight text-sidebar-foreground">
-          <Wordmark />
-        </span>
-      </Link>
-      <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            activeOptions={{ exact: item.to === "/" }}
-            className={`${SIDEBAR_LINK} text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
-            activeProps={{
-              className: `${SIDEBAR_LINK} bg-sidebar-accent text-primary font-medium`,
-            }}
-          >
-            <item.icon aria-hidden="true" />
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-    </aside>
-  );
-}
 
 /** Top bar shown on phones, where the sidebar is hidden. */
 function MobileTopBar() {

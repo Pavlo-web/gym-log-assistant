@@ -12,7 +12,7 @@ import {
 /**
  * Where an item sits in the phone bottom bar:
  * - "tab": one of the regular tabs
- * - "action": the raised centre button
+ * - "action": the main action, the raised centre button (and the button above the sidebar list)
  * - "more": inside the "More" sheet
  */
 type MobilePlacement = "tab" | "action" | "more";
@@ -43,4 +43,8 @@ function byPlacement(placement: MobilePlacement): NavItem[] {
 
 export const MOBILE_TABS = byPlacement("tab");
 export const MOBILE_MORE_ITEMS = byPlacement("more");
-export const MOBILE_ACTION = byPlacement("action")[0];
+/** The main action of the app: the centre button on phones, the button above the sidebar list. */
+export const PRIMARY_ACTION = byPlacement("action")[0];
+export const MOBILE_ACTION = PRIMARY_ACTION;
+/** Sections listed in the desktop sidebar; the main action is a button above them. */
+export const SIDEBAR_ITEMS = NAV_ITEMS.filter((item) => item.mobile !== "action");
