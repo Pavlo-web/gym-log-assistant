@@ -1,3 +1,4 @@
+import { TimePicker } from "@/components/ui/time-picker";
 import { useState, type FormEvent } from "react";
 import { addDays } from "date-fns";
 import { Plus, X } from "lucide-react";
@@ -109,16 +110,14 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plan-time">Time</Label>
-                <Input
+                <TimePicker
                   id="plan-time"
-                  type="time"
                   aria-invalid={!!timeError}
                   value={time}
-                  onChange={(event) => {
-                    setTime(event.target.value);
+                  onChange={(next) => {
+                    setTime(next);
                     setTimeError("");
                   }}
-                  className="tabular"
                 />
                 {timeError && <FieldError>{timeError}</FieldError>}
               </div>
@@ -138,7 +137,9 @@ export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">Exercises</p>
+              <Label asChild>
+                <p>Exercises</p>
+              </Label>
               {exercises.length > 0 && (
                 <ul className="divide-y divide-border rounded-md border border-border">
                   {exercises.map((exercise) => (

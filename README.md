@@ -83,7 +83,7 @@ Before pushing, run the type check, lint and build.
 src/
   routes/       One file per URL. Routes are thin: page metadata plus the page component.
   components/   UI, one folder per page, plus pieces shared between pages.
-    ui/         shadcn/ui primitives and two app inputs (number-input, date-picker).
+    ui/         shadcn/ui primitives and the app inputs (number-input, date-picker, time-picker).
     charts/     Styling and tooltip shared by the charts.
   hooks/        TanStack Query hooks: the only way components read or change data.
   data/         Repositories (localStorage), storage access with validation, default exercises.
