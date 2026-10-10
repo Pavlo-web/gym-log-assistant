@@ -13,7 +13,6 @@ interface ExerciseGroup {
   items: Exercise[];
 }
 
-/** Exercises matching the search, grouped by muscle group and sorted by name. */
 const groupExercises = (exercises: readonly Exercise[], search: string): ExerciseGroup[] => {
   const query = search.trim().toLocaleLowerCase();
   return MUSCLE_GROUPS.map((group) => ({
@@ -62,10 +61,8 @@ function ListMessage({ role, children }: { role?: "status" | "alert"; children: 
 
 interface ExerciseListProps {
   groups: ExerciseGroup[];
-  /** Exercises already in the workout; shown as "Added" and not selectable. */
   addedIds: Set<string>;
   onSelect: (exercise: Exercise) => void;
-  /** Extra classes for each row, e.g. a taller tap target on phones. */
   rowClassName?: string;
 }
 
@@ -106,7 +103,6 @@ function ExerciseList({ groups, addedIds, onSelect, rowClassName }: ExerciseList
 }
 
 interface ExercisePickerProps {
-  /** Heading of the picker, e.g. "Add exercise" or "Change exercise". */
   title: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -114,7 +110,6 @@ interface ExercisePickerProps {
   onSelect: (exercise: Exercise) => void;
 }
 
-/** Searchable exercise list: a bottom sheet on phones, a dialog on larger screens. */
 export function ExercisePicker({
   title,
   open,

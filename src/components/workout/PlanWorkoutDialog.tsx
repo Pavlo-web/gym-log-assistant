@@ -31,7 +31,6 @@ interface PlanWorkoutDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/** Dialog for scheduling a workout: when it is and which exercises it has. */
 export function PlanWorkoutDialog({ open, onOpenChange }: PlanWorkoutDialogProps) {
   const create = useCreatePlannedWorkout();
   const today = todayLocal();

@@ -5,10 +5,9 @@ import { Sidebar } from "@/components/Sidebar";
 import { Wordmark } from "@/components/Wordmark";
 import { cn } from "@/lib/utils";
 
-/** Pages whose content is a grid of cards and can use a wide screen; the rest stay readable-width. */
+// Grids of cards can use a wide screen; other pages stay at a readable width.
 const WIDE_PAGES: readonly string[] = ["/dashboard"];
 
-/** Top bar shown on phones, where the sidebar is hidden. */
 function MobileTopBar() {
   return (
     <div className="border-b border-border bg-sidebar px-3 py-3 md:hidden">
@@ -19,7 +18,6 @@ function MobileTopBar() {
   );
 }
 
-/** Page frame: sidebar on desktop, top bar and bottom navigation on phones. */
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const wide = WIDE_PAGES.includes(pathname);

@@ -1,6 +1,5 @@
 const APP_NAME = "Gym Log";
 
-/** Builds the `<head>` meta entries every page shares from its title and description. */
 export const pageMeta = (title: string, description: string) => {
   const fullTitle = `${title} — ${APP_NAME}`;
   return [

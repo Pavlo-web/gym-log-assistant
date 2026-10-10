@@ -32,7 +32,6 @@ const HEADER = (
   <PageHeader title="Body weight" description="Track your weight alongside your training" />
 );
 
-/** A range needs two entries; equal weights collapse to a single value. */
 const formatRange = (lowest: number, highest: number, singleEntry: boolean): string => {
   if (singleEntry) return "–";
   if (lowest === highest) return `${formatNumber(lowest)} kg`;

@@ -7,7 +7,6 @@ interface FieldErrorProps {
   className?: string;
 }
 
-/** Short message under the field it is about. */
 export function FieldError({ children, className }: FieldErrorProps) {
   return (
     <p role="alert" className={cn("text-xs text-danger", className)}>
@@ -16,7 +15,6 @@ export function FieldError({ children, className }: FieldErrorProps) {
   );
 }
 
-/** Boxed message for a problem with the form as a whole, such as a failed save. */
 export function FormAlert({ children, className }: FieldErrorProps) {
   return (
     <div

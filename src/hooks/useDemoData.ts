@@ -3,7 +3,6 @@ import { demoDataRepository } from "@/data";
 
 export const demoDataKey = ["demo-data"] as const;
 
-/** Whether sample records are currently stored. */
 export const useHasDemoData = () =>
   useQuery({
     queryKey: demoDataKey,

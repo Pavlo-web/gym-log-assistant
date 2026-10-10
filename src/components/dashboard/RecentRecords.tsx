@@ -2,7 +2,6 @@ import type { RecentPR } from "@/lib/dashboard";
 import { formatDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 
-/** Latest personal records across all exercises. */
 export function RecentRecords({ records }: { records: RecentPR[] }) {
   if (records.length === 0) {
     return <p className="text-sm text-muted-foreground">No records yet.</p>;

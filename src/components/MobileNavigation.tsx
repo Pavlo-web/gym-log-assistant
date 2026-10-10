@@ -18,7 +18,6 @@ import {
 } from "@/components/navigation";
 import { cn } from "@/lib/utils";
 
-/** Tabs shown to the left of the centre button; the rest go to its right. */
 const TABS_BEFORE_ACTION = 2;
 
 const TAB_BUTTON =
@@ -39,7 +38,6 @@ function NavTab({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-/** Raised round button in the middle of the bar for the primary action. */
 function ActionButton({ item, pathname }: { item: NavItem; pathname: string }) {
   const Icon = item.icon;
   const active = pathname === item.to;
@@ -62,7 +60,6 @@ function ActionButton({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-/** "More" tab: opens a bottom sheet with the sections that do not fit in the bar. */
 function MoreMenu({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false);
   const active = MOBILE_MORE_ITEMS.some((item) => item.to === pathname);
@@ -99,7 +96,6 @@ function MoreMenu({ pathname }: { pathname: string }) {
   );
 }
 
-/** Fixed bottom bar shown on phones instead of the sidebar. */
 export function MobileNavigation() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   return (

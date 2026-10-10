@@ -13,7 +13,6 @@ export const MUSCLE_SPLIT_DAYS = 30;
 export const RECENT_ITEMS = 5;
 
 export interface WeekBucket {
-  /** Monday of the week, yyyy-mm-dd */
   week: string;
   volume: number;
   workouts: number;
@@ -27,20 +26,17 @@ export interface MuscleGroupSets {
 export interface RecentPR {
   exerciseId: string;
   name: string;
-  /** estimated 1RM in kg */
   value: number;
   weight: number;
   reps: number;
   date: string;
 }
 
-/** Monday (yyyy-mm-dd) of the week containing the given date. */
 export const weekStart = (date: string | Date): string => {
   const day = typeof date === "string" ? parseLocalDate(date) : date;
   return toIsoDate(startOfWeek(day, WEEK_OPTIONS));
 };
 
-/** Last `count` weeks ending with the current week, oldest first; empty weeks are zero. */
 export const weeklyBuckets = (
   workouts: readonly Workout[],
   today: Date,
@@ -63,11 +59,7 @@ export const weeklyBuckets = (
   return buckets;
 };
 
-/**
- * Consecutive weeks with a workout, counting back from this week. A week that
- * has not been trained yet does not break the streak: counting then starts
- * from last week.
- */
+// A week not trained yet does not break the streak: counting then starts from last week.
 export const weeklyStreak = (workouts: readonly Workout[], today: Date): number => {
   const trainedWeeks = new Set(workouts.map((workout) => weekStart(workout.date)));
   let cursor = startOfWeek(today, WEEK_OPTIONS);
@@ -87,7 +79,6 @@ export const workoutsThisMonth = (workouts: readonly Workout[], today: Date): nu
   return workouts.filter((workout) => workout.date >= from && workout.date <= to).length;
 };
 
-/** Sets per muscle group over the last `days` days (including today); all groups, zeros included. */
 export const muscleGroupSplit = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
@@ -109,7 +100,6 @@ export const muscleGroupSplit = (
   return MUSCLE_GROUPS.map((group) => ({ group, sets: counts.get(group) ?? 0 }));
 };
 
-/** Display name per exercise id: the live library name wins over names stored on entries. */
 const exerciseNames = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
@@ -126,10 +116,7 @@ const exerciseNames = (
   return names;
 };
 
-/**
- * Sessions that set a new best estimated 1RM for their exercise, newest first.
- * The first session of an exercise counts as a record.
- */
+// The first session of an exercise counts as a record.
 export const recentPRs = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],

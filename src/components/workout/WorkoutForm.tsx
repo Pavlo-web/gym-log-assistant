@@ -35,7 +35,6 @@ import { ExerciseCard } from "./ExerciseCard";
 import { ExercisePicker } from "./ExercisePicker";
 import { WorkoutSummary } from "./WorkoutSummary";
 
-/** Problems of every set that has any, keyed by set id. */
 const collectSetErrors = (draft: WorkoutDraft, check: SetCheck): Record<string, SetFieldErrors> => {
   const errors: Record<string, SetFieldErrors> = {};
   for (const entry of draft.entries) {
@@ -53,10 +52,7 @@ const validateDate = (date: string, today: string): string => {
   return "";
 };
 
-/**
- * Stores the exercise name and muscle group on each entry, preferring the live
- * library values, so the workout stays readable if the exercise is deleted.
- */
+// Snapshots the exercise name and group so the workout stays readable if the exercise is deleted.
 const withExerciseSnapshots = (
   entries: WorkoutEntry[],
   exercisesById: ReadonlyMap<string, Exercise>,
@@ -73,13 +69,10 @@ const withExerciseSnapshots = (
   });
 
 interface WorkoutFormProps {
-  /** Unsaved draft to resume when logging a new workout. */
   initial?: WorkoutDraft | null;
-  /** Saved workout to edit. When set, the form updates it instead of creating one. */
   workout?: Workout;
 }
 
-/** Form for logging a new workout or editing a saved one. */
 export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
   const navigate = useNavigate();
   const editing = !!workout;
@@ -143,7 +136,6 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     setFormError("");
   };
 
-  /** Opens the picker to add an exercise, or to replace the exercise of `entryId`. */
   const openPicker = (entryId: string | null = null) => {
     setChangingEntryId(entryId);
     setPickerOpen(true);
@@ -164,7 +156,6 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
     });
   };
 
-  /** Swaps the exercise of an entry and keeps the sets already typed in. */
   const changeExercise = (entryId: string, exercise: Exercise) => {
     update({
       entries: draft.entries.map((entry) =>
@@ -312,11 +303,7 @@ export function WorkoutForm({ initial, workout }: WorkoutFormProps) {
         </p>
       )}
 
-      {/*
-        On phones the bar is docked to the bottom navigation, edge to edge, so the two read
-        as one block; the buttons sit at the sides to leave the centre to the round nav
-        button. See `.mobile-save-bar` in styles.css.
-      */}
+      {/* Docked to the bottom navigation on phones; the side buttons leave the centre to the nav button. */}
       <div className="mobile-save-bar fixed inset-x-0 z-30 flex items-center justify-between gap-2 border-t border-sidebar-border bg-sidebar px-3 py-3 md:static md:justify-end md:border-border md:bg-transparent md:px-0 md:pb-0 md:pt-6">
         {workout ? (
           <Button

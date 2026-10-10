@@ -1,4 +1,3 @@
-/** The app name as it appears in the sidebar and the phone top bar. */
 export function Wordmark() {
   return (
     <>

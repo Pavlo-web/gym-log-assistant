@@ -26,7 +26,6 @@ const METRICS: { value: Metric; label: string }[] = [
 ];
 
 interface ProgressPageProps {
-  /** Exercise id from the URL; ignored when it has no logged sets. */
   selectedId: string | undefined;
   onSelect: (id: string) => void;
 }

@@ -7,12 +7,10 @@ import { formatWeekdayDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 
 interface BodyWeightLogProps {
-  /** Newest first. */
   rows: BodyWeightRow[];
   onDelete: (row: BodyWeightRow) => void;
 }
 
-/** Every entry of the log with its change from the previous one. */
 export function BodyWeightLog({ rows, onDelete }: BodyWeightLogProps) {
   return (
     <Surface as="section">

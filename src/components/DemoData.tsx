@@ -8,7 +8,6 @@ import { useHasDemoData, useLoadDemoData, useRemoveDemoData } from "@/hooks/useD
 const failureMessage = (cause: unknown, fallback: string): string =>
   cause instanceof StorageWriteError ? cause.message : fallback;
 
-/** Fills the app with sample workouts, for looking around before logging anything. */
 export function LoadDemoDataButton({ className }: { className?: string }) {
   const load = useLoadDemoData();
 
@@ -33,7 +32,6 @@ export function LoadDemoDataButton({ className }: { className?: string }) {
   );
 }
 
-/** Says that sample records are mixed in and offers to remove them; hidden when there are none. */
 export function DemoDataNotice() {
   const { data: hasDemoData } = useHasDemoData();
   const remove = useRemoveDemoData();
@@ -68,7 +66,6 @@ export function DemoDataNotice() {
   );
 }
 
-/** Quiet offer under a page that already has records; hidden once sample data is loaded. */
 export function DemoDataOffer() {
   const { data: hasDemoData, isPending } = useHasDemoData();
   if (isPending || hasDemoData) return null;

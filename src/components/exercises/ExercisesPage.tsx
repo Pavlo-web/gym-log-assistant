@@ -10,7 +10,6 @@ import { AddExerciseDialog } from "./AddExerciseDialog";
 import { ExerciseFilters, type GroupFilter } from "./ExerciseFilters";
 import { ExerciseGroupList, type ExerciseGroup } from "./ExerciseGroupList";
 
-/** Exercises matching the search and group filter, grouped and sorted by name. */
 const filterExercises = (
   exercises: readonly Exercise[],
   search: string,

@@ -4,17 +4,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface PickerTriggerProps extends Omit<ComponentPropsWithoutRef<typeof Button>, "children"> {
-  /** Shown at the right edge; tells date, time and other pickers apart. */
   icon: LucideIcon;
-  /** Formatted value; when missing the placeholder is shown instead. */
   value: string | undefined;
   placeholder: string;
 }
 
-/**
- * The field-like button every picker opens from. Date and time pickers share
- * it so the two fields always look the same: value left, icon right.
- */
+// Shared by the date and time pickers so the two fields always look the same.
 export const PickerTrigger = forwardRef<HTMLButtonElement, PickerTriggerProps>(
   function PickerTrigger({ icon: Icon, value, placeholder, className, ...props }, ref) {
     return (

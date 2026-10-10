@@ -73,11 +73,6 @@ const isRemovedDefault = (exercise: Exercise): boolean => {
   );
 };
 
-/**
- * Brings an existing library in line with the current defaults: drops defaults
- * that were removed and adds the ones that are missing. Custom exercises are
- * never touched.
- */
 const migrateDefaultExercises = (exercises: readonly Exercise[]): Exercise[] => {
   const migrated = exercises.filter((exercise) => !isRemovedDefault(exercise));
 
@@ -137,7 +132,6 @@ class LocalExerciseRepository implements ExerciseRepository {
 }
 
 class LocalWorkoutRepository implements WorkoutRepository {
-  /** Newest first; workouts on the same date are ordered by creation time. */
   async list(): Promise<Workout[]> {
     return loadWorkouts().sort(
       (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt),
@@ -176,7 +170,6 @@ class LocalWorkoutRepository implements WorkoutRepository {
 }
 
 class LocalDraftRepository implements DraftRepository {
-  /** Null when there is no draft or the stored one does not have the expected shape. */
   async get(): Promise<WorkoutDraft | null> {
     return readObject<WorkoutDraft>(DRAFT_KEY, workoutDraftSchema);
   }
@@ -194,7 +187,6 @@ const loadBodyWeight = (): BodyWeightEntry[] =>
   readList<BodyWeightEntry>(BODY_WEIGHT_KEY, bodyWeightEntrySchema);
 
 class LocalBodyWeightRepository implements BodyWeightRepository {
-  /** Newest first. */
   async list(): Promise<BodyWeightEntry[]> {
     return loadBodyWeight().sort((a, b) => b.date.localeCompare(a.date));
   }
@@ -219,7 +211,6 @@ class LocalBodyWeightRepository implements BodyWeightRepository {
   }
 }
 
-/** Local implementations; consumers import them through `@/data`. */
 export const exerciseRepository: ExerciseRepository = new LocalExerciseRepository();
 export const workoutRepository: WorkoutRepository = new LocalWorkoutRepository();
 export const draftRepository: DraftRepository = new LocalDraftRepository();
@@ -229,7 +220,6 @@ const loadPlannedWorkouts = (): PlannedWorkout[] =>
   readList<PlannedWorkout>(PLANNED_WORKOUTS_KEY, plannedWorkoutSchema);
 
 class LocalPlannedWorkoutRepository implements PlannedWorkoutRepository {
-  /** Soonest first. */
   async list(): Promise<PlannedWorkout[]> {
     return loadPlannedWorkouts().sort(
       (a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time),
@@ -253,7 +243,6 @@ class LocalPlannedWorkoutRepository implements PlannedWorkoutRepository {
   }
 }
 
-/** Keeps the records that are not sample data. */
 const withoutDemo = <T extends { id: string }>(records: readonly T[]): T[] =>
   records.filter((record) => !isDemoId(record.id));
 
@@ -287,7 +276,6 @@ class LocalDemoDataRepository implements DemoDataRepository {
   }
 }
 
-/** Local implementations; consumers import them through `@/data`. */
 export const plannedWorkoutRepository: PlannedWorkoutRepository =
   new LocalPlannedWorkoutRepository();
 export const demoDataRepository: DemoDataRepository = new LocalDemoDataRepository();

@@ -1,6 +1,5 @@
 import type { MuscleGroupSets } from "@/lib/dashboard";
 
-/** Horizontal bars comparing sets per muscle group; the busiest group fills the row. */
 export function MuscleSplit({ split }: { split: MuscleGroupSets[] }) {
   const maxSets = Math.max(1, ...split.map((item) => item.sets));
   return (

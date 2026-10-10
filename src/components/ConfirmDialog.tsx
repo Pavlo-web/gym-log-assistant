@@ -18,19 +18,13 @@ interface ConfirmDialogProps {
   description: ReactNode;
   confirmLabel: string;
   onConfirm: () => void;
-  /**
-   * Keep the dialog open after confirming. Use it for async actions that close
-   * the dialog themselves once they succeed, so a failure can be shown inside.
-   */
+  // For async actions that close the dialog themselves on success, so a failure shows inside it.
   keepOpenOnConfirm?: boolean;
-  /** Disables the confirm button while the action is running. */
   pending?: boolean;
-  /** Error from a failed action, shown above the buttons. */
   error?: string;
   size?: "sm" | "default";
 }
 
-/** Confirmation for destructive actions: a cancel button and a red confirm button. */
 export function ConfirmDialog({
   open,
   onOpenChange,

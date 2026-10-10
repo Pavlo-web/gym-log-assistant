@@ -15,7 +15,6 @@ import { formatNumber } from "@/lib/number";
 import type { DraftSet } from "@/types/domain";
 import { weightInputId } from "./set-input-id";
 
-/** Smallest plate jump, used by the weight stepper. */
 const WEIGHT_STEP_KG = 2.5;
 
 const FIELD_CELL = "py-2 pr-1 md:pr-3";
@@ -24,20 +23,13 @@ const MESSAGE_CELL = "pb-2 pr-1 align-top text-xs md:pr-3";
 interface SetRowProps {
   index: number;
   set: DraftSet;
-  /** Problems of this set, per field; null when it has none. */
   errors: SetFieldErrors | null;
-  /** Set when this set beats the previous best estimated 1RM of the exercise. */
   record: DraftRecord | null;
   onChange: (patch: Partial<DraftSet>) => void;
   onRemove: () => void;
-  /** Called when Enter is pressed in the reps field. */
   onRepsEnter?: (() => void) | undefined;
 }
 
-/**
- * One editable set: weight, reps and a remove button. A problem is shown under
- * the field it belongs to, and only that field is marked invalid.
- */
 export function SetRow({
   index,
   set,

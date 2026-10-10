@@ -12,7 +12,6 @@ interface SummaryTilesProps {
   thisWeek: WeekBucket;
   lastWeek: WeekBucket;
   workoutsThisMonth: number;
-  /** Consecutive weeks with at least one workout. */
   streak: number;
 }
 

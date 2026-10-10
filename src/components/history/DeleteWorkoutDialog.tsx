@@ -10,7 +10,6 @@ interface DeleteWorkoutDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/** Confirms deleting a workout, then returns to the history list. */
 export function DeleteWorkoutDialog({ workoutId, open, onOpenChange }: DeleteWorkoutDialogProps) {
   const navigate = useNavigate();
   const remove = useDeleteWorkout();

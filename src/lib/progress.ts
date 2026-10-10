@@ -2,11 +2,9 @@ import type { Exercise, MuscleGroup, Workout, WorkoutSet } from "@/types/domain"
 import { bestEpley1RM, epley1RM, setsVolume } from "./calc";
 import { exerciseLabel } from "./workout";
 
-/** One training day of a single exercise. */
 export interface ExercisePoint {
   date: string;
   topWeight: number;
-  /** reps of the heaviest set (most reps on ties) */
   topReps: number;
   bestE1RM: number;
   volume: number;
@@ -20,7 +18,6 @@ export interface PersonalRecords {
   maxVolume: { value: number; date: string };
 }
 
-/** An exercise that appears in at least one saved workout. */
 export interface LoggedExercise {
   id: string;
   name: string;
@@ -32,7 +29,6 @@ interface DayBucket {
   workoutIds: string[];
 }
 
-/** Sets of one exercise grouped by date, ascending by date. */
 const setsByDate = (workouts: readonly Workout[], exerciseId: string): [string, DayBucket][] => {
   const byDate = new Map<string, DayBucket>();
   for (const workout of workouts) {
@@ -57,7 +53,6 @@ const heaviestSet = (sets: readonly WorkoutSet[]): WorkoutSet | undefined =>
     return heavier || sameWeightMoreReps ? set : top;
   }, undefined);
 
-/** One point per date containing the exercise, ascending by date. */
 export const exerciseHistory = (
   workouts: readonly Workout[],
   exerciseId: string,
@@ -75,7 +70,7 @@ export const exerciseHistory = (
     };
   });
 
-/** Personal records; earliest date wins ties. Null when the exercise was never logged. */
+// Earliest date wins ties.
 export const personalRecords = (
   workouts: readonly Workout[],
   exerciseId: string,
@@ -110,7 +105,6 @@ export const personalRecords = (
   return { maxWeight, bestE1RM, maxVolume };
 };
 
-/** Exercises with at least one logged set, most recently trained first. */
 export const loggedExercises = (
   workouts: readonly Workout[],
   exercises: readonly Exercise[],
@@ -126,11 +120,7 @@ export const loggedExercises = (
   return [...logged.values()];
 };
 
-/**
- * Best estimated 1RM ever logged for an exercise; 0 when it was never logged.
- * `excludeWorkoutId` leaves one workout out, so a workout being edited is not
- * compared with its own saved version.
- */
+// `excludeWorkoutId` keeps a workout being edited from competing with its own saved version.
 export const bestLoggedE1RM = (
   workouts: readonly Workout[],
   exerciseId: string,

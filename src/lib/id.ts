@@ -1,4 +1,3 @@
-/** Returns a unique id; falls back to a time-based id where `crypto.randomUUID` is unavailable. */
 export const newId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();

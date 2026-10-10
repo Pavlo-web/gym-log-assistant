@@ -17,7 +17,6 @@ interface ExerciseFiltersProps {
   onGroupChange: (group: GroupFilter) => void;
 }
 
-/** Search field and muscle-group chips above the exercise library. */
 export function ExerciseFilters({
   search,
   onSearchChange,
@@ -39,7 +38,6 @@ export function ExerciseFilters({
           className="pl-10"
         />
       </div>
-      {/* On phones the chips scroll sideways inside their own row instead of wrapping. */}
       <ChipGroup
         options={FILTERS}
         value={group}

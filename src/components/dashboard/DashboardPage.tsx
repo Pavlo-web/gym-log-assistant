@@ -32,7 +32,6 @@ import { TrainingCalendar } from "./TrainingCalendar";
 const WeeklyVolumeChart = lazy(() => import("./WeeklyVolumeChart"));
 const chartPlaceholder = <div className="h-64" />;
 
-/** Pairs of sections sit side by side once the screen is wide enough for two readable columns. */
 const TWO_COLUMNS = "grid grid-cols-1 gap-x-6 xl:grid-cols-2";
 
 function DashboardHeader() {
@@ -67,7 +66,6 @@ function DraftNotice() {
 }
 
 interface OverviewProps {
-  /** Newest first. */
   workouts: Workout[];
   exercises: Exercise[];
 }

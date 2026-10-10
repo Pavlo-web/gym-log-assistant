@@ -13,11 +13,10 @@ export interface ExerciseGroup {
 
 interface ExerciseGroupListProps {
   groups: ExerciseGroup[];
-  /** Called for custom exercises only; default exercises cannot be deleted. */
+  // Custom exercises only; defaults cannot be deleted.
   onDelete: (exercise: Exercise) => void;
 }
 
-/** The exercise library, one section per muscle group. */
 export function ExerciseGroupList({ groups, onDelete }: ExerciseGroupListProps) {
   return (
     <div className="space-y-9">

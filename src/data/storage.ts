@@ -1,6 +1,5 @@
 import type { ZodType } from "zod";
 
-/** Thrown when a change could not be written, so the UI can tell the user it was not saved. */
 export class StorageWriteError extends Error {
   constructor() {
     super("Could not save: this browser's storage is full or turned off.");
@@ -8,7 +7,6 @@ export class StorageWriteError extends Error {
   }
 }
 
-/** Suffix of the key that keeps the original text of data that failed validation. */
 const BACKUP_SUFFIX = ".backup";
 
 /** Keys already reported this session, so a damaged record is logged once, not on every read. */
@@ -32,7 +30,6 @@ export const readItem = (key: string): string | null => {
   }
 };
 
-/** Writes a value the user asked to save; throws when the browser refuses it. */
 export const writeItem = (key: string, value: string): void => {
   if (!hasStorage()) throw new StorageWriteError();
   try {
@@ -42,10 +39,8 @@ export const writeItem = (key: string, value: string): void => {
   }
 };
 
-/**
- * Best-effort write for housekeeping the user did not ask for (seeding, migrations,
- * backups). Returns whether it worked; a failure must not break reading.
- */
+// For housekeeping the user did not ask for (seeding, migrations, backups): a failure must not
+// break reading.
 export const tryWriteItem = (key: string, value: string): boolean => {
   try {
     writeItem(key, value);
@@ -64,10 +59,7 @@ export const removeItem = (key: string): void => {
   }
 };
 
-/**
- * Keeps the original text of damaged data under a backup key before anything
- * overwrites it, and logs the problem once per session.
- */
+// Backs up damaged data before anything overwrites it and logs the problem once per session.
 const reportDamage = (key: string, raw: string, problem: string): void => {
   if (reportedKeys.has(key)) return;
   reportedKeys.add(key);
@@ -86,11 +78,7 @@ const parseJson = (raw: string): { ok: true; value: unknown } | { ok: false } =>
   }
 };
 
-/**
- * Reads a stored list and checks every item against `schema`. Items that fail
- * are skipped, so one damaged record cannot break a whole page; the rest are
- * returned exactly as stored.
- */
+// Items that fail the schema are skipped, so one damaged record cannot break a whole page.
 export const readList = <T>(key: string, schema: ZodType): T[] => {
   const raw = readItem(key);
   if (!raw) return [];
@@ -114,7 +102,6 @@ export const readList = <T>(key: string, schema: ZodType): T[] => {
   return valid as T[];
 };
 
-/** Reads a single stored object; null when it is missing or does not match `schema`. */
 export const readObject = <T>(key: string, schema: ZodType): T | null => {
   const raw = readItem(key);
   if (!raw) return null;

@@ -9,28 +9,21 @@ type NumberInputProps = Omit<
   ComponentProps<typeof Input>,
   "type" | "value" | "onChange" | "step"
 > & {
-  /** Raw text of the field; parsing is left to the caller so partial input survives. */
+  // Raw text: parsing is left to the caller so partial input survives.
   value: string;
   onValueChange: (value: string) => void;
   step?: number;
-  /**
-   * Where the steppers sit on phones: "stacked" inside the field, which fits
-   * narrow table cells, or "sides" as full-size − and + buttons around it.
-   * Desktop always shows them stacked inside the field.
-   */
+  // On phones: "stacked" fits narrow table cells, "sides" puts full-size − and + around the field.
   stepperLayout?: "stacked" | "sides";
 };
 
 const STEPPER_BUTTON = "h-4 w-7 rounded-sm p-0 text-muted-foreground hover:text-foreground";
 
-/** Decimal places of the step, so stepping by 2.5 never yields 7.500000001. */
+// So stepping by 2.5 never yields 7.500000001.
 const stepPrecision = (step: number): number => (String(step).split(".")[1] ?? "").length;
 
-/**
- * Text field for numbers with up/down steppers (buttons and arrow keys).
- * It is a text input rather than `type="number"` so a comma can be typed as
- * the decimal separator and no browser spinner or scroll-to-change appears.
- */
+// A text input, not type="number": a comma works as the decimal separator and there is no
+// browser spinner or scroll-to-change.
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(function NumberInput(
   {
     value,
@@ -82,7 +75,6 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         inputMode={allowDecimal ? "decimal" : "numeric"}
         value={value}
         disabled={disabled}
-        // Letters, signs and extra separators never make it into the field.
         onChange={(event) => onValueChange(sanitizeNumberInput(event.target.value, allowDecimal))}
         onKeyDown={handleKeyDown}
         className={cn("tabular pr-9", className)}

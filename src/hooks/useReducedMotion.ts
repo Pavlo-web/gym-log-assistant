@@ -5,7 +5,6 @@ const QUERY = "(prefers-reduced-motion: reduce)";
 const prefersReducedMotion = (): boolean =>
   typeof window !== "undefined" && window.matchMedia(QUERY).matches;
 
-/** True when the user asked the system to minimise animation. */
 export const useReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(prefersReducedMotion);
 

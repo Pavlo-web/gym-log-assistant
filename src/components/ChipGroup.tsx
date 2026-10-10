@@ -9,10 +9,6 @@ interface ChipGroupProps<T extends string> {
   className?: string;
 }
 
-/**
- * Pick one of a few options, e.g. a filter or a chart metric. The selected chip
- * is tinted, not filled, so it never competes with the page's primary button.
- */
 export function ChipGroup<T extends string>({
   options,
   value,

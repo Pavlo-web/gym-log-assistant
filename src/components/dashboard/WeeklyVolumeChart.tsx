@@ -28,7 +28,7 @@ function WeekTooltip(props: TooltipProps<WeekBucket>) {
   );
 }
 
-/** Bar chart of total volume per week. Default export so the page can lazy-load Recharts. */
+// Default export so the page can lazy-load Recharts.
 export default function WeeklyVolumeChart({ data }: { data: WeekBucket[] }) {
   const mobile = useIsMobile();
   const reducedMotion = useReducedMotion();

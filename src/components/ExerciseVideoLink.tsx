@@ -3,7 +3,6 @@ import { CirclePlay } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { exerciseVideoUrl } from "@/lib/workout";
 
-/** Icon link that opens videos showing how to perform the exercise, in a new tab. */
 export function ExerciseVideoLink({ name }: { name: string }) {
   return (
     <Hint label="Watch how to do it">

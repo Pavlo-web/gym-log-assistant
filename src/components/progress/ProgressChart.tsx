@@ -28,7 +28,6 @@ import type { ExercisePoint } from "@/lib/progress";
 
 export type Metric = "topWeight" | "bestE1RM" | "volume";
 
-/** Minimum pixel gap between x-axis labels. */
 const TICK_GAP = { mobile: 50, desktop: 5 };
 
 function PointTooltip(props: TooltipProps<ExercisePoint>) {
@@ -50,7 +49,7 @@ interface ProgressChartProps {
   metric: Metric;
 }
 
-/** Line chart of one metric over time. Default export so the page can lazy-load Recharts. */
+// Default export so the page can lazy-load Recharts.
 export default function ProgressChart({ points, metric }: ProgressChartProps) {
   const mobile = useIsMobile();
   const reducedMotion = useReducedMotion();

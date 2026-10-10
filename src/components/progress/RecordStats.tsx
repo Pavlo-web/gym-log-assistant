@@ -3,7 +3,6 @@ import { formatDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 import type { PersonalRecords } from "@/lib/progress";
 
-/** The three personal records of one exercise, each with the date it was set. */
 export function RecordStats({ records }: { records: PersonalRecords }) {
   const { maxWeight, bestE1RM, maxVolume } = records;
   return (

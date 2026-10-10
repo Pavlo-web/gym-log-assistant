@@ -15,19 +15,15 @@ import { weightInputId } from "./set-input-id";
 
 interface ExerciseCardProps {
   entry: DraftEntry;
-  /** Live library exercise; undefined when it has been deleted. */
+  // Undefined when the exercise has been deleted from the library.
   exercise: Exercise | undefined;
-  /** Problems of the sets that have any, keyed by set id. */
   errors: Record<string, SetFieldErrors>;
-  /** The set that beats the previous best of this exercise, if any. */
   record: DraftRecord | null;
   onChange: (entry: DraftEntry) => void;
-  /** Asks the form to open the picker and replace this exercise, keeping the sets. */
   onChangeExercise: () => void;
   onRemove: () => void;
 }
 
-/** One exercise of the workout form with its editable list of sets. */
 export function ExerciseCard({
   entry,
   exercise,
@@ -41,7 +37,7 @@ export function ExerciseCard({
   const { name, group } = exerciseLabel(entry, exercise ? [exercise] : []);
   const lastSet = entry.sets.at(-1);
 
-  /** Adds a set prefilled from the previous one, since sets usually repeat. */
+  // Prefilled from the previous set, since sets usually repeat.
   const addSet = ({ focus = false } = {}) => {
     const set: DraftSet = {
       id: newId(),
@@ -66,7 +62,6 @@ export function ExerciseCard({
     onChange({ ...entry, sets: entry.sets.filter((set) => set.id !== id) });
   };
 
-  /** Asks first only when there is entered data to lose. */
   const requestRemove = () => {
     const hasData = entry.sets.some((set) => setStatus(set) !== "empty");
     if (hasData) setConfirmingRemove(true);
@@ -131,7 +126,6 @@ export function ExerciseCard({
               record={record?.setId === set.id ? record : null}
               onChange={(patch) => updateSet(set.id, patch)}
               onRemove={() => removeSet(set.id)}
-              // Enter in the last set adds the next one and moves focus to it.
               onRepsEnter={set === lastSet ? () => addSet({ focus: true }) : undefined}
             />
           ))}

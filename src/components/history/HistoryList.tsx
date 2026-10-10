@@ -11,7 +11,6 @@ import { formatMonth } from "@/lib/date";
 import type { Workout } from "@/types/domain";
 import { WorkoutListItem } from "./WorkoutListItem";
 
-/** Groups workouts under "October 2026"-style headings, keeping their order. */
 const groupByMonth = (workouts: readonly Workout[]): [string, Workout[]][] => {
   const months = new Map<string, Workout[]>();
   for (const workout of workouts) {

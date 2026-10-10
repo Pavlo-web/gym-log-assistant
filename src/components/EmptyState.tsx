@@ -5,11 +5,9 @@ interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
   description: string;
-  /** Call to action rendered under the text. */
   children?: ReactNode;
 }
 
-/** Dashed placeholder shown where a page has nothing to list yet. */
 export function EmptyState({ icon: Icon, title, description, children }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center rounded-lg border border-dashed border-border px-6 py-14 text-center">

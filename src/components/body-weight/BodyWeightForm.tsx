@@ -12,24 +12,19 @@ import { BODY_WEIGHT_MAX_KG, BODY_WEIGHT_MIN_KG, WEIGHT_INPUT_MAX_LENGTH } from 
 import { parseDecimal } from "@/lib/number";
 import type { BodyWeightEntry } from "@/types/domain";
 
-/** Scales usually show one decimal. */
 const WEIGHT_STEP_KG = 0.1;
 
 interface BodyWeightFormProps {
-  /** Existing log, used to prefill the field and warn before replacing a day. */
   entries: BodyWeightEntry[];
 }
 
-/** Adds the weight for a day; a day that already has an entry is updated instead. */
 export function BodyWeightForm({ entries }: BodyWeightFormProps) {
   const save = useSaveBodyWeight();
   const today = todayLocal();
   const [date, setDate] = useState(today);
   // Start from the latest weight: the next measurement is usually close to it.
   const [weight, setWeight] = useState(() => (entries[0] ? String(entries[0].weight) : ""));
-  /** Problem with the typed weight, shown under the field. */
   const [weightError, setWeightError] = useState("");
-  /** Problem with saving, shown for the form as a whole. */
   const [saveError, setSaveError] = useState("");
 
   const existing = entries.find((entry) => entry.date === date);

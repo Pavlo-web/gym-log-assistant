@@ -9,19 +9,14 @@ import type {
   WorkoutEntry,
 } from "@/types/domain";
 
-/**
- * Sample records carry this id prefix, which is how they are told apart from
- * the user's own records when they are removed.
- */
+// Marks sample records so they can be removed without touching the user's own.
 const DEMO_ID_PREFIX = "demo-";
 
 export const isDemoId = (id: string): boolean => id.startsWith(DEMO_ID_PREFIX);
 
-/** How many weeks of training the sample covers, the current week included. */
 const WEEKS = 12;
 
 interface DemoLift {
-  /** Name of a default exercise. */
   name: string;
   /** Weight in the first week, in kg. */
   start: number;
@@ -76,7 +71,7 @@ const SESSIONS: readonly DemoSession[] = [
   },
 ];
 
-/** Sessions left out as "week-session", so the calendar does not look machine-made. */
+// Skipped "week-session" pairs, so the calendar does not look machine-made.
 const SKIPPED = new Set(["2-2", "5-1", "8-0", "9-2"]);
 
 /** Reps of the three sets relative to the target; the pattern rotates by week. */
@@ -92,11 +87,9 @@ const NOTES: Readonly<Record<string, string>> = {
   "10-1": "New deadlift best.",
 };
 
-/** Small ups and downs added to the body weight trend, in kg. */
 const WEIGHT_WIGGLE = [0, 0.3, -0.2, 0.1, -0.1] as const;
 const BODY_WEIGHT_START_KG = 82;
 const BODY_WEIGHT_WEEKLY_LOSS_KG = 0.2;
-/** Days after Monday on which the sample weighs in. */
 const WEIGH_IN_OFFSETS = [0, 3] as const;
 
 const roundTo = (value: number, step: number): number => Math.round(value / step) * step;
@@ -145,11 +138,7 @@ export interface DemoData {
   plannedWorkouts: PlannedWorkout[];
 }
 
-/**
- * Three months of a push / pull / legs routine with steady progress, a body
- * weight trend and two planned workouts. The result depends only on `today`
- * and the exercise library, so loading it twice gives the same records.
- */
+// Depends only on `today` and the exercise library, so loading it twice gives the same records.
 export const buildDemoData = (today: Date, exercises: readonly Exercise[]): DemoData => {
   const exercisesByName = new Map(exercises.map((exercise) => [exercise.name, exercise]));
   const todayIso = toIsoDate(today);

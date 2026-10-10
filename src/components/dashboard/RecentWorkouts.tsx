@@ -5,7 +5,6 @@ import { formatNumber } from "@/lib/number";
 import { workoutStats } from "@/lib/workout";
 import type { Workout } from "@/types/domain";
 
-/** Latest workouts, each linking to its details page. */
 export function RecentWorkouts({ workouts }: { workouts: Workout[] }) {
   return (
     <ul className="divide-y divide-border text-sm">

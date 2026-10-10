@@ -10,7 +10,6 @@ import { formatDay } from "@/lib/date";
 import { formatNumber } from "@/lib/number";
 import { cn } from "@/lib/utils";
 
-/** Background per heat level, from a rest day to the busiest kind of day. */
 const LEVEL_CLASS: Record<HeatLevel, string> = {
   0: "bg-muted",
   1: "bg-primary/25",
@@ -54,10 +53,6 @@ function DayCell({ day, column, row }: { day: CalendarDay; column: number; row: 
   );
 }
 
-/**
- * GitHub-style heatmap of the last year: a column per week, a row per weekday,
- * darker squares for days with more sets. Training days link to the workout.
- */
 export function TrainingCalendar({ calendar }: { calendar: Calendar }) {
   const { weeks, months, activeDays } = calendar;
   const scroller = useRef<HTMLDivElement>(null);

@@ -30,18 +30,14 @@ const isMuscleGroup = (value: string): value is MuscleGroup =>
 interface AddExerciseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Current library, used to reject duplicates before saving. */
   exercises: Exercise[];
 }
 
-/** Dialog for adding a custom exercise to the library. */
 export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExerciseDialogProps) {
   const create = useCreateExercise();
   const [name, setName] = useState("");
   const [group, setGroup] = useState<MuscleGroup>(DEFAULT_GROUP);
-  /** Problem with the typed name, shown under the field. */
   const [nameError, setNameError] = useState("");
-  /** Problem with saving, shown for the form as a whole. */
   const [saveError, setSaveError] = useState("");
 
   const clearErrors = () => {
@@ -87,7 +83,6 @@ export function AddExerciseDialog({ open, onOpenChange, exercises }: AddExercise
         <DialogHeader>
           <DialogTitle>Add exercise</DialogTitle>
         </DialogHeader>
-        {/* noValidate: the form shows its own messages instead of the browser bubbles. */}
         <form onSubmit={submit} noValidate className="space-y-5 pt-2">
           <div className="space-y-2">
             <Label htmlFor="exercise-name">Name</Label>

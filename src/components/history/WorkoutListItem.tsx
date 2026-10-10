@@ -6,7 +6,6 @@ import { exerciseLabel, workoutStats } from "@/lib/workout";
 import type { Exercise, Workout } from "@/types/domain";
 import { WorkoutStats } from "./WorkoutStats";
 
-/** Exercise names shown on a card before the rest collapse into "+N more". */
 const PREVIEW_EXERCISES = 3;
 
 interface WorkoutListItemProps {
@@ -14,7 +13,6 @@ interface WorkoutListItemProps {
   exercises: Exercise[];
 }
 
-/** Card for one workout in the history list; links to its details page. */
 export function WorkoutListItem({ workout, exercises }: WorkoutListItemProps) {
   const names = workout.entries
     .slice(0, PREVIEW_EXERCISES)

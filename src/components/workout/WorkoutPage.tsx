@@ -13,13 +13,11 @@ import { WorkoutForm } from "./WorkoutForm";
 
 const FORM_ID = "workout-form";
 
-/** The page for logging a workout, with the planned ones listed above the form. */
 export function WorkoutPage() {
   const draft = useWorkoutDraft();
   const saveDraft = useSaveWorkoutDraft();
   // The form reads its draft on mount, so starting a plan remounts it under a new key.
   const [formVersion, setFormVersion] = useState(0);
-  // Plan waiting for the user to confirm that it may replace the current draft.
   const [replacingWith, setReplacingWith] = useState<PlannedWorkout | null>(null);
 
   const start = async (plan: PlannedWorkout) => {

@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
-/** Shown when the workout id in the URL does not match a saved workout. */
 export function WorkoutNotFound() {
   return (
     <div className="space-y-4">

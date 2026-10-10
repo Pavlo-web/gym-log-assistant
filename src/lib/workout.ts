@@ -1,7 +1,6 @@
 import type { Exercise, MuscleGroup, Workout, WorkoutEntry } from "@/types/domain";
 import { countSets, workoutVolume } from "./calc";
 
-/** Shown for entries whose exercise was deleted and that carry no stored name. */
 export const DELETED_EXERCISE_NAME = "Deleted exercise";
 
 export interface ExerciseLabel {
@@ -9,11 +8,7 @@ export interface ExerciseLabel {
   group: MuscleGroup | undefined;
 }
 
-/**
- * Display label for a workout entry: the live library exercise wins, then the
- * name stored on the entry when it was saved, so old workouts stay readable
- * after an exercise is deleted.
- */
+// The live library name wins, then the name stored on the entry.
 export const exerciseLabel = (
   entry: Pick<WorkoutEntry, "exerciseId" | "exerciseName" | "muscleGroup">,
   exercises: readonly Exercise[],
@@ -25,13 +20,11 @@ export const exerciseLabel = (
   };
 };
 
-/** YouTube search for videos showing how to perform the exercise. */
 export const exerciseVideoUrl = (name: string): string => {
   const query = encodeURIComponent(`${name} proper form`);
   return `https://www.youtube.com/results?search_query=${query}`;
 };
 
-/** True when `exercise` has this name (case-insensitive) in this muscle group. */
 export const isSameExercise = (
   exercise: Pick<Exercise, "name" | "muscleGroup">,
   name: string,
@@ -46,7 +39,6 @@ export interface WorkoutStats {
   volume: number;
 }
 
-/** Headline numbers of a workout: exercise count, set count and total volume in kg. */
 export const workoutStats = (workout: Workout): WorkoutStats => ({
   exercises: workout.entries.length,
   sets: countSets(workout.entries),

@@ -19,7 +19,6 @@ import { PlanWorkoutDialog } from "./PlanWorkoutDialog";
 interface PlanRowProps {
   plan: PlannedWorkout;
   now: Date;
-  /** True while the workout form is filled from this plan. */
   inProgress: boolean;
   onStart: () => void;
   onDelete: () => void;
@@ -70,12 +69,10 @@ function PlanRow({ plan, now, inProgress, onStart, onDelete }: PlanRowProps) {
 }
 
 interface UpcomingWorkoutsProps {
-  /** Plan the workout form is currently filled from, if any. */
   activePlanId: string | undefined;
   onStart: (plan: PlannedWorkout) => void;
 }
 
-/** Planned workouts with a countdown to each, and the way to plan another. */
 export function UpcomingWorkouts({ activePlanId, onStart }: UpcomingWorkoutsProps) {
   const { data: plans = [] } = usePlannedWorkouts();
   const deletePlan = useDeletePlannedWorkout();
